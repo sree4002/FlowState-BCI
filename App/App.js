@@ -1,0 +1,143 @@
+/**
+ * FlowState BCI - Main App
+ * 
+ * This is the entry point for the React Native app.
+ * It sets up navigation and provides global state.
+ */
+
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { StatusBar } from 'react-native';
+
+// Screens
+import HomeScreen from './src/screens/HomeScreen';
+import SessionScreen from './src/screens/SessionScreen';
+import HistoryScreen from './src/screens/HistoryScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+
+// Services
+import BleService from './src/services/BleService';
+
+// Create context for global state
+export const AppContext = createContext();
+
+// Tab navigator
+const Tab = createBottomTabNavigator();
+
+// Simple icon component (replace with react-native-vector-icons in production)
+const TabIcon = ({ name, focused }) => {
+  const icons = {
+    Home: focused ? '🏠' : '🏚️',
+    Session: focused ? '🧠' : '💭',
+    History: focused ? '📊' : '📈',
+    Settings: focused ? '⚙️' : '🔧',
+  };
+  return <>{icons[name] || '•'}</>;
+};
+
+export default function App() {
+  // Global state
+  const [isConnected, setIsConnected] = useState(false);
+  const [deviceStatus, setDeviceStatus] = useState({
+    isPlaying: false,
+    frequency: 6.0,
+    volume: 0.5,
+  });
+  const [userProfile, setUserProfile] = useState(null);
+
+  // Initialize BLE service
+  useEffect(() => {
+    // Set up status callback
+    BleService.onStatusUpdate = (status) => {
+      setDeviceStatus(status);
+    };
+
+    // Clean up on unmount
+    return () => {
+      BleService.disconnect();
+    };
+  }, []);
+
+  // Context value
+  const contextValue = {
+    isConnected,
+    setIsConnected,
+    deviceStatus,
+    setDeviceStatus,
+    userProfile,
+    setUserProfile,
+    bleService: BleService,
+  };
+
+  return (
+    <AppContext.Provider value={contextValue}>
+      <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
+      <NavigationContainer
+                  theme={{
+            ...DarkTheme,
+            colors: {
+              ...DarkTheme.colors,
+              primary: '#64ffda',
+              background: '#1a1a2e',
+              card: '#16213e',
+              text: '#ffffff',
+              border: '#0f3460',
+              notification: '#e94560',
+            },
+          }}
+      >
+        <Tab.Navigator
+  screenOptions={{
+    headerShown: false,
+    tabBarActiveTintColor: '#64ffda',
+    tabBarInactiveTintColor: '#8892b0',
+    tabBarStyle: {
+      backgroundColor: '#16213e',
+      borderTopColor: '#0f3460',
+      paddingBottom: 5,
+      paddingTop: 5,
+      height: 60,
+    },
+  }}
+>
+  <Tab.Screen
+    name="Home"
+    component={HomeScreen}
+    options={{
+     headerTitle: '',
+     tabBarIcon: ({ focused }) => <TabIcon name="Home" focused={focused} />,
+    }}
+  />
+  <Tab.Screen
+    name="Session"
+    component={SessionScreen}
+    options={{
+      headerTitle: '',
+      tabBarIcon: ({ focused }) => <TabIcon name="Session" focused={focused} />,
+    }}
+  />
+  <Tab.Screen
+    name="History"
+    component={HistoryScreen}
+    options={{
+      headerTitle: '',
+     tabBarIcon: ({ focused }) => <TabIcon name="History" focused={focused} />,
+    }}
+  />
+  <Tab.Screen
+    name="Settings"
+    component={SettingsScreen}
+    options={{
+      headerTitle: '',
+    tabBarIcon: ({ focused }) => <TabIcon name="Settings" focused={focused} />,
+    }}
+  />
+</Tab.Navigator>
+      </NavigationContainer>
+    </AppContext.Provider>
+  );
+}
+
+// Custom hook for accessing app context
+export const useApp = () => useContext(AppContext);
