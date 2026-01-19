@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { AppContext } from '../../App';
+import { useApp } from '../context/AppContext';
 import bleService from '../services/BleService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SettingsScreen() {
-  const { isConnected, setIsConnected } = useContext(AppContext);
+  const { isConnected, setIsConnected } = useApp();
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [autoBoost, setAutoBoost] = useState(false);

@@ -16,7 +16,7 @@ import {
   StyleSheet,
   Animated,
 } from 'react-native';
-import { useApp } from '../../App';
+import { useApp } from '../context/AppContext';
 
 export default function HomeScreen({ navigation }) {
   const { isConnected, deviceStatus, bleService, userProfile } = useApp();

@@ -17,7 +17,7 @@ import {
   ScrollView,
   Dimensions,
 } from 'react-native';
-import { useApp } from '../../App';
+import { useApp } from '../context/AppContext';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
