@@ -5,10 +5,13 @@
  * It sets up navigation and provides global state.
  */
 
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'react-native';
+
+// Context
+import { AppContext } from './src/context/AppContext';
 
 // Screens
 import HomeScreen from './src/screens/HomeScreen';
@@ -18,9 +21,6 @@ import SettingsScreen from './src/screens/SettingsScreen';
 
 // Services
 import BleService from './src/services/BleService';
-
-// Create context for global state
-export const AppContext = createContext();
 
 // Tab navigator
 const Tab = createBottomTabNavigator();
@@ -138,6 +138,3 @@ export default function App() {
     </AppContext.Provider>
   );
 }
-
-// Custom hook for accessing app context
-export const useApp = () => useContext(AppContext);
