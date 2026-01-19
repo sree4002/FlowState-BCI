@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StatusBar } from 'react-native';
+import { StatusBar, Text } from 'react-native';
 
 // Context
 import { AppContext } from './src/context/AppContext';
@@ -33,7 +33,7 @@ const TabIcon = ({ name, focused }) => {
     History: focused ? '📊' : '📈',
     Settings: focused ? '⚙️' : '🔧',
   };
-  return <>{icons[name] || '•'}</>;
+  return <Text style={{ fontSize: 24 }}>{icons[name] || '•'}</Text>;
 };
 
 export default function App() {
@@ -88,52 +88,52 @@ export default function App() {
           }}
       >
         <Tab.Navigator
-  screenOptions={{
-    headerShown: false,
-    tabBarActiveTintColor: '#64ffda',
-    tabBarInactiveTintColor: '#8892b0',
-    tabBarStyle: {
-      backgroundColor: '#16213e',
-      borderTopColor: '#0f3460',
-      paddingBottom: 5,
-      paddingTop: 5,
-      height: 60,
-    },
-  }}
->
-  <Tab.Screen
-    name="Home"
-    component={HomeScreen}
-    options={{
-     headerTitle: '',
-     tabBarIcon: ({ focused }) => <TabIcon name="Home" focused={focused} />,
-    }}
-  />
-  <Tab.Screen
-    name="Session"
-    component={SessionScreen}
-    options={{
-      headerTitle: '',
-      tabBarIcon: ({ focused }) => <TabIcon name="Session" focused={focused} />,
-    }}
-  />
-  <Tab.Screen
-    name="History"
-    component={HistoryScreen}
-    options={{
-      headerTitle: '',
-     tabBarIcon: ({ focused }) => <TabIcon name="History" focused={focused} />,
-    }}
-  />
-  <Tab.Screen
-    name="Settings"
-    component={SettingsScreen}
-    options={{
-      headerTitle: '',
-    tabBarIcon: ({ focused }) => <TabIcon name="Settings" focused={focused} />,
-    }}
-  />
-</Tab.Navigator>
+          screenOptions={{
+            headerShown: false,
+            tabBarActiveTintColor: '#64ffda',
+            tabBarInactiveTintColor: '#8892b0',
+            tabBarStyle: {
+              backgroundColor: '#16213e',
+              borderTopColor: '#0f3460',
+              paddingBottom: 5,
+              paddingTop: 5,
+              height: 60,
+            },
+          }}
+        >
+          <Tab.Screen
+            name="Home"
+            component={HomeScreen}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ focused }) => <TabIcon name="Home" focused={focused} />,
+            }}
+          />
+          <Tab.Screen
+            name="Session"
+            component={SessionScreen}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ focused }) => <TabIcon name="Session" focused={focused} />,
+            }}
+          />
+          <Tab.Screen
+            name="History"
+            component={HistoryScreen}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ focused }) => <TabIcon name="History" focused={focused} />,
+            }}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={SettingsScreen}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ focused }) => <TabIcon name="Settings" focused={focused} />,
+            }}
+          />
+        </Tab.Navigator>
       </NavigationContainer>
     </AppContext.Provider>
   );
