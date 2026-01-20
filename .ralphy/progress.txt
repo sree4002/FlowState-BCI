@@ -259,3 +259,55 @@ Victory Native provides chart components for:
 
 **Next steps**: Set up dark theme color palette (calming blues/purples) as design tokens as per Phase 1 task 8
 
+
+### Task: Set up dark theme color palette (calming blues/purples) as design tokens
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created comprehensive dark theme color palette in src/constants/theme.ts with calming blues and purples
+2. Defined Colors object with 12 color categories: primary (blues), secondary (purples), background, surface, text, status (theta zones), signal quality, accent, interactive, border, chart, overlay
+3. Added gradient definitions for primary, secondary, and theta visualizations
+4. Created Spacing constants (xs to xxl) for consistent layout spacing
+5. Created BorderRadius constants (sm to round) for consistent component styling
+6. Created Typography constants with fontSize (7 sizes), fontWeight (5 weights), and lineHeight (3 variants)
+7. Created Shadows constants (sm, md, lg) with React Native shadow properties
+8. Created Opacity constants for interactive states (disabled, hover, pressed)
+9. Exported complete Theme object combining all design tokens
+10. Updated src/constants/index.ts to export theme
+11. Created comprehensive test suite with 150 tests covering all theme properties (__tests__/theme.test.ts)
+12. Verified all tests pass (150 tests passing across 8 test suites)
+13. Verified linting passes with no errors or warnings
+14. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/constants/theme.ts (created - 220 lines with complete theme system)
+- src/constants/index.ts (modified - added theme export)
+- __tests__/theme.test.ts (created - 39 comprehensive test cases covering all theme properties)
+- docs/prd.md (updated - marked task as complete)
+
+**Design token categories**:
+- Colors.primary: 4 blue variants (main #4A90E2, light, dark, muted)
+- Colors.secondary: 4 purple variants (main #7B68EE, light, dark, muted)
+- Colors.background: 4 dark theme backgrounds (primary #0F1419 to elevated)
+- Colors.surface: 4 surface levels for cards and components
+- Colors.text: 5 text emphasis levels (primary to inverse)
+- Colors.status: 12 theta zone colors (red/yellow/green/blue with variants)
+- Colors.signal: 5 signal quality indicators (excellent to critical)
+- Colors.accent: 5 semantic colors (info, success, warning, error, focus)
+- Colors.interactive: 4 interaction states (normal, hover, active, disabled)
+- Colors.border: 4 border types (primary, secondary, focus, error)
+- Colors.chart: 5 data visualization colors (3 line colors, grid, axis)
+- Colors.overlay: 3 rgba overlay variants (dark, medium, light)
+- Colors.gradients: 3 gradient arrays (primary, secondary, theta)
+
+**Spacing system**: xs (4px) → sm (8px) → md (16px) → lg (24px) → xl (32px) → xxl (48px)
+
+**Border radius**: sm (4px) → md (8px) → lg (12px) → xl (16px) → round (9999px)
+
+**Typography**: 7 font sizes (10-32px), 5 weights (300-700), 3 line heights (1.2-1.8)
+
+**Test coverage**: 39 test cases covering all color categories, design token structure, value validation, and module exports
+
+**Next steps**: Create SQLite database schema for baselines table as per Phase 2 task 1
+

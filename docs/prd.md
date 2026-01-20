@@ -9,7 +9,7 @@
 - [x] Create TypeScript types for Session, BaselineProfile, CircadianPattern, DeviceInfo, and AppSettings
 - [x] Set up React Context for global state management (DeviceContext, SessionContext, SettingsContext)
 - [x] Configure ESLint and Prettier for code consistency
-- [ ] Set up dark theme color palette (calming blues/purples) as design tokens
+- [x] Set up dark theme color palette (calming blues/purples) as design tokens
 
 ## Phase 2: Database & Storage Layer
 
