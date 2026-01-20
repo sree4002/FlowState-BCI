@@ -26,8 +26,13 @@ import BleService from './src/services/BleService';
 const Tab = createBottomTabNavigator();
 
 // Simple icon component (replace with react-native-vector-icons in production)
-const TabIcon = ({ name, focused }) => {
-  const icons = {
+interface TabIconProps {
+  name: string;
+  focused: boolean;
+}
+
+const TabIcon: React.FC<TabIconProps> = ({ name, focused }) => {
+  const icons: Record<string, string> = {
     Home: focused ? '🏠' : '🏚️',
     Session: focused ? '🧠' : '💭',
     History: focused ? '📊' : '📈',
@@ -36,15 +41,21 @@ const TabIcon = ({ name, focused }) => {
   return <Text style={{ fontSize: 24 }}>{icons[name] || '•'}</Text>;
 };
 
-export default function App() {
+interface DeviceStatus {
+  isPlaying: boolean;
+  frequency: number;
+  volume: number;
+}
+
+export default function App(): React.JSX.Element {
   // Global state
-  const [isConnected, setIsConnected] = useState(false);
-  const [deviceStatus, setDeviceStatus] = useState({
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({
     isPlaying: false,
     frequency: 6.0,
     volume: 0.5,
   });
-  const [userProfile, setUserProfile] = useState(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   // Initialize BLE service
   useEffect(() => {
