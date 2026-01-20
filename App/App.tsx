@@ -55,7 +55,7 @@ export default function App(): React.JSX.Element {
     frequency: 6.0,
     volume: 0.5,
   });
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<Record<string, unknown> | null>(null);
 
   // Initialize BLE service
   useEffect(() => {

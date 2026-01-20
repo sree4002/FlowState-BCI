@@ -32,6 +32,10 @@ export default [
       'babel.config.js',
       'jest.config.js',
       'jest.setup.js',
+      'venv/**',
+      'ralphy/**',
+      'App/src/**',
+      'coverage/**',
     ],
   },
 ];
