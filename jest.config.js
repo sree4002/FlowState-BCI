@@ -12,6 +12,7 @@ module.exports = {
       },
     ],
   },
+  transformIgnorePatterns: ['node_modules/(?!(expo-sqlite)/)'],
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverageFrom: [
@@ -24,6 +25,9 @@ module.exports = {
     '/node_modules/',
     '/App/__tests__/', // Temporarily ignore React Native component tests
   ],
+  moduleNameMapper: {
+    '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.ts',
+  },
   testTimeout: 10000,
   maxWorkers: 1,
 };

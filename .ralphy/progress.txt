@@ -311,3 +311,89 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for baselines table as per Phase 2 task 1
 
+
+### Task: Create SQLite database schema for baselines table
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created src/services/database.ts with comprehensive SQLite database schema and operations
+2. Implemented baselines table with 10 columns: id (primary key, auto-increment), theta_mean, theta_std, alpha_mean, beta_mean, peak_theta_freq, optimal_freq, calibration_timestamp, quality_score, created_at
+3. Created database initialization functions: openDatabase, createBaselinesTable, initializeDatabase
+4. Implemented complete CRUD operations for baselines table:
+   - insertBaseline: Insert new baseline profile
+   - getLatestBaseline: Retrieve most recent baseline
+   - getAllBaselines: Get all baselines ordered by timestamp (newest first)
+   - getBaselineById: Retrieve baseline by ID
+   - updateBaseline: Update existing baseline (supports partial updates)
+   - deleteBaseline: Delete baseline by ID
+   - deleteAllBaselines: Clear all baselines
+   - getBaselinesCount: Get count of baselines
+5. Added BaselineRecord TypeScript interface matching database schema
+6. Implemented dropAllTables utility function for testing/development
+7. Updated src/services/index.ts to export database module
+8. Created comprehensive test suite with 26 test cases covering all database operations (__tests__/database-baselines.test.ts)
+9. Created __mocks__/expo-sqlite.ts mock implementation for testing (353 lines)
+10. Updated jest.config.js to add moduleNameMapper for expo-sqlite mock
+11. Mock supports: table creation/deletion, INSERT/UPDATE/DELETE/SELECT queries, PRAGMA queries, sqlite_master queries, WHERE clauses, ORDER BY, LIMIT, auto-increment IDs
+12. Fixed all ESLint warnings (removed unused variables)
+13. Verified all tests pass (176 tests passing across 9 test suites)
+14. Verified linting passes with no errors or warnings
+15. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/services/database.ts (created - 217 lines with complete baselines table implementation)
+- src/services/index.ts (modified - added database export)
+- __tests__/database-baselines.test.ts (created - 540 lines with 26 comprehensive test cases)
+- __mocks__/expo-sqlite.ts (created - 359 lines with full SQLite mock implementation)
+- jest.config.js (modified - added transformIgnorePatterns and moduleNameMapper for expo-sqlite)
+- docs/prd.md (updated - marked task as complete)
+
+**Database schema details**:
+- Table: baselines
+- Columns:
+  - id: INTEGER PRIMARY KEY AUTOINCREMENT
+  - theta_mean: REAL NOT NULL (baseline theta band power mean)
+  - theta_std: REAL NOT NULL (baseline theta band power standard deviation)
+  - alpha_mean: REAL NOT NULL (baseline alpha band power mean)
+  - beta_mean: REAL NOT NULL (baseline beta band power mean)
+  - peak_theta_freq: REAL NOT NULL (peak frequency in theta band)
+  - optimal_freq: REAL (optimal entrainment frequency, nullable)
+  - calibration_timestamp: INTEGER NOT NULL (Unix timestamp of calibration)
+  - quality_score: REAL NOT NULL (calibration quality score 0-100)
+  - created_at: INTEGER DEFAULT (strftime('%s', 'now')) (record creation timestamp)
+
+**CRUD operations implemented**:
+- Create: insertBaseline() - returns auto-increment ID
+- Read: getLatestBaseline(), getAllBaselines(), getBaselineById()
+- Update: updateBaseline() - supports partial updates of any field
+- Delete: deleteBaseline(), deleteAllBaselines()
+- Utility: getBaselinesCount(), dropAllTables()
+
+**Test coverage**: 26 test cases covering:
+- Database initialization (3 tests)
+- Table schema validation (2 tests)
+- Insert operations (3 tests)
+- Get latest baseline (2 tests)
+- Get all baselines (2 tests)
+- Get baseline by ID (2 tests)
+- Update operations (4 tests)
+- Delete operations (2 tests)
+- Delete all baselines (1 test)
+- Count operations (3 tests)
+- Data integrity (2 tests)
+
+**Mock implementation features**:
+- In-memory Map-based storage
+- Full SQL parsing for CREATE, DROP, INSERT, SELECT, UPDATE, DELETE
+- Auto-increment ID support
+- WHERE clause filtering
+- ORDER BY sorting (ASC/DESC)
+- LIMIT support
+- PRAGMA table_info support
+- sqlite_master queries for table existence checks
+- Decimal precision preservation
+- Null value support
+
+**Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
+

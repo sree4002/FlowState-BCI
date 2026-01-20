@@ -13,7 +13,7 @@
 
 ## Phase 2: Database & Storage Layer
 
-- [ ] Create SQLite database schema for baselines table (theta_mean, theta_std, alpha_mean, beta_mean, peak_theta_freq, optimal_freq, calibration_timestamp, quality_score)
+- [x] Create SQLite database schema for baselines table (theta_mean, theta_std, alpha_mean, beta_mean, peak_theta_freq, optimal_freq, calibration_timestamp, quality_score)
 - [ ] Create SQLite database schema for sessions table (id, session_type, start_time, end_time, duration_seconds, avg_theta_zscore, max_theta_zscore, entrainment_freq, volume, signal_quality_avg, subjective_rating, notes)
 - [ ] Create SQLite database schema for circadian_patterns table (hour_of_day, avg_theta_mean, avg_theta_std, session_count, avg_subjective_rating)
 - [ ] Implement DatabaseService with CRUD operations for all tables
