@@ -5,7 +5,7 @@
 - [x] Initialize React Native project with Expo SDK 54+ and TypeScript
 - [x] Set up project folder structure (src/screens, src/components, src/services, src/hooks, src/utils, src/types, src/constants)
 - [x] Install and configure core dependencies: react-native-ble-plx, @react-navigation/native, @react-navigation/bottom-tabs, expo-sqlite, @react-native-async-storage/async-storage
-- [ ] Install and configure chart library (react-native-chart-kit or victory-native)
+- [x] Install and configure chart library (react-native-chart-kit or victory-native)
 - [ ] Create TypeScript types for Session, BaselineProfile, CircadianPattern, DeviceInfo, and AppSettings
 - [ ] Set up React Context for global state management (DeviceContext, SessionContext, SettingsContext)
 - [ ] Configure ESLint and Prettier for code consistency
