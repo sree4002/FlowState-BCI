@@ -169,3 +169,50 @@ Victory Native provides chart components for:
 
 **Next steps**: Set up React Context for global state management (DeviceContext, SessionContext, SettingsContext) as per Phase 1 task 6
 
+
+### Task: Set up React Context for global state management (DeviceContext, SessionContext, SettingsContext)
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created src/contexts directory for React Context providers and hooks
+2. Implemented DeviceContext with full BLE device state management (device info, signal quality, EEG data, connection state)
+3. Implemented SessionContext with complete session state management (current session, config, state machine, calibration state, visualization mode, theta z-score tracking)
+4. Implemented SettingsContext with comprehensive app settings (device, notifications, audio, entrainment, theta threshold, accessibility, privacy settings)
+5. Created index.ts for clean module exports from contexts directory
+6. Added proper TypeScript interfaces for all context state and actions
+7. Implemented custom hooks (useDevice, useSession, useSettings) with error handling for usage outside providers
+8. Created comprehensive test suite with 33 tests covering all three contexts (__tests__/contexts.test.tsx)
+9. Installed @testing-library/react (v16.0.1) for React hooks testing
+10. Installed jest-environment-jsdom for React component testing in Jest
+11. Updated Jest configuration to use jsdom test environment for React/JSX tests
+12. Fixed ESLint warnings by removing unused initialState variables
+13. Verified all tests pass (93 tests passing across 6 test suites)
+14. Verified linting passes with no errors or warnings
+15. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/contexts/DeviceContext.tsx (created - 99 lines)
+- src/contexts/SessionContext.tsx (created - 111 lines)
+- src/contexts/SettingsContext.tsx (created - 111 lines)
+- src/contexts/index.ts (created - centralized exports)
+- __tests__/contexts.test.tsx (created - 33 comprehensive tests)
+- jest.config.js (modified - changed testEnvironment from 'node' to 'jsdom')
+- package.json (added @testing-library/react: ^16.0.1, jest-environment-jsdom: ^30.2.0)
+- docs/prd.md (updated - marked task as complete)
+
+**Contexts created**:
+- DeviceContext: Manages BLE device connection state with 5 state properties and 6 actions
+- SessionContext: Manages active session state with 8 state properties and 9 actions
+- SettingsContext: Manages app settings with 21 configurable preferences and 2 actions
+
+**Key features**:
+- DeviceContext tracks device info, signal quality, real-time EEG data, connection status, and errors
+- SessionContext handles session lifecycle, calibration flow, visualization modes, and recent sessions history
+- SettingsContext provides default settings and supports partial updates across all categories
+- All contexts include reset functions to clear state
+- Custom hooks throw helpful errors when used outside their respective providers
+- Full TypeScript support with comprehensive type definitions
+
+**Next steps**: Configure ESLint and Prettier for code consistency as per Phase 1 task 7
+
