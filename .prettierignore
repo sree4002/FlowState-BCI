@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+*.log
+
+# Environment
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+
+# Generated files
+coverage/
+.expo/
+.expo-shared/
+
+# Python virtual environment
+venv/
+
+# Legacy code
+App/src/
+
+# Ralphy
+.ralphy/
+
+# OS files
+.DS_Store
+Thumbs.db

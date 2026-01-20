@@ -34,17 +34,26 @@ describe('Chart Library Installation', () => {
 
   describe('node_modules', () => {
     test('victory-native should be installed in node_modules', () => {
-      const victoryNativePath = resolve(__dirname, '../node_modules/victory-native');
+      const victoryNativePath = resolve(
+        __dirname,
+        '../node_modules/victory-native'
+      );
       expect(existsSync(victoryNativePath)).toBe(true);
     });
 
     test('victory-native package.json should exist', () => {
-      const packageJsonPath = resolve(__dirname, '../node_modules/victory-native/package.json');
+      const packageJsonPath = resolve(
+        __dirname,
+        '../node_modules/victory-native/package.json'
+      );
       expect(existsSync(packageJsonPath)).toBe(true);
     });
 
     test('victory-native should have a valid package.json', () => {
-      const packageJsonPath = resolve(__dirname, '../node_modules/victory-native/package.json');
+      const packageJsonPath = resolve(
+        __dirname,
+        '../node_modules/victory-native/package.json'
+      );
       const packageContent = readFileSync(packageJsonPath, 'utf-8');
       const packageJson = JSON.parse(packageContent);
       expect(packageJson.name).toBe('victory-native');
@@ -58,12 +67,18 @@ describe('Chart Library Installation', () => {
     });
 
     test('victory-native dist folder should exist', () => {
-      const distPath = resolve(__dirname, '../node_modules/victory-native/dist');
+      const distPath = resolve(
+        __dirname,
+        '../node_modules/victory-native/dist'
+      );
       expect(existsSync(distPath)).toBe(true);
     });
 
     test('victory-native should have index file', () => {
-      const indexPath = resolve(__dirname, '../node_modules/victory-native/dist/index.js');
+      const indexPath = resolve(
+        __dirname,
+        '../node_modules/victory-native/dist/index.js'
+      );
       expect(existsSync(indexPath)).toBe(true);
     });
   });
@@ -79,7 +94,10 @@ describe('Chart Library Installation', () => {
       // - SessionFrequencyChart with bar charts
       // - And other visualization needs throughout the app
 
-      const packageJsonPath = resolve(__dirname, '../node_modules/victory-native/package.json');
+      const packageJsonPath = resolve(
+        __dirname,
+        '../node_modules/victory-native/package.json'
+      );
       expect(existsSync(packageJsonPath)).toBe(true);
     });
   });

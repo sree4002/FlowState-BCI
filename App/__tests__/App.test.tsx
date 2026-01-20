@@ -10,7 +10,9 @@ import App from '../App';
 // Mock navigation
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
-  NavigationContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  NavigationContainer: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
   DarkTheme: {
     dark: true,
     colors: {

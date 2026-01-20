@@ -29,7 +29,9 @@ describe('Core Dependencies', () => {
       expect(dependencies['expo-sqlite']).toBeDefined();
 
       // Verify Storage dependency
-      expect(dependencies['@react-native-async-storage/async-storage']).toBeDefined();
+      expect(
+        dependencies['@react-native-async-storage/async-storage']
+      ).toBeDefined();
     });
 
     it('should have compatible versions', () => {
@@ -39,9 +41,13 @@ describe('Core Dependencies', () => {
       // Check that versions are specified
       expect(dependencies['react-native-ble-plx']).toMatch(/\d+\.\d+\.\d+/);
       expect(dependencies['@react-navigation/native']).toMatch(/\d+\.\d+\.\d+/);
-      expect(dependencies['@react-navigation/bottom-tabs']).toMatch(/\d+\.\d+\.\d+/);
+      expect(dependencies['@react-navigation/bottom-tabs']).toMatch(
+        /\d+\.\d+\.\d+/
+      );
       expect(dependencies['expo-sqlite']).toMatch(/\d+\.\d+\.\d+/);
-      expect(dependencies['@react-native-async-storage/async-storage']).toMatch(/\d+\.\d+\.\d+/);
+      expect(dependencies['@react-native-async-storage/async-storage']).toMatch(
+        /\d+\.\d+\.\d+/
+      );
     });
   });
 
@@ -50,37 +56,75 @@ describe('Core Dependencies', () => {
     const path = require('path');
 
     it('should have react-native-ble-plx installed in node_modules', () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', 'react-native-ble-plx');
+      const modulePath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        'react-native-ble-plx'
+      );
       expect(fs.existsSync(modulePath)).toBe(true);
     });
 
     it('should have @react-navigation/native installed in node_modules', () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', '@react-navigation', 'native');
+      const modulePath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        '@react-navigation',
+        'native'
+      );
       expect(fs.existsSync(modulePath)).toBe(true);
     });
 
     it('should have @react-navigation/bottom-tabs installed in node_modules', () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', '@react-navigation', 'bottom-tabs');
+      const modulePath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        '@react-navigation',
+        'bottom-tabs'
+      );
       expect(fs.existsSync(modulePath)).toBe(true);
     });
 
     it('should have expo-sqlite installed in node_modules', () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', 'expo-sqlite');
+      const modulePath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        'expo-sqlite'
+      );
       expect(fs.existsSync(modulePath)).toBe(true);
     });
 
     it('should have @react-native-async-storage/async-storage installed in node_modules', () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', '@react-native-async-storage', 'async-storage');
+      const modulePath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        '@react-native-async-storage',
+        'async-storage'
+      );
       expect(fs.existsSync(modulePath)).toBe(true);
     });
 
     it('should have react-native-screens installed in node_modules', () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', 'react-native-screens');
+      const modulePath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        'react-native-screens'
+      );
       expect(fs.existsSync(modulePath)).toBe(true);
     });
 
     it('should have react-native-safe-area-context installed in node_modules', () => {
-      const modulePath = path.join(__dirname, '..', 'node_modules', 'react-native-safe-area-context');
+      const modulePath = path.join(
+        __dirname,
+        '..',
+        'node_modules',
+        'react-native-safe-area-context'
+      );
       expect(fs.existsSync(modulePath)).toBe(true);
     });
   });

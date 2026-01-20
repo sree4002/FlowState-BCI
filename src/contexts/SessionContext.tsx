@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { Session, SessionConfig, SessionState, CalibrationState, VisualizationMode } from '../types';
+import {
+  Session,
+  SessionConfig,
+  SessionState,
+  CalibrationState,
+  VisualizationMode,
+} from '../types';
 
 /**
  * Session context state interface
@@ -52,13 +58,21 @@ interface SessionProviderProps {
  * SessionProvider component
  * Manages global session state for active and recent sessions
  */
-export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) => {
+export const SessionProvider: React.FC<SessionProviderProps> = ({
+  children,
+}) => {
   const [currentSession, setCurrentSession] = useState<Session | null>(null);
-  const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(null);
+  const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(
+    null
+  );
   const [sessionState, setSessionState] = useState<SessionState>('idle');
-  const [calibrationState, setCalibrationState] = useState<CalibrationState | null>(null);
-  const [visualizationMode, setVisualizationMode] = useState<VisualizationMode>('numeric');
-  const [currentThetaZScore, setCurrentThetaZScore] = useState<number | null>(null);
+  const [calibrationState, setCalibrationState] =
+    useState<CalibrationState | null>(null);
+  const [visualizationMode, setVisualizationMode] =
+    useState<VisualizationMode>('numeric');
+  const [currentThetaZScore, setCurrentThetaZScore] = useState<number | null>(
+    null
+  );
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [recentSessions, setRecentSessions] = useState<Session[]>([]);
 
@@ -97,7 +111,9 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children }) =>
     resetSessionState,
   };
 
-  return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
+  return (
+    <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
+  );
 };
 
 /**

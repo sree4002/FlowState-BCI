@@ -68,7 +68,9 @@ export const defaultSettings: AppSettings = {
 /**
  * Settings context for managing app preferences
  */
-const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
+const SettingsContext = createContext<SettingsContextType | undefined>(
+  undefined
+);
 
 /**
  * Settings provider props
@@ -84,7 +86,7 @@ interface SettingsProviderProps {
  */
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   children,
-  initialSettings = {}
+  initialSettings = {},
 }) => {
   const [settings, setSettings] = useState<AppSettings>({
     ...defaultSettings,
@@ -108,7 +110,11 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     resetSettings,
   };
 
-  return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
+  return (
+    <SettingsContext.Provider value={value}>
+      {children}
+    </SettingsContext.Provider>
+  );
 };
 
 /**

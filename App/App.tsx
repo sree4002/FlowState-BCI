@@ -1,6 +1,6 @@
 /**
  * FlowState BCI - Main App
- * 
+ *
  * This is the entry point for the React Native app.
  * It sets up navigation and provides global state.
  */
@@ -55,7 +55,10 @@ export default function App(): React.JSX.Element {
     frequency: 6.0,
     volume: 0.5,
   });
-  const [userProfile, setUserProfile] = useState<Record<string, unknown> | null>(null);
+  const [userProfile, setUserProfile] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
   // Initialize BLE service
   useEffect(() => {
@@ -85,18 +88,18 @@ export default function App(): React.JSX.Element {
     <AppContext.Provider value={contextValue}>
       <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
       <NavigationContainer
-                  theme={{
-            ...DarkTheme,
-            colors: {
-              ...DarkTheme.colors,
-              primary: '#64ffda',
-              background: '#1a1a2e',
-              card: '#16213e',
-              text: '#ffffff',
-              border: '#0f3460',
-              notification: '#e94560',
-            },
-          }}
+        theme={{
+          ...DarkTheme,
+          colors: {
+            ...DarkTheme.colors,
+            primary: '#64ffda',
+            background: '#1a1a2e',
+            card: '#16213e',
+            text: '#ffffff',
+            border: '#0f3460',
+            notification: '#e94560',
+          },
+        }}
       >
         <Tab.Navigator
           screenOptions={{
@@ -117,7 +120,9 @@ export default function App(): React.JSX.Element {
             component={HomeScreen}
             options={{
               headerShown: false,
-              tabBarIcon: ({ focused }) => <TabIcon name="Home" focused={focused} />,
+              tabBarIcon: ({ focused }) => (
+                <TabIcon name="Home" focused={focused} />
+              ),
             }}
           />
           <Tab.Screen
@@ -125,7 +130,9 @@ export default function App(): React.JSX.Element {
             component={SessionScreen}
             options={{
               headerShown: false,
-              tabBarIcon: ({ focused }) => <TabIcon name="Session" focused={focused} />,
+              tabBarIcon: ({ focused }) => (
+                <TabIcon name="Session" focused={focused} />
+              ),
             }}
           />
           <Tab.Screen
@@ -133,7 +140,9 @@ export default function App(): React.JSX.Element {
             component={HistoryScreen}
             options={{
               headerShown: false,
-              tabBarIcon: ({ focused }) => <TabIcon name="History" focused={focused} />,
+              tabBarIcon: ({ focused }) => (
+                <TabIcon name="History" focused={focused} />
+              ),
             }}
           />
           <Tab.Screen
@@ -141,7 +150,9 @@ export default function App(): React.JSX.Element {
             component={SettingsScreen}
             options={{
               headerShown: false,
-              tabBarIcon: ({ focused }) => <TabIcon name="Settings" focused={focused} />,
+              tabBarIcon: ({ focused }) => (
+                <TabIcon name="Settings" focused={focused} />
+              ),
             }}
           />
         </Tab.Navigator>

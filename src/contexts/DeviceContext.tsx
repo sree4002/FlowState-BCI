@@ -47,8 +47,12 @@ interface DeviceProviderProps {
  */
 export const DeviceProvider: React.FC<DeviceProviderProps> = ({ children }) => {
   const [deviceInfo, setDeviceInfo] = useState<DeviceInfo | null>(null);
-  const [signalQuality, setSignalQuality] = useState<SignalQuality | null>(null);
-  const [latestEEGData, setLatestEEGData] = useState<EEGDataPacket | null>(null);
+  const [signalQuality, setSignalQuality] = useState<SignalQuality | null>(
+    null
+  );
+  const [latestEEGData, setLatestEEGData] = useState<EEGDataPacket | null>(
+    null
+  );
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
@@ -74,7 +78,9 @@ export const DeviceProvider: React.FC<DeviceProviderProps> = ({ children }) => {
     resetDeviceState,
   };
 
-  return <DeviceContext.Provider value={value}>{children}</DeviceContext.Provider>;
+  return (
+    <DeviceContext.Provider value={value}>{children}</DeviceContext.Provider>
+  );
 };
 
 /**

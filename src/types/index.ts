@@ -87,7 +87,10 @@ export interface AppSettings {
 
   // Theta threshold settings
   target_zscore: number;
-  closed_loop_behavior: 'reduce_intensity' | 'stop_entrainment' | 'maintain_level';
+  closed_loop_behavior:
+    | 'reduce_intensity'
+    | 'stop_entrainment'
+    | 'maintain_level';
 
   // Accessibility settings
   text_size: 'small' | 'medium' | 'large';
@@ -133,7 +136,10 @@ export interface SessionConfig {
   entrainment_freq: number;
   volume: number;
   target_zscore: number;
-  closed_loop_behavior: 'reduce_intensity' | 'stop_entrainment' | 'maintain_level';
+  closed_loop_behavior:
+    | 'reduce_intensity'
+    | 'stop_entrainment'
+    | 'maintain_level';
 }
 
 /**
@@ -144,7 +150,12 @@ export type SessionState = 'idle' | 'running' | 'paused' | 'stopped';
 /**
  * Calibration state for calibration flow
  */
-export type CalibrationState = 'instructions' | 'countdown' | 'recording' | 'processing' | 'complete';
+export type CalibrationState =
+  | 'instructions'
+  | 'countdown'
+  | 'recording'
+  | 'processing'
+  | 'complete';
 
 /**
  * Visualization mode for active session screen

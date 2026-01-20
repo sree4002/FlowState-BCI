@@ -484,7 +484,9 @@ describe('SettingsContext', () => {
       };
 
       const wrapper = ({ children }: { children: React.ReactNode }) => (
-        <SettingsProvider initialSettings={initialSettings}>{children}</SettingsProvider>
+        <SettingsProvider initialSettings={initialSettings}>
+          {children}
+        </SettingsProvider>
       );
 
       const { result } = renderHook(() => useSettings(), { wrapper });
@@ -637,7 +639,9 @@ describe('SettingsContext', () => {
       });
 
       expect(result.current.settings.target_zscore).toBe(1.5);
-      expect(result.current.settings.closed_loop_behavior).toBe('stop_entrainment');
+      expect(result.current.settings.closed_loop_behavior).toBe(
+        'stop_entrainment'
+      );
     });
 
     it('should handle accessibility settings', () => {

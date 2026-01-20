@@ -22,6 +22,7 @@ FlowState BCI is a closed-loop brain-computer interface system that leverages re
 ### 1.3 Core Value Proposition
 
 FlowState BCI delivers personalized theta brainwave entrainment through:
+
 - **Dual-device system**: Comprehensive calibration headband + comfortable all-day earpiece
 - **Closed-loop feedback**: Real-time EEG monitoring adjusts entrainment dynamically
 - **ML-driven personalization**: Machine learning discovers each user's optimal entrainment frequency
@@ -86,27 +87,32 @@ FlowState BCI delivers personalized theta brainwave entrainment through:
 ### 2.2 Core Capabilities
 
 #### Calibration Mode
+
 - **Purpose**: Establish individual baseline theta patterns
 - **Duration**: 5-10 minutes per session
 - **Process**: High-fidelity EEG acquisition → Python processing → Baseline profile generation
 - **Output**: Mean/std theta power, optimal starting frequency, circadian metadata
 
 #### Daily Wear Mode
+
 - **Purpose**: On-demand and scheduled cognitive enhancement
 - **Process**: Real-time theta monitoring → Closed-loop entrainment adjustment → Session logging
 - **Features**: Manual boost, scheduled sessions, circadian suggestions, performance tracking
 
 #### Closed-Loop Entrainment
+
 - **Mechanism**: Monitor theta z-score → Compare to threshold → Adjust audio parameters
 - **User-configurable**: Reduce intensity / Stop / Maintain when threshold exceeded
 - **Adaptive**: Learn from session outcomes to refine future entrainment
 
 #### Personalization Engine
+
 - **ML approach**: Ensemble model (physiological + behavioral + temporal features)
 - **Learning**: Continuous improvement as session data accumulates
 - **Flexibility**: User can override, system adapts to preferences
 
 #### Session Tracking & Analytics
+
 - **Storage**: Local SQLite database with CSV/EDF/JSON export
 - **Views**: Session list, calendar heat map, trend charts, statistics dashboard
 - **Insights**: Theta improvement trends, frequency optimization, circadian patterns
@@ -119,24 +125,26 @@ FlowState BCI delivers personalized theta brainwave entrainment through:
 
 #### 3.1.1 Calibration EEG Headband
 
-| Specification | Requirement | Notes |
-|--------------|-------------|-------|
-| **Channels** | 4+ electrodes | Comprehensive brain mapping |
-| **Sampling Rate** | 500 Hz | High-fidelity acquisition during calibration |
-| **ADC Resolution** | 12-16 bit | Adequate signal resolution |
-| **Battery Life** | 4-6 hours | Multiple calibration sessions |
-| **Connectivity** | BLE 5.0+ | Reliable, low-latency communication |
-| **Form Factor** | Headband | Comfortable for short-duration use |
-| **Impedance Monitoring** | Real-time | Signal quality feedback |
-| **Weight** | <100g target | Minimize discomfort |
+| Specification            | Requirement   | Notes                                        |
+| ------------------------ | ------------- | -------------------------------------------- |
+| **Channels**             | 4+ electrodes | Comprehensive brain mapping                  |
+| **Sampling Rate**        | 500 Hz        | High-fidelity acquisition during calibration |
+| **ADC Resolution**       | 12-16 bit     | Adequate signal resolution                   |
+| **Battery Life**         | 4-6 hours     | Multiple calibration sessions                |
+| **Connectivity**         | BLE 5.0+      | Reliable, low-latency communication          |
+| **Form Factor**          | Headband      | Comfortable for short-duration use           |
+| **Impedance Monitoring** | Real-time     | Signal quality feedback                      |
+| **Weight**               | <100g target  | Minimize discomfort                          |
 
 **Signal Quality Requirements:**
+
 - Real-time impedance monitoring (<10 kΩ ideal, <50 kΩ acceptable)
 - Artifact detection: motion, EMG, eye blinks
 - Visual quality indicator in app (green/yellow/red)
 - Auto-rejection of high-artifact segments
 
 **Electrical Safety:**
+
 - Low voltage: <5V DC
 - Current-limited electrodes
 - Biocompatible materials (hypoallergenic)
@@ -144,25 +152,27 @@ FlowState BCI delivers personalized theta brainwave entrainment through:
 
 #### 3.1.2 Daily Wear Earpiece
 
-| Specification | Requirement | Notes |
-|--------------|-------------|-------|
-| **Channels** | 2 (1 active + reference) | In-ear EEG electrode + reference |
-| **Sampling Rate** | 250 Hz | Power-optimized for daily wear |
-| **ADC Resolution** | 12-16 bit | Consistent with headband |
-| **Battery Life** | 16+ hours | Full day + overnight margin |
-| **Audio Output** | Isochronic tone generation | 4-8 Hz theta range |
-| **Connectivity** | BLE 5.0+ | Matched to headband |
-| **Form Factor** | Earpiece | Comfortable extended wear, unobtrusive |
-| **Weight** | <20g per ear | Minimal fatigue |
-| **Volume Range** | 0-100% | Independent of system volume |
+| Specification      | Requirement                | Notes                                  |
+| ------------------ | -------------------------- | -------------------------------------- |
+| **Channels**       | 2 (1 active + reference)   | In-ear EEG electrode + reference       |
+| **Sampling Rate**  | 250 Hz                     | Power-optimized for daily wear         |
+| **ADC Resolution** | 12-16 bit                  | Consistent with headband               |
+| **Battery Life**   | 16+ hours                  | Full day + overnight margin            |
+| **Audio Output**   | Isochronic tone generation | 4-8 Hz theta range                     |
+| **Connectivity**   | BLE 5.0+                   | Matched to headband                    |
+| **Form Factor**    | Earpiece                   | Comfortable extended wear, unobtrusive |
+| **Weight**         | <20g per ear               | Minimal fatigue                        |
+| **Volume Range**   | 0-100%                     | Independent of system volume           |
 
 **Audio Specifications:**
+
 - Frequency range: 4-8 Hz (theta band), 0.1 Hz precision
 - Volume control: Independent of device system volume
 - Tone generation: DAC or PWM-based isochronic tones
 - Audio mixing: Option to blend with other audio sources
 
 **Power Management:**
+
 - Adaptive sampling: Lower rate when not in active session
 - Sleep mode: When disconnected or idle
 - Charging: USB-C, <2 hours full charge
@@ -170,6 +180,7 @@ FlowState BCI delivers personalized theta brainwave entrainment through:
 #### 3.1.3 ESP32 Firmware Implementation
 
 **Core Responsibilities:**
+
 - EEG signal acquisition via ADC
 - On-device signal preprocessing (bandpass filter, artifact detection)
 - Isochronic tone generation via DAC/PWM
@@ -178,6 +189,7 @@ FlowState BCI delivers personalized theta brainwave entrainment through:
 - Power management for battery optimization
 
 **BLE Protocol:**
+
 - Service UUID: Custom FlowState service
 - Characteristics:
   - EEG Data Stream (notify)
@@ -187,6 +199,7 @@ FlowState BCI delivers personalized theta brainwave entrainment through:
   - OTA Update (write)
 
 **Signal Processing (On-Device):**
+
 - Hardware filters: 0.5-50 Hz bandpass (if feasible)
 - Software preprocessing:
   - DC offset removal
@@ -194,6 +207,7 @@ FlowState BCI delivers personalized theta brainwave entrainment through:
   - Downsample for BLE transmission (send processed theta power, not raw samples when possible)
 
 **OTA Updates:**
+
 - Automatic updates in background when device idle
 - Integrity verification (checksum, signature)
 - Rollback capability on failed update
@@ -203,24 +217,25 @@ FlowState BCI delivers personalized theta brainwave entrainment through:
 
 #### 3.2.1 Platform & Technology Stack
 
-| Component | Technology | Version |
-|-----------|-----------|---------|
-| **Framework** | React Native with Expo | Expo SDK 54+ |
-| **iOS Support** | iOS 13.0+ | |
-| **Android Support** | Android 8.0+ | API level 26+ |
-| **BLE Library** | react-native-ble-plx | v3.1.2+ |
-| **Navigation** | React Navigation | v6.1.9+ |
-| **State Management** | React Context API | Built-in |
-| **Local Storage** | AsyncStorage | For settings/preferences |
-| **Database** | SQLite | For session data |
-| **Charts** | React Native Chart Kit or Victory Native | TBD |
-| **Data Export** | Custom modules | CSV, EDF, JSON |
+| Component            | Technology                               | Version                  |
+| -------------------- | ---------------------------------------- | ------------------------ |
+| **Framework**        | React Native with Expo                   | Expo SDK 54+             |
+| **iOS Support**      | iOS 13.0+                                |                          |
+| **Android Support**  | Android 8.0+                             | API level 26+            |
+| **BLE Library**      | react-native-ble-plx                     | v3.1.2+                  |
+| **Navigation**       | React Navigation                         | v6.1.9+                  |
+| **State Management** | React Context API                        | Built-in                 |
+| **Local Storage**    | AsyncStorage                             | For settings/preferences |
+| **Database**         | SQLite                                   | For session data         |
+| **Charts**           | React Native Chart Kit or Victory Native | TBD                      |
+| **Data Export**      | Custom modules                           | CSV, EDF, JSON           |
 
 #### 3.2.2 Navigation & Information Architecture
 
 **Dashboard-Centric Design:**
 
 Primary screen with **configurable widgets** (user can add/remove/reorder):
+
 - Device connection status
 - Today's session summary (count, total time, avg theta)
 - Recent theta trends (sparkline or mini-chart)
@@ -261,12 +276,14 @@ Primary screen with **configurable widgets** (user can add/remove/reorder):
 #### 3.2.3 Device Management
 
 **Auto-Discovery & Pairing:**
+
 - Scan for BLE devices named "FlowState" or "BCI"
 - Separate pairing for calibration headband and daily earpiece
 - Store paired device IDs in AsyncStorage
 - Visual pairing instructions with illustrations
 
 **Connection Management:**
+
 - Real-time connection status indicator
 - Auto-reconnect on connectivity loss
   - Seamless session continuation (earpiece maintains last settings)
@@ -275,6 +292,7 @@ Primary screen with **configurable widgets** (user can add/remove/reorder):
 - Troubleshooting tips for poor connection
 
 **Firmware Updates:**
+
 - Automatic background updates when device idle
 - Progress indicator during update
 - Notification of available updates
@@ -287,11 +305,13 @@ Primary screen with **configurable widgets** (user can add/remove/reorder):
 **Purpose:** Establish user's baseline theta patterns
 
 **Configuration:**
+
 - Duration: 5-10 minutes (user selectable, default 8 min)
 - EEG source: Calibration headband (4+ channels)
 - Processing: Python service via BLE passthrough
 
 **User Flow:**
+
 1. User taps "Calibrate" from dashboard
 2. App checks for paired calibration headband
 3. If not paired, guide pairing process
@@ -315,6 +335,7 @@ Primary screen with **configurable widgets** (user can add/remove/reorder):
     - Option to recalibrate if quality poor
 
 **Data Collected:**
+
 - Raw EEG (all channels, 500 Hz)
 - Processed theta/alpha/beta power time series
 - Baseline statistics: mean, std, percentiles
@@ -323,6 +344,7 @@ Primary screen with **configurable widgets** (user can add/remove/reorder):
 - Signal quality metrics
 
 **Storage:**
+
 - Baseline profile: SQLite (theta_mean, theta_std, optimal_freq, timestamp)
 - Raw EEG: Optional export to EDF file
 - Session metadata: SQLite
@@ -332,12 +354,14 @@ Primary screen with **configurable widgets** (user can add/remove/reorder):
 **Purpose:** Real-time theta enhancement with closed-loop feedback
 
 **Configuration:**
+
 - Duration: User selectable (5, 15, 30, 60 min presets or custom)
 - EEG source: Daily wear earpiece (2 channels)
 - Entrainment: Isochronic tones, 4-8 Hz, adjustable volume
 - Closed-loop: User-configurable threshold behavior
 
 **User Flow:**
+
 1. User taps "Start Session" or "Boost"
 2. App checks for paired earpiece, establishes connection
 3. Session configuration:
@@ -362,6 +386,7 @@ Primary screen with **configurable widgets** (user can add/remove/reorder):
 
 **Real-Time Visualization Options:**
 User can toggle between or show multiple views:
+
 - **Numeric**: Z-score value (e.g., "+1.2 SD above baseline")
 - **Gauge**: Circular or bar gauge, color-coded zones
   - Red: Below baseline (<0 SD)
@@ -371,6 +396,7 @@ User can toggle between or show multiple views:
 - **Time-Series Chart**: Scrolling line chart of theta power over time (last 1-5 minutes visible)
 
 **Controls (Always Visible):**
+
 - Frequency slider: 4-8 Hz, 0.1 Hz increments, current value displayed
 - Volume slider: 0-100%, current value displayed
 - Pause/Resume button (large, center)
@@ -379,6 +405,7 @@ User can toggle between or show multiple views:
 - Signal quality indicator (corner, non-intrusive)
 
 **Data Collected:**
+
 - Theta power time series (250 Hz EEG → 0.5 Hz theta estimates)
 - Entrainment parameters: frequency and volume over time
 - Closed-loop adjustments: timestamps and reasons
@@ -391,29 +418,34 @@ User can toggle between or show multiple views:
 **Purpose:** Circadian-aware proactive entrainment
 
 **Configuration:**
+
 - Scheduling: Time-based OR circadian-suggested
 - Notifications: User-configurable (timing, style, frequency)
 - Calendar integration: Detect study/work blocks
 
 **Circadian Awareness:**
+
 - System analyzes historical theta patterns by time of day
 - Identifies peak performance times
 - Suggests optimal session times (e.g., "Your theta is typically highest at 2 PM")
 - Adapts over time as more data accumulates
 
 **Notification Options (User Configurable):**
+
 - **Simple reminder**: Push notification at scheduled time
 - **Smart reminder**: Remind at predicted optimal time (circadian model)
 - **Gentle prompt**: In-app prompt only, no push
 - **Off**: No notifications, scheduled sessions visible in dashboard only
 
 **Integration with Calendar:**
+
 - Request calendar permissions (optional)
 - Detect calendar events tagged as "study", "focus", "work"
 - Suggest sessions before these blocks
 - Auto-schedule if user enables
 
 **User Flow:**
+
 1. User creates scheduled session:
    - Choose time (manual) or accept circadian suggestion
    - Set default frequency/duration
@@ -427,6 +459,7 @@ User can toggle between or show multiple views:
 #### 3.2.5 Visualization & Feedback
 
 **Real-Time Updates:**
+
 - Update frequency: 2-5 Hz (fast, responsive)
 - Smooth animations for gauge/chart
 - Visual indicators for entrainment state:
@@ -435,12 +468,14 @@ User can toggle between or show multiple views:
   - **Stopped**: Session summary screen
 
 **Signal Quality Indicator:**
+
 - **Visual only**: Color-coded icon (red/yellow/green)
 - **Location**: Corner of session screen (non-intrusive)
 - **Behavior**: Does not auto-pause unless critically degraded (<20% quality)
 - **Tap for details**: Shows impedance values, troubleshooting tips
 
 **Entrainment State Visualization:**
+
 - Current frequency displayed prominently (e.g., "6.3 Hz")
 - Volume level (0-100%)
 - Theta state relative to baseline and target
@@ -450,6 +485,7 @@ User can toggle between or show multiple views:
 **Multi-View Analytics (Tabs/Cards):**
 
 ##### 1. Session List View
+
 - **Display**: Scrollable list, newest first
 - **Each entry shows**:
   - Date & time
@@ -465,6 +501,7 @@ User can toggle between or show multiple views:
   - Sort by date, duration, or theta score
 
 ##### 2. Calendar Heat Map
+
 - **Display**: Monthly calendar grid
 - **Color coding**: Intensity represents session outcome
   - Darker colors = better theta improvement OR more consistent usage
@@ -475,7 +512,9 @@ User can toggle between or show multiple views:
 - **Insight**: Visual pattern recognition (e.g., weekday vs weekend consistency)
 
 ##### 3. Trend Charts
+
 Multiple charts, user can scroll or tab through:
+
 - **Theta Power Improvement**: Line chart of avg theta z-score over time
 - **Optimal Frequency Convergence**: Show how ML-suggested frequency changes and stabilizes
 - **Circadian Pattern**: Heatmap or line chart of theta power by time of day
@@ -485,7 +524,9 @@ Multiple charts, user can scroll or tab through:
 **X-axis options**: Last 7 days, 30 days, 3 months, all time
 
 ##### 4. Statistics Dashboard
+
 Summary cards with key metrics:
+
 - **This Week**:
   - Total sessions
   - Total time
@@ -507,6 +548,7 @@ Summary cards with key metrics:
 #### 3.2.7 User Profile & Personalization
 
 **Baseline Profile (Stored in SQLite):**
+
 ```
 {
   "theta_mean": float,  // Mean theta power (µV²)
@@ -525,6 +567,7 @@ Summary cards with key metrics:
 ```
 
 **Circadian Patterns (Aggregated from Sessions):**
+
 ```
 {
   "hour_of_day": int,  // 0-23
@@ -536,6 +579,7 @@ Summary cards with key metrics:
 ```
 
 **Session History (SQLite Schema):**
+
 ```
 sessions {
   id: integer primary key,
@@ -578,18 +622,21 @@ sessions {
 #### 3.2.8 Settings & Configuration
 
 **Device Management:**
+
 - Paired devices list (headband, earpiece)
 - Forget device / Re-pair
 - Device info: name, battery level, firmware version
 - OTA update controls: Auto-update on/off
 
 **Notification Preferences:**
+
 - Enable/disable notifications
 - Notification style: Simple / Smart / Gentle
 - Notification frequency: Before every scheduled session / Daily summary only
 - Quiet hours: No notifications during specific times
 
 **Audio Settings:**
+
 - **Audio mixing behavior**:
   - Exclusive: Pause other audio during entrainment
   - Mix: Blend isochronic tones with music/podcasts
@@ -597,11 +644,13 @@ sessions {
 - **Mixing ratio** (if Mix enabled): Entrainment volume relative to other audio
 
 **Entrainment Settings:**
+
 - **Auto-boost**: Enable/disable scheduled auto-boost
 - **Boost frequency**: How often (daily, weekdays only, custom)
 - **Boost time**: Preferred time of day
 
 **Theta Threshold Settings:**
+
 - **Target theta z-score**: +0.5 to +2.0 SD (default +1.0)
 - **Closed-loop behavior** when threshold exceeded:
   - Reduce intensity
@@ -609,6 +658,7 @@ sessions {
   - Maintain level
 
 **Theme & Accessibility:**
+
 - **Theme**: Wellness aesthetic (calming blues/purples, rounded elements)
   - Future: Light mode option
 - **Text size**: Small / Medium / Large / Extra Large
@@ -616,11 +666,13 @@ sessions {
 - **Haptic feedback**: Enable/disable vibration for events
 
 **Data Management:**
+
 - **Export data**: Choose format (CSV / EDF / JSON)
 - **Clear session history**: Delete all sessions (confirmation required)
 - **Storage usage**: Display current database size
 
 **Privacy Settings:**
+
 - **Anonymous analytics**: Opt in/out of usage statistics
   - Clarify: No PII, no raw EEG, aggregate metrics only
 - **Data policy**: Link to full privacy policy document
@@ -629,11 +681,13 @@ sessions {
 #### 3.2.9 Onboarding
 
 **Goals:**
+
 - Minimal friction: Get users to first session quickly
 - Contextual learning: Explain features as encountered, not upfront
 - Optional depth: Users can skip and explore on their own
 
 **Onboarding Flow:**
+
 1. **Welcome Screen**:
    - Brief intro: "FlowState BCI helps you enhance focus through personalized brainwave entrainment"
    - Option to skip or continue tour
@@ -653,6 +707,7 @@ sessions {
    - User choice determines first experience
 
 **Contextual Learning Throughout App:**
+
 - **Tooltips**: Tap "?" icons next to complex terms (z-score, entrainment, etc.)
 - **Progressive disclosure**: First time user sees a screen, brief overlay explains key elements
 - **Help section**: Accessible from settings, articles on:
@@ -667,16 +722,19 @@ sessions {
 #### 3.3.1 EEG Acquisition Pipeline
 
 **Adaptive Sampling Strategy:**
+
 - **Calibration mode**: 500 Hz (high-fidelity for baseline computation)
 - **Daily wear mode**: 250 Hz (power-optimized, adequate for theta)
 
 **Hardware Preprocessing (ESP32):**
+
 1. **ADC sampling**: 12-16 bit resolution
 2. **Hardware bandpass filter** (if feasible): 0.5-50 Hz
    - High-pass 0.5 Hz: Remove DC offset and slow drift
    - Low-pass 50 Hz: Anti-aliasing, remove high-frequency noise
 
 **Software Preprocessing (Python Service or On-Device):**
+
 1. **DC offset removal**: Subtract mean of each epoch
 2. **Notch filter**: 50 Hz or 60 Hz (line noise), depending on region
 3. **Bandpass filter**: 0.5-50 Hz (if not done in hardware)
@@ -705,6 +763,7 @@ sessions {
    - Action: Mark segment as bad
 
 **Artifact Handling:**
+
 - **During calibration**:
   - Auto-reject bad segments (exclude from baseline computation)
   - If >30% of session is bad, extend session or prompt user to adjust headband
@@ -717,11 +776,13 @@ sessions {
 #### 3.3.3 Band Power Extraction
 
 **Multi-Band Analysis:**
+
 - **Theta**: 4-8 Hz
 - **Alpha**: 8-13 Hz
 - **Beta**: 13-30 Hz
 
 **Method:**
+
 - **Welch's periodogram** or **FFT with sliding window**
 - **Window size**: 2-4 seconds (trade-off: time resolution vs frequency resolution)
   - 2 sec window → 0.5 Hz frequency resolution
@@ -730,14 +791,17 @@ sessions {
 - **Update rate**: 2-5 Hz for real-time feedback (new estimate every 200-500 ms)
 
 **Z-Score Normalization:**
+
 ```
 theta_zscore = (theta_power_current - theta_mean_baseline) / theta_std_baseline
 ```
+
 - Provides standardized measure relative to user's baseline
 - Positive z-score: Above baseline
 - +1.0: One standard deviation above baseline (target zone)
 
 **Real-Time Implementation:**
+
 - Maintain sliding buffer of last 2-4 seconds of EEG
 - Compute FFT every 200-500 ms (depending on desired update rate)
 - Extract power in theta band, compute z-score
@@ -746,6 +810,7 @@ theta_zscore = (theta_power_current - theta_mean_baseline) / theta_std_baseline
 #### 3.3.4 Baseline Computation (Calibration)
 
 **Process:**
+
 1. Collect 5-10 minutes of clean EEG data (artifact-rejected)
 2. Extract theta power for each 2-4 second window
 3. Compute statistics across all windows:
@@ -761,16 +826,18 @@ theta_zscore = (theta_power_current - theta_mean_baseline) / theta_std_baseline
    - This is initial "optimal frequency" for entrainment
 6. **Confidence metric**:
    - Based on data quality (% clean), stability (coefficient of variation)
-   - Confidence = (% clean) * (1 - CV)
+   - Confidence = (% clean) \* (1 - CV)
    - High confidence (>0.8): Reliable baseline
    - Low confidence (<0.5): Suggest recalibration
 
 **Storage:**
+
 - Save baseline profile to SQLite
 - Timestamp for tracking recalibration needs
 - Multiple baselines if time-of-day stratified
 
 **Recalibration:**
+
 - Recommend recalibration every 4-8 weeks (baseline may drift)
 - OR if user reports subjective change in efficacy
 - New calibration updates baseline profile
@@ -804,6 +871,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 **ML Architecture:**
 
 **Training (Python Service, Offline):**
+
 - **Algorithm**: Gradient boosting (XGBoost or LightGBM) OR Gaussian process regression
 - **Features**: All features listed above (~10-15 features total)
 - **Target**: Optimal frequency (4-8 Hz) that maximizes:
@@ -815,15 +883,18 @@ Combine multiple feature types for robust optimal frequency discovery:
 - **Export**: Lightweight model parameters for on-device inference
 
 **Deployment (Mobile App / ESP32):**
+
 - **Inference on-device**: Given current context (time of day, recent sessions), predict optimal frequency
 - **Periodic retraining**: Weekly or monthly, as more data accumulates
 - **User override**: User can always manually set frequency; system learns from these choices too
 
 **Fallback:**
+
 - If insufficient data (<10 sessions): Use peak theta frequency from calibration
 - If model confidence low: Use 6.0 Hz default
 
 **Adaptive Presets:**
+
 - System learns common patterns:
   - Example: "Morning sessions at 6.5 Hz work best for you"
   - Example: "After 3 PM, you respond better to 5.8 Hz"
@@ -832,6 +903,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 #### 3.3.6 Closed-Loop Entrainment
 
 **Control Loop:**
+
 1. **Monitor**: Real-time theta z-score from earpiece
 2. **Compare**: Current z-score vs target threshold (default +1.0 SD)
 3. **Decide**: If z-score > threshold for >10 seconds:
@@ -843,11 +915,13 @@ Combine multiple feature types for robust optimal frequency discovery:
 5. **Log**: Record adjustment timestamp, reason, parameters
 
 **User Configuration:**
+
 - User selects preferred behavior in settings
 - Can change mid-session if desired
 - System logs which behavior user prefers, may suggest based on past preferences
 
 **Hysteresis:**
+
 - To prevent oscillation, use hysteresis:
   - Trigger adjustment when z-score > threshold + 0.2
   - Resume normal entrainment when z-score < threshold - 0.2
@@ -855,17 +929,20 @@ Combine multiple feature types for robust optimal frequency discovery:
 #### 3.3.7 Adaptive Presets
 
 **Learning Process:**
+
 1. System analyzes session history
 2. Clusters sessions by context (time of day, recent activity, etc.)
 3. Identifies optimal configurations for each cluster
 4. Generates preset suggestions
 
 **Example Presets:**
+
 - **"Morning Boost"**: 6.5 Hz, 10 min (learned from user's successful morning sessions)
 - **"Afternoon Focus"**: 5.8 Hz, 30 min (optimized for post-lunch sessions)
 - **"Quick Reset"**: 6.0 Hz, 5 min (when user needs fast recharge)
 
 **User Interaction:**
+
 - Dashboard shows suggested preset based on current time/context
 - User can accept, modify, or ignore
 - System learns from user's choices (if user always modifies preset, system adapts)
@@ -875,22 +952,26 @@ Combine multiple feature types for robust optimal frequency discovery:
 #### 3.4.1 Architecture
 
 **Deployment:**
+
 - Local service running on user's computer (development machine)
 - Production: Could be containerized (Docker) or native app
 
 **Communication:**
+
 - **BLE Passthrough**: Mobile app forwards raw EEG data from headband to Python service
   - Method: HTTP POST with binary EEG data OR WebSocket stream
   - Mobile app acts as BLE-to-network bridge
 - **Response**: Python returns processed results (baseline profile) to app
 
 **Flexible Design:**
+
 - Modular: Can migrate components to on-device processing as mobile/ESP32 capabilities improve
 - Well-defined API: Makes transition smooth
 
 #### 3.4.2 Responsibilities
 
 **1. Calibration Session Processing:**
+
 - **Input**: Raw EEG stream (4+ channels, 500 Hz)
 - **Processing**:
   - Apply preprocessing pipeline (filtering, artifact rejection)
@@ -912,6 +993,7 @@ Combine multiple feature types for robust optimal frequency discovery:
   ```
 
 **2. ML Model Training:**
+
 - **Input**: Session history (SQLite export or JSON)
 - **Processing**:
   - Feature extraction
@@ -922,6 +1004,7 @@ Combine multiple feature types for robust optimal frequency discovery:
   - Model metadata: accuracy, confidence, feature importance
 
 **3. Research & Experimentation:**
+
 - Test new algorithms (different filters, ML models, features)
 - Generate synthetic EEG for testing (already implemented: `FlowState_SimulatedEEG_Test.py`)
 - Visualization and debugging tools
@@ -929,29 +1012,32 @@ Combine multiple feature types for robust optimal frequency discovery:
 
 #### 3.4.3 Technology Stack
 
-| Component | Technology | Notes |
-|-----------|-----------|-------|
-| **Language** | Python 3.9+ | |
-| **Signal Processing** | NumPy, SciPy | FFT, filtering, statistics |
-| **ML Training** | scikit-learn | Gradient boosting, preprocessing |
-| **EEG Analysis** | MNE-Python (optional) | Advanced EEG tools, if needed |
-| **API Framework** | Flask or FastAPI | HTTP endpoints for app communication |
-| **Real-time** | WebSocket (optional) | For streaming during calibration |
-| **Data Export** | pandas | CSV/JSON export |
+| Component             | Technology            | Notes                                |
+| --------------------- | --------------------- | ------------------------------------ |
+| **Language**          | Python 3.9+           |                                      |
+| **Signal Processing** | NumPy, SciPy          | FFT, filtering, statistics           |
+| **ML Training**       | scikit-learn          | Gradient boosting, preprocessing     |
+| **EEG Analysis**      | MNE-Python (optional) | Advanced EEG tools, if needed        |
+| **API Framework**     | Flask or FastAPI      | HTTP endpoints for app communication |
+| **Real-time**         | WebSocket (optional)  | For streaming during calibration     |
+| **Data Export**       | pandas                | CSV/JSON export                      |
 
 #### 3.4.4 API Endpoints
 
 **1. POST /calibration/process**
+
 - **Input**: Raw EEG data (binary or JSON array)
 - **Output**: Baseline profile (JSON)
 - **Processing time**: Near real-time (process as data streams in)
 
 **2. POST /ml/train**
+
 - **Input**: Session history (JSON)
 - **Output**: Trained model parameters
 - **Processing time**: Minutes (offline, run periodically)
 
 **3. GET /health**
+
 - **Output**: Service status, version
 
 #### 3.4.5 Data Flow (Calibration Mode)
@@ -969,12 +1055,14 @@ Combine multiple feature types for robust optimal frequency discovery:
 #### 3.5.1 Local Storage
 
 **AsyncStorage (Key-Value Store):**
+
 - User settings and preferences
 - Device pairing info (UUIDs, names)
 - Current session state (for recovery after app restart)
 - Last sync timestamps
 
 **SQLite (Relational Database):**
+
 - **Tables**:
   - `baselines`: Calibration baseline profiles
   - `sessions`: Session history with detailed metrics
@@ -982,6 +1070,7 @@ Combine multiple feature types for robust optimal frequency discovery:
   - `ml_models`: Trained model parameters and metadata
 
 **File Storage:**
+
 - Raw EEG exports (EDF format): `<app_documents>/eeg_exports/session_<id>.edf`
 - CSV exports: `<app_documents>/exports/sessions_<timestamp>.csv`
 - JSON exports: `<app_documents>/exports/profile_<timestamp>.json`
@@ -989,19 +1078,23 @@ Combine multiple feature types for robust optimal frequency discovery:
 #### 3.5.2 Data Export
 
 **CSV (Session Summary):**
+
 - Columns: session_id, type, start_time, end_time, duration_sec, avg_theta_zscore, max_theta_zscore, entrainment_freq_hz, volume, subjective_rating, notes
 - Use case: Import to Excel/Sheets for personal analysis
 
 **EDF (Raw EEG):**
+
 - Standard: European Data Format (EDF or EDF+)
 - Includes: All channels, full sampling rate, electrode metadata
 - Use case: Advanced analysis in MATLAB, Python (MNE), or other neuroscience tools
 
 **JSON (Structured Export):**
+
 - Complete user profile: baselines, sessions, circadian patterns, settings, ML model params
 - Use case: Programmatic access, backup, migration to new device
 
 **Export Trigger:**
+
 - User-initiated from settings
 - Choose format
 - Share via iOS/Android share sheet (email, cloud storage, etc.)
@@ -1011,16 +1104,19 @@ Combine multiple feature types for robust optimal frequency discovery:
 **All Measures Implemented:**
 
 **1. Local-Only Data (MVP):**
+
 - No cloud sync in initial version
 - All data stays on device
 - User has full control
 
 **2. End-to-End Encryption (Future Cloud Features):**
+
 - If cloud backup/sync added later:
   - E2E encryption (user's device encrypts, only user can decrypt)
   - Zero-knowledge architecture (server cannot read data)
 
 **3. Anonymized Analytics (Opt-In):**
+
 - User can opt-in to share anonymous usage statistics
 - **What's shared** (if opted-in):
   - App version, OS version
@@ -1033,6 +1129,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 - **Purpose**: Improve app, guide feature development
 
 **4. Full Transparency:**
+
 - Clear privacy policy (accessible from settings)
 - User controls all data sharing (opt-in, not opt-out)
 - GDPR compliance:
@@ -1044,6 +1141,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 - HIPAA considerations: If future clinical features, ensure compliance
 
 **Data Retention:**
+
 - Local: User controls (can clear anytime)
 - Cloud (future): User controls retention period
 - Analytics: Aggregate only, no individual user data retained
@@ -1051,10 +1149,12 @@ Combine multiple feature types for robust optimal frequency discovery:
 #### 3.5.4 Multi-User Support
 
 **MVP: Single User Only**
+
 - One profile per app installation
 - Simplifies data model, privacy, UX
 
 **Future Enhancement:**
+
 - Multiple user profiles per device
 - Each profile has own:
   - Baseline calibration
@@ -1070,6 +1170,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 **Purpose:** Correlate theta sessions with behavioral outcomes
 
 **Potential Integrations:**
+
 1. **Pomodoro Timers**:
    - Forest, Focus Keeper, Be Focused
    - Data: Focus session duration, completion rate
@@ -1086,12 +1187,14 @@ Combine multiple feature types for robust optimal frequency discovery:
    - Correlation: Task completion rate on days with theta sessions
 
 **Integration Method:**
+
 - OAuth or API key authentication
 - Read-only access (privacy-conscious)
 - User grants permissions explicitly
 - Data fetched periodically (daily sync)
 
 **Data Flow:**
+
 1. User enables integration in FlowState settings
 2. App authenticates with third-party service
 3. App fetches study/focus time for past 7-30 days
@@ -1099,6 +1202,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 5. Display insights: "On days you use FlowState, you study 25% longer on average"
 
 **Privacy:**
+
 - Third-party data stays local (same privacy as FlowState data)
 - User can disconnect integration anytime
 
@@ -1107,6 +1211,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 **Purpose:** Allow users to listen to music/podcasts while using entrainment
 
 **User Choice (Configurable in Settings):**
+
 1. **Exclusive Audio**:
    - FlowState pauses other audio during entrainment
    - Resume other audio when session ends
@@ -1120,6 +1225,7 @@ Combine multiple feature types for robust optimal frequency discovery:
    - Use case: User prefers background music while working
 
 **Audio Mixing Implementation:**
+
 - iOS: Use AVAudioSession with `.mixWithOthers` option
 - Android: Use AudioManager with `AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK`
 - Detect if other audio playing, suggest appropriate mode if not set
@@ -1133,6 +1239,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 **Purpose:** Allow users to self-validate entrainment efficacy
 
 **Implementation:**
+
 - User enables A/B testing in settings
 - System randomly assigns sessions as:
   - **Real**: Isochronic tones at theta frequency (e.g., 6 Hz)
@@ -1141,12 +1248,14 @@ Combine multiple feature types for robust optimal frequency discovery:
 - After session, user rates focus/productivity (1-5 scale)
 
 **Analysis:**
+
 - Compare subjective ratings: Real vs Sham
 - Compare theta z-scores achieved: Real vs Sham (should be higher for Real)
 - Display results after 10+ sessions (sufficient N for basic stats)
 - Example insight: "Your theta was 35% higher during real sessions, and you rated focus 0.8 points higher on average"
 
 **Use Case:**
+
 - User wants to verify FlowState is actually working
 - Builds user confidence in product
 
@@ -1155,16 +1264,19 @@ Combine multiple feature types for robust optimal frequency discovery:
 **Purpose:** Track theta improvement over time
 
 **Metrics Tracked:**
+
 - **Theta z-score trends**: Plot avg z-score per session over weeks/months
 - **Improvement percentage**: Compare recent avg (last 7 days) vs baseline calibration or first sessions
 - **Frequency optimization convergence**: Show how ML-suggested frequency stabilizes
 - **Session outcomes**: % of sessions reaching target theta threshold
 
 **Display:**
+
 - Trend charts in History & Analytics
 - Summary stats in dashboard ("Your theta has improved 18% over the past month")
 
 **Use Case:**
+
 - User sees objective progress
 - Motivates continued use
 - Identifies when recalibration may be needed (if trends plateau or decline)
@@ -1174,6 +1286,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 **Purpose:** Correlate FlowState usage with external performance metrics
 
 **Methods:**
+
 1. **Third-Party Integration** (see 3.6.1):
    - Correlate session usage with study time, task completion, productivity scores
    - Display insights in app
@@ -1191,6 +1304,7 @@ Combine multiple feature types for robust optimal frequency discovery:
    - User can manually correlate with FlowState usage
 
 **Use Case:**
+
 - Strengthen evidence of efficacy beyond EEG metrics
 - Build user confidence and adherence
 
@@ -1199,6 +1313,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 **Comprehensive QA Approach:**
 
 **1. Unit Tests:**
+
 - Signal processing functions (filtering, FFT, artifact detection)
 - ML model training and inference
 - BLE service methods (connection, data parsing)
@@ -1206,12 +1321,14 @@ Combine multiple feature types for robust optimal frequency discovery:
 - **Target coverage**: >80%
 
 **2. Integration Tests:**
+
 - App-to-device communication (mock BLE devices)
 - Python service integration (mock calibration flow)
 - Third-party API integrations (mock OAuth, data fetch)
 - **Test scenarios**: Typical user flows end-to-end
 
 **3. End-to-End Tests:**
+
 - Complete user flows:
   - Onboarding → Device pairing → Calibration → Daily session → View analytics
   - Scheduled session trigger → Notification → Start session
@@ -1219,6 +1336,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 - **Tools**: Detox (React Native E2E), Appium
 
 **4. User Studies:**
+
 - **Alpha testing** (internal, 5-10 users):
   - Test basic functionality, identify critical bugs
   - Collect qualitative feedback on UX
@@ -1229,6 +1347,7 @@ Combine multiple feature types for robust optimal frequency discovery:
   - Refine based on feedback
 
 **5. Clinical Validation:**
+
 - **Signal quality validation**:
   - Compare ear-EEG (daily earpiece) vs traditional scalp EEG (research-grade)
   - Measure correlation of theta power estimates
@@ -1253,47 +1372,47 @@ Combine multiple feature types for robust optimal frequency discovery:
 
 ### 4.1 Engagement Metrics
 
-| Metric | Definition | Target (Month 3) |
-|--------|-----------|------------------|
-| **DAU / WAU** | Daily Active Users / Weekly Active Users | WAU >70% of installs |
-| **Session Frequency** | Avg sessions per user per week | >3 sessions/week |
-| **Retention Rate** | % users still active after X days | 7-day: >40%, 30-day: >25%, 90-day: >15% |
-| **Feature Adoption** | % users who complete calibration | >60% within first week |
-| **Feature Adoption** | % users who use scheduled sessions | >30% by month 2 |
-| **Time to First Session** | Time from download to first session | <24 hours for >50% users |
-| **Session Completion** | % of sessions completed (not stopped early) | >80% |
-| **Streak** | % users with 3+ day streak | >20% |
+| Metric                    | Definition                                  | Target (Month 3)                        |
+| ------------------------- | ------------------------------------------- | --------------------------------------- |
+| **DAU / WAU**             | Daily Active Users / Weekly Active Users    | WAU >70% of installs                    |
+| **Session Frequency**     | Avg sessions per user per week              | >3 sessions/week                        |
+| **Retention Rate**        | % users still active after X days           | 7-day: >40%, 30-day: >25%, 90-day: >15% |
+| **Feature Adoption**      | % users who complete calibration            | >60% within first week                  |
+| **Feature Adoption**      | % users who use scheduled sessions          | >30% by month 2                         |
+| **Time to First Session** | Time from download to first session         | <24 hours for >50% users                |
+| **Session Completion**    | % of sessions completed (not stopped early) | >80%                                    |
+| **Streak**                | % users with 3+ day streak                  | >20%                                    |
 
 ### 4.2 Efficacy Metrics
 
-| Metric | Definition | Target |
-|--------|-----------|--------|
-| **Theta Improvement** | Avg z-score increase from baseline after 4 weeks | +0.3 to +0.5 SD |
-| **Baseline Stability** | Coefficient of variation in repeat calibrations | <15% CV |
-| **Optimal Freq Discovery** | % users for whom ML finds stable optimal frequency | >70% after 20+ sessions |
-| **Closed-Loop Effectiveness** | Correlation between target theta and achieved theta | r >0.6 |
-| **Target Achievement** | % of sessions reaching target theta threshold | >60% |
-| **Session Outcomes** | User-reported focus improvement (pre/post rating) | +1.0 point avg (on 1-5 scale) |
+| Metric                        | Definition                                          | Target                        |
+| ----------------------------- | --------------------------------------------------- | ----------------------------- |
+| **Theta Improvement**         | Avg z-score increase from baseline after 4 weeks    | +0.3 to +0.5 SD               |
+| **Baseline Stability**        | Coefficient of variation in repeat calibrations     | <15% CV                       |
+| **Optimal Freq Discovery**    | % users for whom ML finds stable optimal frequency  | >70% after 20+ sessions       |
+| **Closed-Loop Effectiveness** | Correlation between target theta and achieved theta | r >0.6                        |
+| **Target Achievement**        | % of sessions reaching target theta threshold       | >60%                          |
+| **Session Outcomes**          | User-reported focus improvement (pre/post rating)   | +1.0 point avg (on 1-5 scale) |
 
 ### 4.3 User Satisfaction
 
-| Metric | Definition | Target |
-|--------|-----------|--------|
-| **NPS (Net Promoter Score)** | "How likely to recommend?" (0-10) | NPS >30 (promoters - detractors) |
-| **App Store Ratings** | Avg rating on iOS App Store / Google Play | >4.0 stars |
-| **Subjective Focus Rating** | Post-session focus/productivity (1-5) | >3.5 avg |
-| **Qualitative Feedback** | User testimonials, feature requests | Collect >20 testimonials in beta |
-| **Support Tickets** | Volume and resolution time | <5% users submit tickets, <48h resolution |
-| **Churn Reasons** | Exit surveys: Why did you stop using? | Identify top 3 reasons, address in updates |
+| Metric                       | Definition                                | Target                                     |
+| ---------------------------- | ----------------------------------------- | ------------------------------------------ |
+| **NPS (Net Promoter Score)** | "How likely to recommend?" (0-10)         | NPS >30 (promoters - detractors)           |
+| **App Store Ratings**        | Avg rating on iOS App Store / Google Play | >4.0 stars                                 |
+| **Subjective Focus Rating**  | Post-session focus/productivity (1-5)     | >3.5 avg                                   |
+| **Qualitative Feedback**     | User testimonials, feature requests       | Collect >20 testimonials in beta           |
+| **Support Tickets**          | Volume and resolution time                | <5% users submit tickets, <48h resolution  |
+| **Churn Reasons**            | Exit surveys: Why did you stop using?     | Identify top 3 reasons, address in updates |
 
 ### 4.4 Technical Metrics
 
-| Metric | Definition | Target |
-|--------|-----------|--------|
-| **Signal Quality** | Avg signal quality score during sessions | >75% |
-| **BLE Connection Reliability** | % of sessions with zero connection drops | >90% |
-| **App Crashes** | Crash rate per session | <1% |
-| **Battery Impact** | Battery drain during 30-min session | <10% on avg device |
+| Metric                         | Definition                               | Target             |
+| ------------------------------ | ---------------------------------------- | ------------------ |
+| **Signal Quality**             | Avg signal quality score during sessions | >75%               |
+| **BLE Connection Reliability** | % of sessions with zero connection drops | >90%               |
+| **App Crashes**                | Crash rate per session                   | <1%                |
+| **Battery Impact**             | Battery drain during 30-min session      | <10% on avg device |
 
 ---
 
@@ -1302,11 +1421,13 @@ Combine multiple feature types for robust optimal frequency discovery:
 ### 5.1 EEG Signal Quality (HIGH RISK)
 
 **Risk:**
+
 - Ear-EEG may have more artifacts than traditional scalp EEG
 - Motion, jaw clenching, talking can contaminate signal
 - Poor electrode contact in ear canal
 
 **Mitigation:**
+
 1. **Comprehensive artifact rejection algorithms**:
    - Multi-method detection (amplitude, frequency, gradient)
    - Real-time quality feedback to user
@@ -1325,17 +1446,20 @@ Combine multiple feature types for robust optimal frequency discovery:
    - Help section: "Getting the best signal quality"
 
 **Success Criterion:**
+
 - Correlation between ear-EEG and scalp EEG theta power >0.7
-- >75% avg signal quality during user sessions
+- > 75% avg signal quality during user sessions
 
 ### 5.2 Bluetooth Reliability (MEDIUM RISK)
 
 **Risk:**
+
 - BLE connection drops during sessions
 - Latency issues (delay between EEG event and app display)
 - Data throughput limitations (500 Hz × 4 channels × 2 bytes = 4 KB/s during calibration)
 
 **Mitigation:**
+
 1. **Auto-reconnect and resume**:
    - App detects disconnect immediately
    - Attempts reconnection every 2 seconds
@@ -1360,17 +1484,20 @@ Combine multiple feature types for robust optimal frequency discovery:
    - Test on variety of phones (iOS/Android, old/new models)
 
 **Success Criterion:**
-- >90% of sessions have zero connection drops
+
+- > 90% of sessions have zero connection drops
 - Avg latency <500 ms (EEG event to app display)
 
 ### 5.3 ML Model Accuracy (MEDIUM RISK)
 
 **Risk:**
+
 - Personalized frequency optimization may not work reliably with limited training data
 - Cold start problem: New users have no data
 - Model may overfit to noise in small datasets
 
 **Mitigation:**
+
 1. **Start with physiological baseline**:
    - Initial optimal frequency = peak theta frequency from calibration
    - Grounded in neuroscience (individual peak frequency hypothesis)
@@ -1396,17 +1523,20 @@ Combine multiple feature types for robust optimal frequency discovery:
    - A/B test: ML-suggested freq vs random freq, measure outcomes
 
 **Success Criterion:**
-- >70% of users reach stable optimal frequency after 20+ sessions
+
+- > 70% of users reach stable optimal frequency after 20+ sessions
 - ML-suggested frequency outperforms random frequency in A/B tests (higher theta z-score, better subjective ratings)
 
 ### 5.4 User Compliance (LOW-MEDIUM RISK)
 
 **Risk:**
+
 - Users may not complete calibration (perceived friction)
 - Users may not wear devices consistently (forget, uncomfortable)
 - Without consistent usage, insufficient data for personalization
 
 **Mitigation:**
+
 1. **Minimal friction onboarding**:
    - Calibration optional at first
    - Let users try Quick Boost immediately (no calibration needed, use default 6 Hz)
@@ -1434,8 +1564,9 @@ Combine multiple feature types for robust optimal frequency discovery:
    - "Your theta is usually highest now, good time for a session"
 
 **Success Criterion:**
-- >60% of users complete calibration within first week
-- >50% of users session 3+ times per week by month 2
+
+- > 60% of users complete calibration within first week
+- > 50% of users session 3+ times per week by month 2
 - 30-day retention >25%
 
 ---
@@ -1450,11 +1581,13 @@ Combine multiple feature types for robust optimal frequency discovery:
 #### Software (Mobile App + Python Service)
 
 **Done (Partially Implemented):**
+
 - ✅ Mobile app structure: Dashboard, session screen, history, settings
 - ✅ BLE connectivity: Device scanning, pairing, data streaming
 - ✅ Basic session tracking and storage
 
 **To Do:**
+
 - 🔲 Calibration mode integration:
   - BLE passthrough to Python service
   - Real-time signal quality monitoring
@@ -1485,6 +1618,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 #### Hardware (ESP32 Firmware + Devices)
 
 **To Do:**
+
 - 🔲 Calibration headband prototype:
   - 4-channel EEG acquisition
   - 500 Hz sampling
@@ -1689,21 +1823,25 @@ Combine multiple feature types for robust optimal frequency discovery:
 **Classification:** General wellness product, not a medical device
 
 **Regulatory Burden:** Minimal
+
 - No medical claims (does not diagnose, treat, cure disease)
 - Focus on cognitive enhancement, focus, productivity (wellness claims)
 - Safety and quality standards (electrical safety, materials)
 
 **Benefits:**
+
 - Faster time to market
 - Lower regulatory costs
 - Flexibility in marketing and features
 
 **Future Option:**
+
 - Can pursue medical device pathway later if warranted (clinical evidence, market demand)
 
 ### 7.2 Safety Considerations
 
 **Electrical Safety:**
+
 - **Low voltage**: <5V DC (USB power standard)
 - **Current-limited electrodes**: <1 mA through any electrode
 - **Isolation**: Galvanic isolation between EEG and power supply
@@ -1712,16 +1850,19 @@ Combine multiple feature types for robust optimal frequency discovery:
   - Prepares for potential future medical classification
 
 **Skin Compatibility:**
+
 - **Biocompatible materials**: Medical-grade plastics, silicone
 - **Hypoallergenic**: No latex, minimize sensitizers
 - **Testing**: Skin irritation testing (ISO 10993-10)
 
 **Audio Safety:**
+
 - **Volume limiting**: Max output <85 dB SPL (NIOSH safe exposure limit)
 - **Warning**: In-app warning if user sets volume >80%
 - **Hearing protection**: Recommend breaks, monitor usage duration
 
 **Contraindications (User Warnings):**
+
 - **Epilepsy/seizure disorders**: Consult physician before use (auditory stimulation could theoretically trigger in susceptible individuals, though risk very low at theta frequencies)
 - **Pacemakers/implanted devices**: Consult physician (EEG acquisition uses low currents, but caution warranted)
 - **Pregnancy**: Consult physician (general precaution, no known risk)
@@ -1730,6 +1871,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 ### 7.3 Data Compliance
 
 **GDPR (General Data Protection Regulation) - EU:**
+
 - **User rights**:
   - Right to access: User can export all data
   - Right to erasure: User can delete all data
@@ -1740,11 +1882,13 @@ Combine multiple feature types for robust optimal frequency discovery:
 - **Security**: Encryption at rest and in transit (if cloud features)
 
 **CCPA (California Consumer Privacy Act) - California, USA:**
+
 - **Transparency**: Disclose what data is collected and why
 - **Opt-out**: User can opt-out of data sale (not applicable, we don't sell data)
 - **Deletion**: User can request deletion
 
 **HIPAA (Health Insurance Portability and Accountability Act) - USA:**
+
 - **Current status**: Not applicable (wellness device, not medical)
 - **Future consideration**: If pursuing medical pathway or clinical studies, ensure HIPAA compliance
   - Protected Health Information (PHI) safeguards
@@ -1752,6 +1896,7 @@ Combine multiple feature types for robust optimal frequency discovery:
   - Encryption, access controls, audit logs
 
 **Privacy Policy:**
+
 - Clear, accessible from app settings
 - Written in plain language (not just legalese)
 - Covers:
@@ -1769,6 +1914,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 ### 8.1 Hardware Manufacturing
 
 **Questions:**
+
 1. **In-house vs contract manufacturing?**
    - In-house: More control, higher upfront cost, slower scaling
    - Contract: Faster to market, lower upfront, less control
@@ -1787,6 +1933,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 ### 8.2 Business Model
 
 **Questions:**
+
 1. **One-time purchase vs subscription?**
    - One-time: User buys hardware + app (freemium app or paid)
    - Subscription: Monthly fee for premium app features, hardware sold separately or bundled
@@ -1806,6 +1953,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 ### 8.3 Platform Expansion
 
 **Questions:**
+
 1. **Web app for richer analytics?**
    - Pros: Large screen, more complex visualizations, easier data manipulation
    - Cons: Development cost, most users prefer mobile
@@ -1823,6 +1971,7 @@ Combine multiple feature types for robust optimal frequency discovery:
 ### 8.4 Research Collaborations
 
 **Questions:**
+
 1. **Partner with universities for validation studies?**
    - Pros: Credibility, access to participants, publication opportunities
    - Cons: Slower, may require data sharing, IRB approval
@@ -1856,23 +2005,27 @@ Combine multiple feature types for robust optimal frequency discovery:
 ### 9.2 References
 
 **Neuroscience & Neurofeedback:**
-- Gruzelier, J. H. (2014). EEG-neurofeedback for optimising performance. *Neuroscience & Biobehavioral Reviews*, 44, 124-141.
-- Klimesch, W. (1999). EEG alpha and theta oscillations reflect cognitive and memory performance: a review and analysis. *Brain Research Reviews*, 29(2-3), 169-195.
+
+- Gruzelier, J. H. (2014). EEG-neurofeedback for optimising performance. _Neuroscience & Biobehavioral Reviews_, 44, 124-141.
+- Klimesch, W. (1999). EEG alpha and theta oscillations reflect cognitive and memory performance: a review and analysis. _Brain Research Reviews_, 29(2-3), 169-195.
 
 **Brain-Computer Interfaces:**
-- Wolpaw, J., & Wolpaw, E. W. (Eds.). (2012). *Brain-computer interfaces: principles and practice*. Oxford University Press.
+
+- Wolpaw, J., & Wolpaw, E. W. (Eds.). (2012). _Brain-computer interfaces: principles and practice_. Oxford University Press.
 
 **Auditory Entrainment:**
-- Huang, T. L., & Charyton, C. (2008). A comprehensive review of the psychological effects of brainwave entrainment. *Alternative Therapies in Health and Medicine*, 14(5), 38-50.
+
+- Huang, T. L., & Charyton, C. (2008). A comprehensive review of the psychological effects of brainwave entrainment. _Alternative Therapies in Health and Medicine_, 14(5), 38-50.
 
 **Ear-EEG:**
-- Looney, D., et al. (2012). The in-the-ear recording concept: user-centered and wearable brain monitoring. *IEEE Pulse*, 3(6), 32-42.
+
+- Looney, D., et al. (2012). The in-the-ear recording concept: user-centered and wearable brain monitoring. _IEEE Pulse_, 3(6), 32-42.
 
 ### 9.3 Document Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2026-01-19 | FlowState Team | Initial draft based on comprehensive requirements gathering |
+| Version | Date       | Author         | Changes                                                     |
+| ------- | ---------- | -------------- | ----------------------------------------------------------- |
+| 1.0     | 2026-01-19 | FlowState Team | Initial draft based on comprehensive requirements gathering |
 
 ---
 
