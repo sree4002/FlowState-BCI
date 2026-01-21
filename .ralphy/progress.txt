@@ -397,3 +397,84 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Implement connection quality monitoring using RSSI values
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Added comprehensive connection quality TypeScript types to src/types/index.ts:
+   - ConnectionQualityLevel type ('excellent' | 'good' | 'fair' | 'poor')
+   - RSSIReading interface for individual RSSI readings with timestamps
+   - ConnectionQuality interface with 11 fields (currentRSSI, averageRSSI, minRSSI, maxRSSI, rssiStdDev, qualityLevel, qualityScore, isStable, lastUpdated, sampleCount)
+   - ConnectionQualityConfig interface for configurable thresholds and polling intervals
+   - DEFAULT_CONNECTION_QUALITY_CONFIG constant with sensible defaults
+   - ConnectionQualityCallback and QualityLevelChangeCallback types for event handling
+
+2. Created ConnectionQualityMonitor class (src/services/ConnectionQualityMonitor.ts):
+   - RSSI polling at configurable intervals (default 2 seconds)
+   - Sliding window averaging for smoothed metrics (default window size 10)
+   - Quality level classification based on RSSI thresholds:
+     - Excellent: >= -50 dBm
+     - Good: >= -70 dBm
+     - Fair: >= -85 dBm
+     - Poor: < -85 dBm
+   - Connection stability detection based on RSSI standard deviation
+   - Quality score calculation (0-100) combining RSSI strength and stability
+   - Event callbacks for quality updates and level changes
+   - Utility functions: getQualityLevelDescription(), getQualityLevelColor()
+
+3. Created TypeScript BLEService (src/services/BLEService.ts):
+   - Full TypeScript rewrite with proper type safety
+   - Integrated ConnectionQualityMonitor for automatic RSSI monitoring
+   - Auto-reconnect logic with exponential backoff (2s, 4s, 8s)
+   - Device info tracking with real-time RSSI updates
+   - Connection state management ('disconnected' | 'connecting' | 'connected' | 'reconnecting')
+   - EEG data stream monitoring
+   - Event listener pattern for connection state, EEG data, and device info updates
+   - Console warnings when connection quality degrades to 'poor'
+
+4. Updated exports in src/services/index.ts
+
+5. Created comprehensive test suite (__tests__/connection-quality-monitor.test.ts):
+   - 23 tests covering quality level classification, score calculation, RSSI collection, stability detection
+   - Tests for sliding window behavior, standard deviation calculation, and type validation
+   - All tests passing
+
+**Files created/modified**:
+- src/types/index.ts (modified - added 86 lines of connection quality types)
+- src/services/ConnectionQualityMonitor.ts (created - 305 lines)
+- src/services/BLEService.ts (created - 453 lines)
+- src/services/index.ts (modified - added exports)
+- __tests__/connection-quality-monitor.test.ts (created - 270 lines with 23 tests)
+
+**Quality level thresholds** (configurable):
+- Excellent: RSSI >= -50 dBm (very close range, optimal)
+- Good: -50 > RSSI >= -70 dBm (normal operating range)
+- Fair: -70 > RSSI >= -85 dBm (usable but may have issues)
+- Poor: RSSI < -85 dBm (connection may be unstable)
+
+**Quality score algorithm**:
+- Base score (0-80): Maps RSSI from -100 dBm (0) to -30 dBm (80)
+- Stability bonus (0-20): Full bonus if stdDev <= 5, decreases to 0 at stdDev >= 20
+- Final score: 0-100 range
+
+**Key features**:
+- Automatic RSSI polling when device is connected
+- Statistical analysis: average, min, max, standard deviation
+- Configurable thresholds for different use cases
+- Event-driven architecture for UI updates
+- Clean integration with BLEService for seamless monitoring
+
+**Test coverage**: 23 tests covering:
+- Quality level classification (4 tests)
+- Quality score calculation (6 tests)
+- RSSI reading collection (4 tests)
+- Stability detection (2 tests)
+- Current RSSI tracking (1 test)
+- Standard deviation calculation (3 tests)
+- Default config validation (1 test)
+- Type validation (2 tests)
+
+**Next steps**: Add paired device storage and retrieval from AsyncStorage as per Phase 3 task 5
+
