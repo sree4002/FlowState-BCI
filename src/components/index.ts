@@ -2,5 +2,6 @@
 // Export reusable components here as they are created
 export { DeviceStatusWidget } from './DeviceStatusWidget';
 export type { DeviceStatusWidgetProps } from './DeviceStatusWidget';
-export { VolumeSlider } from './VolumeSlider';
-export type { VolumeSliderProps } from './VolumeSlider';
+
+export { SessionTimer, formatTime, calculateProgress } from './SessionTimer';
+export type { SessionTimerProps } from './SessionTimer';
