@@ -1,7 +1,4 @@
 // Components export
 // Export reusable components here as they are created
-
-export {
-  CustomSessionButton,
-  type CustomSessionButtonProps,
-} from './CustomSessionButton';
+export { DeviceStatusWidget } from './DeviceStatusWidget';
+export type { DeviceStatusWidgetProps } from './DeviceStatusWidget';
