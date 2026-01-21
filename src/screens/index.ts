@@ -1,2 +1,2 @@
-// Screens exports
-export { default as SettingsScreen } from './SettingsScreen';
+// Screens export
+export { default as CalibrationScreen } from './CalibrationScreen';
