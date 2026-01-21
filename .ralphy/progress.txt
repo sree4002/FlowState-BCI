@@ -398,75 +398,94 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Implement auto-reconnect logic with exponential backoff (2s, 4s, 8s intervals)
+### Task: Create BLE characteristic handlers for EEG data stream (notify), entrainment control (write), device status (read/notify)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Enhanced BleService with auto-reconnect functionality in App/src/services/BleService.js
-2. Added auto-reconnect state properties: autoReconnectEnabled, lastConnectedDeviceId, reconnectAttempts, maxReconnectAttempts (5), baseReconnectDelay (2000ms), reconnectTimer, isReconnecting, intentionalDisconnect
-3. Implemented calculateBackoffDelay() method using exponential backoff formula: 2^attempt * baseDelay (2s, 4s, 8s, 16s, 32s with 32s cap)
-4. Implemented attemptReconnect() method with retry logic, attempt tracking, and listener notifications
-5. Added reconnectToDeviceById() method to reconnect to previously connected device by ID
-6. Added setAutoReconnect(enabled, deviceId) to configure auto-reconnect
-7. Added cancelReconnect() to stop pending reconnect attempts
-8. Added resetReconnectState() for state cleanup on successful connections
-9. Added handleUnexpectedDisconnect() to trigger auto-reconnect on unexpected disconnections
-10. Updated connectToDevice() to store device ID and reset reconnect state on success
-11. Updated disconnect() to mark intentional disconnect and cancel pending reconnects
-12. Updated destroy() to clean up reconnect timers
-13. Added reconnect listener system: addReconnectListener(), removeReconnectListener(), notifyReconnectAttempt()
-14. Added getReconnectStatus() for current reconnect state inspection
-15. Created TypeScript types in src/types/index.ts: ReconnectStatusType, ReconnectAttemptEvent, ReconnectState
-16. Created reusable utility module src/utils/reconnect.ts with functions: calculateBackoffDelay, getBackoffSequence, canRetry, getTotalBackoffTime
-17. Exported utility functions from src/utils/index.ts
-18. Created comprehensive test suite with 31 tests (__tests__/reconnect.test.ts)
-19. Verified all tests pass (31 reconnect tests, 207 total tests passing)
+1. Created src/services/ble directory for BLE characteristic handlers
+2. Created BLE constants file (src/services/ble/constants.ts) with:
+   - Service and characteristic UUIDs for FlowState BCI device
+   - EntrainmentCommand enum (START, STOP, SET_FREQUENCY, SET_VOLUME, SET_WAVEFORM, PAUSE, RESUME)
+   - WaveformType enum (ISOCHRONIC, BINAURAL, MONAURAL)
+   - DeviceStatusFlag enum for status bitmask parsing
+   - Packet structure size constants
+3. Created BLE types file (src/services/ble/types.ts) with:
+   - Callback types for data and error handling
+   - DeviceStatusData interface for parsed status
+   - EntrainmentConfig interface for control commands
+   - Handler configuration interfaces
+   - CharacteristicHandler interface for common handler pattern
+4. Created EEG Data Stream Handler (src/services/ble/eegDataHandler.ts):
+   - Subscribes to EEG data notifications via BLE
+   - Parses binary packets into EEGDataPacket (timestamp, samples, sequence_number)
+   - Tracks dropped packets for quality monitoring
+   - Implements CharacteristicHandler interface (start/stop/isActive)
+5. Created Entrainment Control Handler (src/services/ble/entrainmentControlHandler.ts):
+   - Writes commands to control audio entrainment
+   - Supports start/stop/pause/resume operations
+   - Supports frequency and volume adjustment
+   - Supports waveform type configuration
+   - Tracks current entrainment configuration
+6. Created Device Status Handler (src/services/ble/deviceStatusHandler.ts):
+   - Reads device status on demand
+   - Subscribes to status change notifications
+   - Parses status flags (connected, streaming, entrainment active, low battery, charging, error)
+   - Parses signal quality data (score, artifact percentage, artifact flags)
+   - Parses firmware version
+   - Includes configurable polling interval as backup for missed notifications
+7. Created index.ts exporting all handlers, types, and constants
+8. Updated src/services/index.ts to export ble module
+9. Created mock for react-native-ble-plx (__mocks__/react-native-ble-plx.ts)
+10. Created comprehensive test suite with 33 tests (__tests__/ble-characteristic-handlers.test.ts)
+11. Verified all tests pass (33 tests for BLE handlers, 209 total tests across 10 test suites)
 
 **Files created/modified**:
-- App/src/services/BleService.js (modified - added ~200 lines of auto-reconnect logic)
-- src/types/index.ts (modified - added 3 new types: ReconnectStatusType, ReconnectAttemptEvent, ReconnectState)
-- src/utils/reconnect.ts (created - 82 lines with reusable backoff utilities)
-- src/utils/index.ts (modified - added reconnect exports)
-- __tests__/reconnect.test.ts (created - 235 lines with 31 comprehensive tests)
+- src/services/ble/constants.ts (created - BLE UUIDs, enums, packet sizes)
+- src/services/ble/types.ts (created - TypeScript interfaces for handlers)
+- src/services/ble/eegDataHandler.ts (created - EEG notify handler)
+- src/services/ble/entrainmentControlHandler.ts (created - Entrainment write handler)
+- src/services/ble/deviceStatusHandler.ts (created - Status read/notify handler)
+- src/services/ble/index.ts (created - module exports)
+- src/services/index.ts (modified - added ble export)
+- __mocks__/react-native-ble-plx.ts (created - BLE mock for testing)
+- __tests__/ble-characteristic-handlers.test.ts (created - 33 comprehensive tests)
 
-**Exponential backoff implementation**:
-- Base delay: 2 seconds (2000ms)
-- Formula: delay = baseDelay * 2^attempt
-- Intervals: 2s → 4s → 8s → 16s → 32s (capped at 32s)
-- Max attempts: 5 (configurable)
-- Total max wait time: 62 seconds across all retries
+**Handler capabilities**:
 
-**BleService auto-reconnect features**:
-- Automatic reconnection on unexpected disconnections
-- Intentional disconnects (via disconnect() method) do not trigger auto-reconnect
-- Device ID stored on successful connection for targeted reconnection
-- Reconnect attempt events notified to listeners with status: waiting, connecting, connected, failed, max_attempts_reached
-- State includes: attempt number, max attempts, next delay, optional error message
-- Can be enabled/disabled via setAutoReconnect(enabled, deviceId)
+EEG Data Stream Handler (notify):
+- Subscribes to BLE notifications for real-time EEG data
+- Parses 8-byte header (timestamp, sequence number, sample count) + float32 samples
+- Tracks dropped packets via sequence number monitoring
+- Delivers parsed EEGDataPacket to callback
 
-**TypeScript types added**:
-- ReconnectStatusType: 'waiting' | 'connecting' | 'connected' | 'failed' | 'max_attempts_reached'
-- ReconnectAttemptEvent: { attempt, maxAttempts, status, nextDelayMs, error? }
-- ReconnectState: { isReconnecting, currentAttempt, maxAttempts, autoReconnectEnabled, lastConnectedDeviceId }
+Entrainment Control Handler (write):
+- startEntrainment(config): Sets waveform, frequency, volume and starts playback
+- stopEntrainment(): Stops entrainment and clears config
+- pauseEntrainment()/resumeEntrainment(): Pause/resume control
+- setFrequency(hz): Adjust frequency in real-time
+- setVolume(0-100): Adjust volume with clamping
+- setWaveform(type): Set isochronic/binaural/monaural
+- getCurrentConfig(): Returns current entrainment configuration
 
-**Utility functions created**:
-- calculateBackoffDelay(attempt, config): Calculate delay for given attempt
-- getBackoffSequence(config): Get array of all delays for max attempts
-- canRetry(currentAttempt, config): Check if more retries allowed
-- getTotalBackoffTime(config): Calculate total wait time across all retries
+Device Status Handler (read/notify):
+- start(): Begin monitoring with initial read and notification subscription
+- stop(): Stop monitoring and polling
+- readStatus(): On-demand status read
+- getLastStatus(): Get cached status
+- setPollingInterval(ms): Configure backup polling rate
+- Parses 16-byte status packet with:
+  - Status flags (connected, streaming, entrainment, low battery, charging, error)
+  - Battery level and error code
+  - Signal quality (score, artifact %, artifact flags)
+  - RSSI and firmware version
 
-**Test coverage** (31 tests):
-- DEFAULT_RECONNECT_CONFIG validation (1 test)
-- calculateBackoffDelay tests (7 tests)
-- getBackoffSequence tests (4 tests)
-- canRetry tests (3 tests)
-- getTotalBackoffTime tests (3 tests)
-- Exponential backoff pattern validation (2 tests)
-- BleService backoff calculation equivalence (3 tests)
-- Reconnect state management (2 tests)
-- Reconnect attempt limits (2 tests)
-- ReconnectAttemptEvent structure (5 tests)
+**Test coverage** (33 tests):
+- BLE Constants (4 tests): UUID format, uniqueness, command/waveform values
+- EEGDataHandler (8 tests): Create, start/stop, parse packets, track dropped packets, handle errors
+- EntrainmentControlHandler (9 tests): Create, start/stop, entrainment commands, frequency/volume, config management
+- DeviceStatusHandler (11 tests): Create, start/read, notifications, flag parsing, artifact parsing, polling
+- Index exports (1 test): Verify all exports available
 
-**Next steps**: Continue with remaining Phase 3 tasks
+**Next steps**: Continue with remaining BLE communication tasks (BLE device scanner, connection manager)
 

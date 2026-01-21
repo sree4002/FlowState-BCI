@@ -1,62 +1,48 @@
 /**
- * Mock implementation of react-native-ble-plx for testing
+ * Mock for react-native-ble-plx module
+ * Used for testing BLE characteristic handlers
  */
 
-// BLE States
-export enum State {
-  Unknown = 'Unknown',
-  Resetting = 'Resetting',
-  Unsupported = 'Unsupported',
-  Unauthorized = 'Unauthorized',
-  PoweredOff = 'PoweredOff',
-  PoweredOn = 'PoweredOn',
-}
-
-// Mock Subscription class
 export class Subscription {
   private callback: (() => void) | null = null;
-  private removed = false;
-
-  constructor(callback?: () => void) {
-    this.callback = callback || null;
-  }
 
   remove(): void {
-    this.removed = true;
     if (this.callback) {
       this.callback();
+      this.callback = null;
     }
   }
 
-  isRemoved(): boolean {
-    return this.removed;
+  setRemoveCallback(cb: () => void): void {
+    this.callback = cb;
   }
 }
 
-// Mock Device class
+export interface Characteristic {
+  value: string | null;
+  uuid: string;
+  serviceUUID: string;
+}
+
 export class Device {
   id: string;
   name: string | null;
-  localName: string | null;
-  rssi: number | null;
-  manufacturerData: string | null;
-  serviceUUIDs: string[] | null;
-  private disconnectCallback:
-    | ((error: Error | null, device: Device) => void)
+  private monitorCallbacks: Map<
+    string,
+    (error: Error | null, characteristic: Characteristic | null) => void
+  > = new Map();
+  private subscriptions: Map<string, Subscription> = new Map();
+  private characteristicValues: Map<string, string> = new Map();
+  private writeHandler:
+    | ((serviceUUID: string, characteristicUUID: string, value: string) => void)
     | null = null;
-  private isConnected = false;
 
-  constructor(data: Partial<Device> = {}) {
-    this.id = data.id || 'mock-device-id';
-    this.name = data.name ?? 'Mock Device';
-    this.localName = data.localName ?? null;
-    this.rssi = data.rssi ?? -50;
-    this.manufacturerData = data.manufacturerData ?? null;
-    this.serviceUUIDs = data.serviceUUIDs ?? null;
+  constructor(id: string, name: string | null = null) {
+    this.id = id;
+    this.name = name;
   }
 
   async connect(): Promise<Device> {
-    this.isConnected = true;
     return this;
   }
 
@@ -65,209 +51,149 @@ export class Device {
   }
 
   async cancelConnection(): Promise<Device> {
-    this.isConnected = false;
     return this;
   }
 
-  onDisconnected(
-    callback: (error: Error | null, device: Device) => void
+  monitorCharacteristicForService(
+    serviceUUID: string,
+    characteristicUUID: string,
+    callback: (error: Error | null, characteristic: Characteristic | null) => void
   ): Subscription {
-    this.disconnectCallback = callback;
-    return new Subscription(() => {
-      this.disconnectCallback = null;
-    });
-  }
+    const key = `${serviceUUID}:${characteristicUUID}`;
+    this.monitorCallbacks.set(key, callback);
 
-  // Test helper to simulate disconnection
-  simulateDisconnect(error: Error | null = null): void {
-    this.isConnected = false;
-    if (this.disconnectCallback) {
-      this.disconnectCallback(error, this);
-    }
-  }
-}
-
-// Mock device storage for scan simulation
-interface MockScanDevice {
-  device: Device;
-  delay?: number;
-}
-
-// BleManager mock
-export class BleManager {
-  private currentState: State = State.PoweredOn;
-  private stateCallback:
-    | ((state: State) => void)
-    | null = null;
-  private scanCallback:
-    | ((error: Error | null, device: Device | null) => void)
-    | null = null;
-  private isScanning = false;
-  private mockDevices: MockScanDevice[] = [];
-  private destroyed = false;
-  private connectedDevices: Map<string, Device> = new Map();
-
-  constructor() {
-    // Default mock devices for testing
-    this.mockDevices = [
-      {
-        device: new Device({
-          id: 'flowstate-headband-001',
-          name: 'FlowState Headband',
-          rssi: -45,
-        }),
-        delay: 100,
-      },
-      {
-        device: new Device({
-          id: 'flowstate-earpiece-001',
-          name: 'FlowState Earpiece',
-          rssi: -55,
-        }),
-        delay: 200,
-      },
-      {
-        device: new Device({
-          id: 'other-device-001',
-          name: 'Other Device',
-          rssi: -70,
-        }),
-        delay: 150,
-      },
-    ];
-  }
-
-  // Allow tests to configure mock devices
-  setMockDevices(devices: MockScanDevice[]): void {
-    this.mockDevices = devices;
-  }
-
-  // Allow tests to set the BLE state
-  setMockState(state: State): void {
-    this.currentState = state;
-    if (this.stateCallback) {
-      this.stateCallback(state);
-    }
-  }
-
-  async state(): Promise<State> {
-    return this.currentState;
-  }
-
-  onStateChange(
-    callback: (state: State) => void,
-    emitCurrentState?: boolean
-  ): Subscription {
-    this.stateCallback = callback;
-    if (emitCurrentState) {
-      callback(this.currentState);
-    }
-    return new Subscription(() => {
-      this.stateCallback = null;
-    });
-  }
-
-  startDeviceScan(
-    uuids: string[] | null,
-    options: { allowDuplicates?: boolean } | null,
-    callback: (error: Error | null, device: Device | null) => void
-  ): Subscription {
-    if (this.destroyed) {
-      callback(new Error('BleManager is destroyed'), null);
-      return new Subscription();
-    }
-
-    if (this.currentState !== State.PoweredOn) {
-      callback(new Error('Bluetooth is not powered on'), null);
-      return new Subscription();
-    }
-
-    this.isScanning = true;
-    this.scanCallback = callback;
-
-    // Simulate device discovery with delays
-    this.mockDevices.forEach(({ device, delay = 0 }) => {
-      setTimeout(() => {
-        if (this.isScanning && this.scanCallback) {
-          this.scanCallback(null, device);
-        }
-      }, delay);
+    const subscription = new Subscription();
+    subscription.setRemoveCallback(() => {
+      this.monitorCallbacks.delete(key);
+      this.subscriptions.delete(key);
     });
 
-    return new Subscription(() => {
-      this.stopDeviceScan();
-    });
+    this.subscriptions.set(key, subscription);
+    return subscription;
   }
 
-  stopDeviceScan(): void {
-    this.isScanning = false;
-    this.scanCallback = null;
+  async readCharacteristicForService(
+    serviceUUID: string,
+    characteristicUUID: string
+  ): Promise<Characteristic> {
+    const key = `${serviceUUID}:${characteristicUUID}`;
+    const value = this.characteristicValues.get(key) ?? null;
+
+    return {
+      value,
+      uuid: characteristicUUID,
+      serviceUUID,
+    };
   }
 
-  async connectToDevice(
-    deviceId: string,
-    options?: { requestMTU?: number }
-  ): Promise<Device> {
-    if (this.destroyed) {
-      throw new Error('BleManager is destroyed');
+  async writeCharacteristicWithResponseForService(
+    serviceUUID: string,
+    characteristicUUID: string,
+    value: string
+  ): Promise<Characteristic> {
+    if (this.writeHandler) {
+      this.writeHandler(serviceUUID, characteristicUUID, value);
     }
 
-    // Find the device in mock devices
-    const mockDevice = this.mockDevices.find(
-      (d) => d.device.id === deviceId
-    );
-
-    let device: Device;
-    if (mockDevice) {
-      device = mockDevice.device;
-    } else {
-      // Create a new device if not found
-      device = new Device({ id: deviceId, name: 'Unknown Device' });
-    }
-
-    await device.connect();
-    this.connectedDevices.set(deviceId, device);
-
-    return device;
-  }
-
-  async cancelDeviceConnection(deviceId: string): Promise<Device> {
-    const device = this.connectedDevices.get(deviceId);
-    if (device) {
-      await device.cancelConnection();
-      this.connectedDevices.delete(deviceId);
-      return device;
-    }
-    throw new Error(`Device ${deviceId} not found`);
-  }
-
-  async connectedDevicesList(): Promise<Device[]> {
-    return Array.from(this.connectedDevices.values());
-  }
-
-  destroy(): void {
-    this.destroyed = true;
-    this.stopDeviceScan();
-    this.stateCallback = null;
-    this.connectedDevices.clear();
+    return {
+      value,
+      uuid: characteristicUUID,
+      serviceUUID,
+    };
   }
 
   // Test helper methods
-  isDestroyed(): boolean {
-    return this.destroyed;
+  simulateNotification(
+    serviceUUID: string,
+    characteristicUUID: string,
+    value: string
+  ): void {
+    const key = `${serviceUUID}:${characteristicUUID}`;
+    const callback = this.monitorCallbacks.get(key);
+
+    if (callback) {
+      callback(null, {
+        value,
+        uuid: characteristicUUID,
+        serviceUUID,
+      });
+    }
   }
 
-  getIsScanning(): boolean {
-    return this.isScanning;
+  simulateError(
+    serviceUUID: string,
+    characteristicUUID: string,
+    error: Error
+  ): void {
+    const key = `${serviceUUID}:${characteristicUUID}`;
+    const callback = this.monitorCallbacks.get(key);
+
+    if (callback) {
+      callback(error, null);
+    }
   }
 
-  // Simulate scan error
+  setCharacteristicValue(
+    serviceUUID: string,
+    characteristicUUID: string,
+    value: string
+  ): void {
+    const key = `${serviceUUID}:${characteristicUUID}`;
+    this.characteristicValues.set(key, value);
+  }
+
+  setWriteHandler(
+    handler: (
+      serviceUUID: string,
+      characteristicUUID: string,
+      value: string
+    ) => void
+  ): void {
+    this.writeHandler = handler;
+  }
+
+  clearWriteHandler(): void {
+    this.writeHandler = null;
+  }
+}
+
+export class BleManager {
+  private devices: Map<string, Device> = new Map();
+  private scanCallback:
+    | ((error: Error | null, device: Device | null) => void)
+    | null = null;
+
+  destroy(): void {
+    this.devices.clear();
+    this.scanCallback = null;
+  }
+
+  startDeviceScan(
+    _serviceUUIDs: string[] | null,
+    _options: object | null,
+    callback: (error: Error | null, device: Device | null) => void
+  ): void {
+    this.scanCallback = callback;
+  }
+
+  stopDeviceScan(): void {
+    this.scanCallback = null;
+  }
+
+  // Test helper methods
+  simulateDeviceFound(device: Device): void {
+    if (this.scanCallback) {
+      this.scanCallback(null, device);
+    }
+  }
+
   simulateScanError(error: Error): void {
     if (this.scanCallback) {
       this.scanCallback(error, null);
     }
   }
-}
 
-// Export types that might be needed
-export type BleError = Error;
+  addDevice(device: Device): void {
+    this.devices.set(device.id, device);
+  }
+}
