@@ -398,137 +398,55 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Implement DatabaseService with CRUD operations for all tables
+### Task: Implement z-score normalization function using baseline mean and std
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created sessions table schema with 13 columns (id, session_type, start_time, end_time, duration_seconds, avg_theta_zscore, max_theta_zscore, entrainment_freq, volume, signal_quality_avg, subjective_rating, notes, created_at)
-2. Created circadian_patterns table schema with 8 columns (id, hour_of_day, avg_theta_mean, avg_theta_std, session_count, avg_subjective_rating, created_at, updated_at)
-3. Implemented complete CRUD operations for sessions table:
-   - insertSession: Insert new session record
-   - getSessionById: Retrieve session by ID
-   - getAllSessions: Get all sessions ordered by start time (newest first)
-   - getLatestSession: Get most recent session
-   - getSessionsByType: Filter sessions by type (calibration, quick_boost, custom, scheduled, sham)
-   - getSessionsByDateRange: Get sessions within a date range
-   - updateSession: Update existing session (supports partial updates)
-   - deleteSession: Delete session by ID
-   - deleteAllSessions: Clear all sessions
-   - getSessionsCount: Get count of sessions
-   - getSessionStats: Get aggregate statistics (total sessions, duration, avg theta, avg signal quality, avg rating)
-4. Implemented complete CRUD operations for circadian_patterns table:
-   - upsertCircadianPattern: Insert or update pattern for a specific hour (upsert logic)
-   - getCircadianPatternByHour: Retrieve pattern by hour of day (0-23)
-   - getCircadianPatternById: Retrieve pattern by ID
-   - getAllCircadianPatterns: Get all patterns ordered by hour (ascending)
-   - updateCircadianPattern: Update existing pattern
-   - deleteCircadianPattern: Delete pattern by ID
-   - deleteCircadianPatternByHour: Delete pattern by hour
-   - deleteAllCircadianPatterns: Clear all patterns
-   - getCircadianPatternsCount: Get count of patterns
-   - getBestCircadianHour: Get hour with best average theta (min 3 sessions)
-   - recalculateCircadianPatterns: Regenerate patterns from session history
-5. Updated initializeDatabase() to create all three tables (baselines, sessions, circadian_patterns)
-6. Updated dropAllTables() to drop all three tables
-7. Added TypeScript interfaces: SessionRecord, SessionType, CircadianPatternRecord, SessionStats
-8. Updated expo-sqlite mock (__mocks__/expo-sqlite.ts) to support:
-   - New table schemas in PRAGMA queries
-   - WHERE clause filtering for session_type, hour_of_day, start_time ranges
-   - UPDATE queries with hour_of_day WHERE clause
-   - DELETE queries with hour_of_day WHERE clause
-   - Aggregate queries (SUM, AVG, COUNT) for session statistics
-9. Created comprehensive test suite for sessions (__tests__/database-sessions.test.ts) with 34 test cases
-10. Created comprehensive test suite for circadian patterns (__tests__/database-circadian.test.ts) with 25 test cases
-11. Verified all 235 tests pass across 11 test suites
-12. Verified linting passes with no errors or warnings
+1. Created src/utils/signalProcessing.ts with comprehensive z-score normalization functions
+2. Implemented calculateZScore() - core z-score calculation with input validation
+3. Implemented normalizeThetaZScore() - normalize theta power using baseline profile
+4. Implemented normalizeAllBands() - normalize theta, alpha, and beta bands simultaneously
+5. Implemented normalizeThetaArray() - batch normalize array of theta values
+6. Implemented calculateWindowZScore() - calculate z-score for sliding window average
+7. Implemented checkZScoreThreshold() - threshold detection with hysteresis for closed-loop control
+8. Implemented categorizeZScoreZone() - categorize z-scores into visual zones (low/baseline/elevated/high)
+9. Created TypeScript interfaces ZScoreResult and BandPowerInput
+10. Updated src/utils/index.ts to export all functions and types
+11. Created comprehensive test suite with 41 tests (__tests__/zscore-normalization.test.ts)
+12. All tests passing (217 total across 10 test suites)
+13. Linting passes with no errors
 
 **Files created/modified**:
-- src/services/database.ts (modified - added 580+ lines for sessions and circadian_patterns)
-- __tests__/database-sessions.test.ts (created - 430 lines with 34 test cases)
-- __tests__/database-circadian.test.ts (created - 350 lines with 25 test cases)
-- __mocks__/expo-sqlite.ts (modified - added support for new tables, queries, and aggregates)
+- src/utils/signalProcessing.ts (created - 176 lines with 7 functions)
+- src/utils/index.ts (modified - added exports for signal processing functions)
+- __tests__/zscore-normalization.test.ts (created - 280 lines with 41 comprehensive tests)
 
-**Sessions table schema**:
-- id: INTEGER PRIMARY KEY AUTOINCREMENT
-- session_type: TEXT NOT NULL CHECK (calibration, quick_boost, custom, scheduled, sham)
-- start_time: INTEGER NOT NULL (Unix timestamp)
-- end_time: INTEGER NOT NULL (Unix timestamp)
-- duration_seconds: INTEGER NOT NULL
-- avg_theta_zscore: REAL NOT NULL
-- max_theta_zscore: REAL NOT NULL
-- entrainment_freq: REAL NOT NULL
-- volume: REAL NOT NULL (0-100)
-- signal_quality_avg: REAL NOT NULL (0-100)
-- subjective_rating: INTEGER (nullable, 1-5)
-- notes: TEXT (nullable)
-- created_at: INTEGER DEFAULT (strftime('%s', 'now'))
+**Functions implemented**:
+- calculateZScore(value, mean, std): Core z-score formula with validation
+- normalizeThetaZScore(thetaPower, baseline): Single theta value normalization
+- normalizeAllBands(bandPowers, baseline): Multi-band normalization
+- normalizeThetaArray(thetaValues, baseline): Batch processing for arrays
+- calculateWindowZScore(thetaWindow, baseline): Sliding window z-score
+- checkZScoreThreshold(zscore, target, hysteresis): Threshold detection with hysteresis
+- categorizeZScoreZone(zscore): Zone categorization for visualization
 
-**Circadian patterns table schema**:
-- id: INTEGER PRIMARY KEY AUTOINCREMENT
-- hour_of_day: INTEGER NOT NULL UNIQUE CHECK (0-23)
-- avg_theta_mean: REAL NOT NULL
-- avg_theta_std: REAL NOT NULL
-- session_count: INTEGER NOT NULL
-- avg_subjective_rating: REAL (nullable)
-- created_at: INTEGER DEFAULT (strftime('%s', 'now'))
-- updated_at: INTEGER DEFAULT (strftime('%s', 'now'))
+**Test coverage**: 41 test cases covering:
+- Core z-score calculation (8 tests)
+- Theta normalization (4 tests)
+- All-bands normalization (3 tests)
+- Array normalization (5 tests)
+- Window z-score calculation (5 tests)
+- Threshold checking with hysteresis (8 tests)
+- Zone categorization (5 tests)
+- Integration tests (3 tests)
 
-**Sessions CRUD operations**:
-- insertSession() - Insert new session, returns ID
-- getSessionById() - Get session by ID
-- getAllSessions() - Get all sessions (newest first)
-- getLatestSession() - Get most recent session
-- getSessionsByType() - Filter by session type
-- getSessionsByDateRange() - Filter by date range
-- updateSession() - Partial update support
-- deleteSession() - Delete by ID
-- deleteAllSessions() - Clear all sessions
-- getSessionsCount() - Get total count
-- getSessionStats() - Aggregate statistics with optional date range
+**Key features**:
+- Z-score formula: z = (value - mean) / std
+- Input validation (throws error for std ≤ 0)
+- Hysteresis support to prevent oscillation in closed-loop control
+- Zone categories aligned with theta gauge color zones
+- TypeScript strict typing throughout
 
-**Circadian patterns CRUD operations**:
-- upsertCircadianPattern() - Insert or update by hour
-- getCircadianPatternByHour() - Get by hour (0-23)
-- getCircadianPatternById() - Get by ID
-- getAllCircadianPatterns() - Get all (ordered by hour)
-- updateCircadianPattern() - Partial update
-- deleteCircadianPattern() - Delete by ID
-- deleteCircadianPatternByHour() - Delete by hour
-- deleteAllCircadianPatterns() - Clear all patterns
-- getCircadianPatternsCount() - Get total count
-- getBestCircadianHour() - Find optimal hour (min 3 sessions)
-- recalculateCircadianPatterns() - Regenerate from sessions
-
-**Test coverage (59 new tests)**:
-Sessions tests (34 tests):
-- Table schema validation (2 tests)
-- Insert operations (4 tests)
-- Get by ID (2 tests)
-- Get all sessions (2 tests)
-- Get latest session (2 tests)
-- Get by type (2 tests)
-- Get by date range (2 tests)
-- Update operations (4 tests)
-- Delete operations (2 tests)
-- Delete all (1 test)
-- Count operations (3 tests)
-- Session stats (2 tests)
-- Data integrity (2 tests)
-
-Circadian patterns tests (25 tests):
-- Table schema validation (2 tests)
-- Upsert operations (4 tests)
-- Get by hour (2 tests)
-- Get by ID (2 tests)
-- Get all patterns (2 tests)
-- Update operations (3 tests)
-- Delete operations (3 tests)
-- Delete all (1 test)
-- Count operations (3 tests)
-- Best hour query (3 tests)
-- Recalculate patterns (2 tests)
-- Data integrity (1 test)
-
-**Next steps**: Implement AsyncStorage wrapper for user settings and device pairing info as per Phase 2 task 5
+**Next steps**: Create sliding buffer manager for real-time EEG processing (last 2-4 seconds)
 
