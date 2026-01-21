@@ -1,13 +1,9 @@
 // Utils exports
 export {
-  calculateSignalQualityScore,
-  calculateSignalQuality,
-  calculateArtifactPercentage,
-  detectAmplitudeArtifact,
-  detectGradientArtifact,
-  getQualityCategory,
-  isQualitySufficientForCalibration,
-  shouldPromptRecalibration,
-  ARTIFACT_THRESHOLDS,
-  QUALITY_THRESHOLDS,
-} from './signalQuality';
+  calculateBackoffDelay,
+  getBackoffSequence,
+  canRetry,
+  getTotalBackoffTime,
+  DEFAULT_RECONNECT_CONFIG,
+} from './reconnect';
+export type { ReconnectConfig } from './reconnect';

@@ -15,6 +15,231 @@ class BleService {
     this.listeners = {
       onConnectionChange: [],
       onDataReceived: [],
+      onReconnectAttempt: [],
+    };
+
+    // Auto-reconnect configuration
+    this.autoReconnectEnabled = false;
+    this.lastConnectedDeviceId = null;
+    this.reconnectAttempts = 0;
+    this.maxReconnectAttempts = 5;
+    this.baseReconnectDelay = 2000; // 2 seconds
+    this.reconnectTimer = null;
+    this.isReconnecting = false;
+    this.intentionalDisconnect = false;
+  }
+
+  /**
+   * Configure auto-reconnect settings
+   * @param {boolean} enabled - Whether auto-reconnect is enabled
+   * @param {string|null} deviceId - Device ID to reconnect to (optional)
+   */
+  setAutoReconnect(enabled, deviceId = null) {
+    this.autoReconnectEnabled = enabled;
+    if (deviceId) {
+      this.lastConnectedDeviceId = deviceId;
+    }
+    console.log('Auto-reconnect:', enabled ? 'enabled' : 'disabled', deviceId ? `for device ${deviceId}` : '');
+  }
+
+  /**
+   * Calculate delay for exponential backoff
+   * Intervals: 2s, 4s, 8s, 16s, 32s (capped)
+   * @param {number} attempt - Current attempt number (0-indexed)
+   * @returns {number} Delay in milliseconds
+   */
+  calculateBackoffDelay(attempt) {
+    // Exponential backoff: 2^attempt * baseDelay
+    // attempt 0: 2s, attempt 1: 4s, attempt 2: 8s, attempt 3: 16s, attempt 4: 32s
+    const delay = this.baseReconnectDelay * Math.pow(2, attempt);
+    const maxDelay = 32000; // Cap at 32 seconds
+    return Math.min(delay, maxDelay);
+  }
+
+  /**
+   * Attempt to reconnect to the last connected device
+   */
+  async attemptReconnect() {
+    if (!this.autoReconnectEnabled || this.isConnected || this.intentionalDisconnect) {
+      this.isReconnecting = false;
+      return;
+    }
+
+    if (this.reconnectAttempts >= this.maxReconnectAttempts) {
+      console.log('Max reconnect attempts reached, stopping auto-reconnect');
+      this.isReconnecting = false;
+      this.notifyReconnectAttempt({
+        attempt: this.reconnectAttempts,
+        maxAttempts: this.maxReconnectAttempts,
+        status: 'max_attempts_reached',
+        nextDelayMs: null,
+      });
+      return;
+    }
+
+    this.isReconnecting = true;
+    const currentAttempt = this.reconnectAttempts;
+    const delay = this.calculateBackoffDelay(currentAttempt);
+
+    console.log(`Auto-reconnect attempt ${currentAttempt + 1}/${this.maxReconnectAttempts} in ${delay}ms`);
+
+    this.notifyReconnectAttempt({
+      attempt: currentAttempt + 1,
+      maxAttempts: this.maxReconnectAttempts,
+      status: 'waiting',
+      nextDelayMs: delay,
+    });
+
+    this.reconnectTimer = setTimeout(async () => {
+      try {
+        this.notifyReconnectAttempt({
+          attempt: currentAttempt + 1,
+          maxAttempts: this.maxReconnectAttempts,
+          status: 'connecting',
+          nextDelayMs: null,
+        });
+
+        if (this.lastConnectedDeviceId) {
+          // Try to reconnect to specific device by ID
+          await this.reconnectToDeviceById(this.lastConnectedDeviceId);
+        } else {
+          // Fall back to scanning for any compatible device
+          await this.scanAndConnect();
+        }
+
+        // Success - reset attempts
+        this.reconnectAttempts = 0;
+        this.isReconnecting = false;
+        console.log('Auto-reconnect successful');
+
+        this.notifyReconnectAttempt({
+          attempt: currentAttempt + 1,
+          maxAttempts: this.maxReconnectAttempts,
+          status: 'connected',
+          nextDelayMs: null,
+        });
+      } catch (error) {
+        console.log(`Reconnect attempt ${currentAttempt + 1} failed:`, error.message);
+        this.reconnectAttempts++;
+
+        this.notifyReconnectAttempt({
+          attempt: currentAttempt + 1,
+          maxAttempts: this.maxReconnectAttempts,
+          status: 'failed',
+          error: error.message,
+          nextDelayMs: this.reconnectAttempts < this.maxReconnectAttempts
+            ? this.calculateBackoffDelay(this.reconnectAttempts)
+            : null,
+        });
+
+        // Schedule next attempt
+        this.attemptReconnect();
+      }
+    }, delay);
+  }
+
+  /**
+   * Reconnect to a specific device by ID
+   * @param {string} deviceId - The device ID to reconnect to
+   */
+  async reconnectToDeviceById(deviceId) {
+    const hasPermissions = await this.requestPermissions();
+    if (!hasPermissions) {
+      throw new Error('Bluetooth permissions not granted');
+    }
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.manager.stopDeviceScan();
+        reject(new Error('Reconnect timeout - device not found'));
+      }, 10000);
+
+      this.manager.startDeviceScan(null, null, (error, device) => {
+        if (error) {
+          clearTimeout(timeout);
+          this.manager.stopDeviceScan();
+          reject(error);
+          return;
+        }
+
+        // Look for the specific device by ID
+        if (device && device.id === deviceId) {
+          clearTimeout(timeout);
+          this.manager.stopDeviceScan();
+          this.connectToDevice(device)
+            .then(resolve)
+            .catch(reject);
+        }
+      });
+    });
+  }
+
+  /**
+   * Cancel any pending reconnect attempts
+   */
+  cancelReconnect() {
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+    this.reconnectAttempts = 0;
+    this.isReconnecting = false;
+    console.log('Auto-reconnect cancelled');
+  }
+
+  /**
+   * Reset reconnect state (call on successful manual connection)
+   */
+  resetReconnectState() {
+    this.reconnectAttempts = 0;
+    this.isReconnecting = false;
+    this.intentionalDisconnect = false;
+    if (this.reconnectTimer) {
+      clearTimeout(this.reconnectTimer);
+      this.reconnectTimer = null;
+    }
+  }
+
+  /**
+   * Handle unexpected disconnection - trigger auto-reconnect if enabled
+   * @param {Error|null} error - The disconnection error if any
+   */
+  handleUnexpectedDisconnect(error) {
+    console.log('Unexpected disconnect detected', error ? error.message : '');
+
+    if (this.autoReconnectEnabled && !this.intentionalDisconnect) {
+      this.attemptReconnect();
+    }
+  }
+
+  // Reconnect attempt listener methods
+  addReconnectListener(callback) {
+    this.listeners.onReconnectAttempt.push(callback);
+  }
+
+  removeReconnectListener(callback) {
+    this.listeners.onReconnectAttempt = this.listeners.onReconnectAttempt.filter(
+      cb => cb !== callback
+    );
+  }
+
+  notifyReconnectAttempt(status) {
+    this.listeners.onReconnectAttempt.forEach(callback => {
+      callback(status);
+    });
+  }
+
+  /**
+   * Get current reconnect status
+   * @returns {Object} Current reconnect state
+   */
+  getReconnectStatus() {
+    return {
+      isReconnecting: this.isReconnecting,
+      currentAttempt: this.reconnectAttempts,
+      maxAttempts: this.maxReconnectAttempts,
+      autoReconnectEnabled: this.autoReconnectEnabled,
+      lastConnectedDeviceId: this.lastConnectedDeviceId,
     };
   }
 
@@ -80,12 +305,21 @@ class BleService {
       const connectedDevice = await device.connect();
       this.device = connectedDevice;
 
-      // Setup disconnect listener
-      this.device.onDisconnected((error, device) => {
-        console.log('Device disconnected:', device.id);
+      // Store device ID for potential reconnection
+      this.lastConnectedDeviceId = device.id;
+
+      // Reset reconnect state on successful connection
+      this.resetReconnectState();
+
+      // Setup disconnect listener with auto-reconnect support
+      this.device.onDisconnected((error, disconnectedDevice) => {
+        console.log('Device disconnected:', disconnectedDevice.id);
         this.isConnected = false;
         this.device = null;
         this.notifyConnectionChange(false);
+
+        // Trigger auto-reconnect if enabled and not intentional
+        this.handleUnexpectedDisconnect(error);
       });
 
       // Discover all services and characteristics
@@ -177,6 +411,10 @@ class BleService {
   }
 
   async disconnect() {
+    // Mark as intentional to prevent auto-reconnect
+    this.intentionalDisconnect = true;
+    this.cancelReconnect();
+
     if (this.device) {
       try {
         await this.device.cancelConnection();
@@ -370,6 +608,7 @@ class BleService {
 
   // Cleanup method
   destroy() {
+    this.cancelReconnect();
     this.disconnect();
     this.manager.destroy();
   }

@@ -398,69 +398,75 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create signal quality score calculator (0-100 based on artifact percentage)
+### Task: Implement auto-reconnect logic with exponential backoff (2s, 4s, 8s intervals)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created src/utils/signalQuality.ts with comprehensive signal quality calculation functions
-2. Implemented calculateSignalQualityScore() - converts artifact percentage (0-100) to quality score (0-100) via inverse relationship
-3. Implemented detectAmplitudeArtifact() - detects samples exceeding ±100 µV amplitude threshold
-4. Implemented detectGradientArtifact() - detects sample-to-sample changes exceeding 50 µV/sample
-5. Implemented calculateArtifactPercentage() - calculates percentage of samples with artifacts
-6. Implemented calculateSignalQuality() - creates complete SignalQuality object from EEG samples
-7. Implemented getQualityCategory() - returns quality category (excellent/good/fair/poor/unusable)
-8. Implemented isQualitySufficientForCalibration() - checks if quality >= AUTO_PAUSE threshold (20)
-9. Implemented shouldPromptRecalibration() - checks if quality < RECALIBRATION_PROMPT threshold (50)
-10. Exported ARTIFACT_THRESHOLDS and QUALITY_THRESHOLDS constants per PRD specifications
-11. Updated src/utils/index.ts to export all signal quality functions and constants
-12. Created comprehensive test suite with 57 tests covering all functions (__tests__/signal-quality.test.ts)
-13. Tests include real-world scenarios: clean EEG signal, eye blink artifacts, muscle movement artifacts, electrode disconnection
-14. Verified all tests pass (57 tests in signal quality suite, all passing)
-15. Verified linting passes with no errors or warnings
+1. Enhanced BleService with auto-reconnect functionality in App/src/services/BleService.js
+2. Added auto-reconnect state properties: autoReconnectEnabled, lastConnectedDeviceId, reconnectAttempts, maxReconnectAttempts (5), baseReconnectDelay (2000ms), reconnectTimer, isReconnecting, intentionalDisconnect
+3. Implemented calculateBackoffDelay() method using exponential backoff formula: 2^attempt * baseDelay (2s, 4s, 8s, 16s, 32s with 32s cap)
+4. Implemented attemptReconnect() method with retry logic, attempt tracking, and listener notifications
+5. Added reconnectToDeviceById() method to reconnect to previously connected device by ID
+6. Added setAutoReconnect(enabled, deviceId) to configure auto-reconnect
+7. Added cancelReconnect() to stop pending reconnect attempts
+8. Added resetReconnectState() for state cleanup on successful connections
+9. Added handleUnexpectedDisconnect() to trigger auto-reconnect on unexpected disconnections
+10. Updated connectToDevice() to store device ID and reset reconnect state on success
+11. Updated disconnect() to mark intentional disconnect and cancel pending reconnects
+12. Updated destroy() to clean up reconnect timers
+13. Added reconnect listener system: addReconnectListener(), removeReconnectListener(), notifyReconnectAttempt()
+14. Added getReconnectStatus() for current reconnect state inspection
+15. Created TypeScript types in src/types/index.ts: ReconnectStatusType, ReconnectAttemptEvent, ReconnectState
+16. Created reusable utility module src/utils/reconnect.ts with functions: calculateBackoffDelay, getBackoffSequence, canRetry, getTotalBackoffTime
+17. Exported utility functions from src/utils/index.ts
+18. Created comprehensive test suite with 31 tests (__tests__/reconnect.test.ts)
+19. Verified all tests pass (31 reconnect tests, 207 total tests passing)
 
 **Files created/modified**:
-- src/utils/signalQuality.ts (created - 182 lines with complete signal quality calculator)
-- src/utils/index.ts (modified - replaced placeholder with exports for all signal quality functions)
-- __tests__/signal-quality.test.ts (created - 310 lines with 57 comprehensive test cases)
+- App/src/services/BleService.js (modified - added ~200 lines of auto-reconnect logic)
+- src/types/index.ts (modified - added 3 new types: ReconnectStatusType, ReconnectAttemptEvent, ReconnectState)
+- src/utils/reconnect.ts (created - 82 lines with reusable backoff utilities)
+- src/utils/index.ts (modified - added reconnect exports)
+- __tests__/reconnect.test.ts (created - 235 lines with 31 comprehensive tests)
 
-**Functions implemented**:
-- calculateSignalQualityScore(artifactPercentage: number): number
-- detectAmplitudeArtifact(samples: number[]): boolean
-- detectGradientArtifact(samples: number[]): boolean
-- calculateArtifactPercentage(samples: number[]): number
-- calculateSignalQuality(samples: number[]): SignalQuality
-- getQualityCategory(score: number): 'excellent' | 'good' | 'fair' | 'poor' | 'unusable'
-- isQualitySufficientForCalibration(score: number): boolean
-- shouldPromptRecalibration(score: number): boolean
+**Exponential backoff implementation**:
+- Base delay: 2 seconds (2000ms)
+- Formula: delay = baseDelay * 2^attempt
+- Intervals: 2s → 4s → 8s → 16s → 32s (capped at 32s)
+- Max attempts: 5 (configurable)
+- Total max wait time: 62 seconds across all retries
 
-**Constants exported**:
-- ARTIFACT_THRESHOLDS: { AMPLITUDE_UV: 100, GRADIENT_UV_PER_SAMPLE: 50, FREQUENCY_RATIO: 2.0 }
-- QUALITY_THRESHOLDS: { AUTO_PAUSE: 20, RECALIBRATION_PROMPT: 50, MINIMUM_ACCEPTABLE: 70, EXCELLENT: 90 }
+**BleService auto-reconnect features**:
+- Automatic reconnection on unexpected disconnections
+- Intentional disconnects (via disconnect() method) do not trigger auto-reconnect
+- Device ID stored on successful connection for targeted reconnection
+- Reconnect attempt events notified to listeners with status: waiting, connecting, connected, failed, max_attempts_reached
+- State includes: attempt number, max attempts, next delay, optional error message
+- Can be enabled/disabled via setAutoReconnect(enabled, deviceId)
 
-**Quality score calculation**:
-- Score = 100 - artifact_percentage
-- 0% artifacts = 100 score (perfect signal)
-- 100% artifacts = 0 score (unusable signal)
-- Scores rounded to 2 decimal places
+**TypeScript types added**:
+- ReconnectStatusType: 'waiting' | 'connecting' | 'connected' | 'failed' | 'max_attempts_reached'
+- ReconnectAttemptEvent: { attempt, maxAttempts, status, nextDelayMs, error? }
+- ReconnectState: { isReconnecting, currentAttempt, maxAttempts, autoReconnectEnabled, lastConnectedDeviceId }
 
-**Artifact detection thresholds (per PRD)**:
-- Amplitude: ±100 µV (samples exceeding this are flagged)
-- Gradient: >50 µV per sample (sudden changes flagged)
-- Frequency ratio: 2.0 (30-50 Hz vs 4-30 Hz, not yet implemented - set to false)
+**Utility functions created**:
+- calculateBackoffDelay(attempt, config): Calculate delay for given attempt
+- getBackoffSequence(config): Get array of all delays for max attempts
+- canRetry(currentAttempt, config): Check if more retries allowed
+- getTotalBackoffTime(config): Calculate total wait time across all retries
 
-**Test coverage**: 57 test cases covering:
-- calculateSignalQualityScore: 9 tests (edge cases, decimals, errors)
-- detectAmplitudeArtifact: 7 tests (thresholds, edge cases)
-- detectGradientArtifact: 8 tests (gradients, thresholds)
-- calculateArtifactPercentage: 6 tests (counting, edge cases)
-- calculateSignalQuality: 5 tests (full quality object creation)
-- getQualityCategory: 5 tests (all categories)
-- isQualitySufficientForCalibration: 3 tests
-- shouldPromptRecalibration: 3 tests
-- ARTIFACT_THRESHOLDS: 3 tests (constant validation)
-- QUALITY_THRESHOLDS: 4 tests (constant validation)
-- Integration scenarios: 4 tests (realistic EEG signals)
+**Test coverage** (31 tests):
+- DEFAULT_RECONNECT_CONFIG validation (1 test)
+- calculateBackoffDelay tests (7 tests)
+- getBackoffSequence tests (4 tests)
+- canRetry tests (3 tests)
+- getTotalBackoffTime tests (3 tests)
+- Exponential backoff pattern validation (2 tests)
+- BleService backoff calculation equivalence (3 tests)
+- Reconnect state management (2 tests)
+- Reconnect attempt limits (2 tests)
+- ReconnectAttemptEvent structure (5 tests)
 
-**Next steps**: Phase 4 signal processing tasks continue
+**Next steps**: Continue with remaining Phase 3 tasks
 
