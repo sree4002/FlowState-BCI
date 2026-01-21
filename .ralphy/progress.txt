@@ -460,3 +460,51 @@ Victory Native provides chart components for:
 
 **Next steps**: Continue with Phase 2 tasks
 
+
+### Task: Create visualization mode toggle (Numeric, Gauge, Chart)
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created VisualizationModeToggle component (src/components/VisualizationModeToggle.tsx) - a segmented control for switching between visualization modes
+2. Component supports three modes: Numeric, Gauge, and Chart - matching the existing VisualizationMode type
+3. Implemented proper styling using the existing theme system (Colors, Spacing, BorderRadius, Typography, Shadows)
+4. Added full accessibility support with accessibilityRole, accessibilityLabel, accessibilityHint, and accessibilityState
+5. Integrated component into ActiveSessionScreen to allow users to toggle visualization mode during sessions
+6. Removed redundant static visualization mode display from Session Info section (toggle provides interactive control)
+7. Connected toggle to SessionContext via useSession hook (uses setVisualizationMode action)
+8. Added comprehensive test coverage with 23 tests covering rendering, mode selection, accessibility, and context integration
+9. Exported component and props type from components index.ts
+10. Verified component integrates with existing VisualizationMode type and SessionContext state
+
+**Files created/modified**:
+- src/components/VisualizationModeToggle.tsx (created - 116 lines, reusable segmented control component)
+- src/components/index.ts (modified - added VisualizationModeToggle export)
+- src/screens/ActiveSessionScreen.tsx (modified - integrated toggle component, added setVisualizationMode to context usage)
+- __tests__/VisualizationModeToggle.test.tsx (created - 23 comprehensive tests)
+
+**Component features**:
+- Props: selectedMode (VisualizationMode), onModeChange ((mode) => void), testID (optional)
+- Three toggle options: Numeric, Gauge, Chart
+- Visual feedback: Selected option highlighted with primary color and shadow
+- Consistent styling with other app components (card-like container with rounded corners)
+- Full keyboard and screen reader accessibility
+- Test IDs for automated testing support
+
+**Styling details**:
+- Container: Surface primary background, xl border radius, lg padding, md shadow
+- Toggle container: Surface secondary background with xs padding
+- Selected option: Primary main background with sm shadow
+- Text: Tertiary color for unselected, primary color with semibold weight for selected
+
+**Test coverage**: 23 tests covering:
+- Rendering (4 tests) - all options, label, testIDs
+- Mode Selection (4 tests) - callback invocation for each mode
+- Accessibility (2 tests) - labels and selected state
+- Selected Mode Prop (3 tests) - validation for each mode value
+- Context Integration (5 tests) - default value, state updates, reset behavior
+- Mode Type Validation (3 tests) - valid mode strings
+- Full Integration (2 tests) - SessionProvider integration
+
+**Next steps**: Continue with remaining Phase 3 visualization components (gauge display, chart components)
+
