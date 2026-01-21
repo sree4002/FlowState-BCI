@@ -1,3 +1,4 @@
-// Screens export placeholder
+// Screens export
 // Export screen components here as they are created
-export {};
+export { OnboardingScreen } from './OnboardingScreen';
+export type { OnboardingScreenProps } from './OnboardingScreen';

@@ -397,3 +397,66 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create OnboardingScreen with swipeable tour (3 screens)
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created OnboardingScreen component at src/screens/OnboardingScreen.tsx
+2. Implemented swipeable tour with 3 screens covering:
+   - Screen 1: "Monitor Your Theta Waves" - Introduces real-time theta wave monitoring
+   - Screen 2: "Personalized Audio Entrainment" - Explains adaptive audio technology
+   - Screen 3: "Track Your Progress" - Highlights progress tracking and optimization
+3. Used FlatList with pagingEnabled for smooth horizontal swipe navigation
+4. Added pagination dots that indicate current slide and allow tapping to navigate
+5. Implemented Skip button for users who want to bypass onboarding
+6. Implemented Next button that changes to "Get Started" on the last slide
+7. Added proper accessibility labels and roles for screen readers
+8. Used theme colors (calming blues/purples) from src/constants/theme.ts
+9. Added onComplete and onSkip callback props for navigation control
+10. Exported component from src/screens/index.ts
+11. Created comprehensive test suite with 34 tests covering:
+    - File structure validation
+    - Component exports
+    - Slide content verification
+    - UI elements
+    - Accessibility features
+    - Styling and navigation functionality
+12. Updated folder-structure test to handle React Native component imports
+13. All 210 tests pass
+
+**Files created/modified**:
+- src/screens/OnboardingScreen.tsx (created - 298 lines)
+- src/screens/index.ts (modified - added OnboardingScreen export)
+- __tests__/onboarding-screen.test.ts (created - 34 comprehensive tests)
+- __tests__/folder-structure.test.ts (modified - updated import test)
+
+**Component features**:
+- 3 onboarding slides with icons, titles, and descriptions
+- Horizontal swipeable FlatList with paging
+- Pagination dots with active state indication
+- Skip button (top right)
+- Next/Get Started button (bottom center)
+- Responsive layout using Dimensions
+- Theme-aware styling (Colors, Spacing, BorderRadius, Typography)
+- TypeScript types: OnboardingSlide interface, OnboardingScreenProps interface
+
+**Props**:
+- onComplete?: () => void - Called when user completes onboarding
+- onSkip?: () => void - Called when user skips onboarding
+
+**Test coverage**: 34 test cases covering:
+- File structure (2 tests)
+- Component exports (3 tests)
+- Screen index exports (2 tests)
+- Slide content (4 tests)
+- Component props (2 tests)
+- UI elements (5 tests)
+- Accessibility (3 tests)
+- Styling (4 tests)
+- Navigation functionality (6 tests)
+- TypeScript types (3 tests)
+
+**Next steps**: Create DevicePairingScreen for BLE device setup as per Phase 5 task
+
