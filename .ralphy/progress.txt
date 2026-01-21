@@ -398,131 +398,73 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Set up React Navigation with bottom tab navigator (Dashboard, Session, History, Settings)
+### Task: Create DevicePairingScreen for BLE device setup
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created App/src/navigation/types.ts with type-safe navigation type definitions
-2. Defined RootTabParamList type with all four screen routes (Dashboard, Session, History, Settings)
-3. Created typed screen props (DashboardScreenProps, SessionScreenProps, HistoryScreenProps, SettingsScreenProps)
-4. Added global ReactNavigation namespace declaration for type-safe useNavigation hooks
-5. Created App/src/context/AppContext.tsx for app-level state management with BLE service interface
-6. Created App/src/services/BleService.ts placeholder for Bluetooth communication
-7. Created DashboardScreen component with device status card and quick action buttons
-8. Created SessionScreen component with session info and instructions
-9. Created HistoryScreen component with stats cards and empty state
-10. Created SettingsScreen component with settings sections and rows
-11. Updated App/App.tsx to use "Dashboard" instead of "Home" as per task requirements
-12. Configured createBottomTabNavigator with RootTabParamList generic for type safety
-13. Styled tab bar with dark theme colors (background #16213e, active #64ffda, inactive #8892b0)
-14. Added emoji icons for each tab with focused/unfocused states
-15. Created comprehensive test suite with 24 tests covering all navigation setup aspects
-16. Fixed tsconfig.json moduleResolution to "bundler" for expo compatibility
-17. All 200 tests pass across 10 test suites
-18. TypeScript compilation passes with no errors
+1. Created comprehensive DevicePairingScreen component in src/screens/DevicePairingScreen.tsx (600+ lines)
+2. Implemented BLE device scanning simulation with mock device discovery
+3. Built discovered devices list UI with FlatList and pull-to-refresh support
+4. Added device information display showing:
+   - Device name and icon (headband/earpiece/unknown)
+   - Signal strength indicator with color-coded RSSI labels (Excellent/Good/Fair/Weak)
+   - Device type and sampling rate (Headband 500Hz, Earpiece 250Hz)
+5. Implemented complete pairing/connection flow with states: idle, scanning, connecting, connected, error
+6. Added loading states with animated pulse indicator during scanning
+7. Created connection success screen showing device stats (battery, sample rate, firmware version)
+8. Added error handling with retry functionality
+9. Implemented skip confirmation with Alert dialog
+10. Added helpful pairing tips section
+11. Used theme constants (Colors, Spacing, BorderRadius, Typography, Shadows) throughout
+12. Integrated with DeviceContext for global device state management
+13. Created helper functions for device type detection and signal strength mapping
+14. Updated src/screens/index.ts to export the new component
+15. Created comprehensive test suite with 96 tests covering:
+    - File structure and exports
+    - Required imports and dependencies
+    - React Native components used
+    - TypeScript interfaces and types
+    - Props interface
+    - Context integration
+    - State management
+    - Core functions (startScan, stopScan, connectToDevice, retryConnection, cancelPairing)
+    - Helper functions
+    - Render functions
+    - UI elements and text content
+    - Signal strength and device type handling
+    - Animation implementation
+    - Effects and refs
+    - Error handling
+    - Skip functionality
+    - Theme-based styling
+16. Fixed all ESLint and Prettier warnings
+17. Verified all tests pass (96/96)
 
 **Files created/modified**:
-- App/src/navigation/types.ts (created - type-safe navigation types)
-- App/src/navigation/index.ts (created - exports)
-- App/src/context/AppContext.tsx (created - app context with BLE service interface)
-- App/src/services/BleService.ts (created - BLE service placeholder)
-- App/src/screens/DashboardScreen.tsx (created - main dashboard screen)
-- App/src/screens/SessionScreen.tsx (created - session screen)
-- App/src/screens/HistoryScreen.tsx (created - history screen)
-- App/src/screens/SettingsScreen.tsx (created - settings screen)
-- App/src/screens/index.ts (created - screen exports)
-- App/App.tsx (modified - updated to use Dashboard, typed navigator, fixed imports)
-- tsconfig.json (modified - changed moduleResolution to bundler)
-- __tests__/navigation.test.ts (created - 24 comprehensive tests)
+- src/screens/DevicePairingScreen.tsx (created - 615 lines, comprehensive BLE pairing screen)
+- src/screens/index.ts (modified - added DevicePairingScreen export)
+- __tests__/DevicePairingScreen.test.ts (created - 330 lines with 96 test cases)
 
-**Navigation setup details**:
-- Bottom tab navigator with 4 screens: Dashboard, Session, History, Settings
-- Type-safe navigation using createBottomTabNavigator<RootTabParamList>()
-- Dark theme integration with NavigationContainer
-- Custom tab bar styling with dark colors
-- Emoji icons with focused/unfocused variants
-- All screens use SafeAreaView and styled with theme constants
+**Component features**:
+- **Scanning**: Animated scanning indicator with progress bar, 10-second timeout
+- **Device Discovery**: Mock device list showing FlowState Headband, FlowState Earpiece, and BCI Monitor Pro
+- **Signal Strength**: Color-coded RSSI display (Excellent ≥-50, Good ≥-60, Fair ≥-70, Weak <-70)
+- **Connection Flow**: Visual feedback during connection with ActivityIndicator
+- **Success State**: Shows connected device info with battery, sample rate, and firmware
+- **Error Handling**: Error state with retry button and clear error messages
+- **Skip Option**: Confirmation dialog warning about limited features
+- **Pairing Tips**: Helpful hints for successful device pairing
+- **Theme Integration**: Full use of theme colors, spacing, typography, and shadows
+- **Animations**: Pulse animation for scanning indicator using Animated API
+- **Pull-to-refresh**: RefreshControl for rescanning devices
 
-**Screen components**:
-- DashboardScreen: Device status, quick actions (Start Session, View History)
-- SessionScreen: Session instructions, BCI information
-- HistoryScreen: Session stats grid, empty state for no sessions
-- SettingsScreen: Organized sections (Device, Sessions, Notifications, About)
+**TypeScript types defined**:
+- DiscoveredDevice: Interface for BLE devices found during scan
+- PairingState: Type for screen state machine ('idle' | 'scanning' | 'connecting' | 'connected' | 'error')
+- DevicePairingScreenProps: Interface for component props (onPairingComplete, onSkip callbacks)
 
-**Test coverage**: 24 tests covering:
-- Navigation directory structure (3 tests)
-- Screen components existence (6 tests)
-- Navigation types validation (2 tests)
-- App.tsx configuration (7 tests)
-- Supporting files (2 tests)
-- Package dependencies (4 tests)
+**Test coverage**: 96 test cases covering module structure, component exports, imports, React Native components, TypeScript interfaces, props, context integration, state management, functions, render methods, UI elements, signal strength logic, device type detection, animations, effects, error handling, skip functionality, and styling.
 
-**Next steps**: Continue with Phase 2 tasks
-
-
-### Task: Create ThetaNumericDisplay showing current z-score value with color coding
-
-**Status**: ✅ Completed
-
-**What was done**:
-1. Created ThetaNumericDisplay component in src/components/ThetaNumericDisplay.tsx
-2. Implemented z-score color coding with 4 zones:
-   - Red (< -0.5): Low/Below target
-   - Yellow (-0.5 to 0.5): Baseline
-   - Green (0.5 to 1.5): Elevated/Good
-   - Blue (>= 1.5): High/Optimal
-3. Added getThetaZoneColor helper function that maps z-scores to Colors.status colors
-4. Added getThetaZoneLabel helper function that returns human-readable zone labels (Waiting, Low, Baseline, Elevated, Optimal)
-5. Added categorizeZScoreZone helper function that returns zone type ('low' | 'baseline' | 'elevated' | 'high')
-6. Added formatZScore helper function that formats values with sign prefix (+/-) and 2 decimal places
-7. Implemented 3 size variants (small, medium, large) with appropriate styling
-8. Component uses SessionContext by default but accepts optional value prop for testing
-9. Optional showLabel prop to display "Theta Z-Score" label
-10. Optional showZone prop to display colored zone badge with label
-11. Updated src/components/index.ts to export component and helper functions
-12. Created comprehensive test suite with 31 tests covering all functionality
-13. All tests pass (31 tests in ThetaNumericDisplay.test.tsx)
-
-**Files created/modified**:
-- src/components/ThetaNumericDisplay.tsx (created - 190 lines)
-- src/components/index.ts (modified - added exports for ThetaNumericDisplay)
-- __tests__/ThetaNumericDisplay.test.tsx (created - 250 lines with 31 tests)
-
-**Component API**:
-```typescript
-interface ThetaNumericDisplayProps {
-  value?: number | null;      // Optional z-score value (uses context if not provided)
-  size?: 'small' | 'medium' | 'large';  // Display size variant (default: 'medium')
-  showLabel?: boolean;        // Show "Theta Z-Score" label (default: true)
-  showZone?: boolean;         // Show zone badge (default: true)
-  testID?: string;            // For testing purposes
-}
-```
-
-**Exported helper functions**:
-- getThetaZoneColor(zscore: number | null): string
-- getThetaZoneLabel(zscore: number | null): string
-- categorizeZScoreZone(zscore: number | null): ThetaZone | null
-- formatZScore(zscore: number | null): string
-
-**Color zone mapping**:
-- null → Colors.text.tertiary (Waiting)
-- < -0.5 → Colors.status.red (Low)
-- -0.5 to 0.5 → Colors.status.yellow (Baseline)
-- 0.5 to 1.5 → Colors.status.green (Elevated)
-- >= 1.5 → Colors.status.blue (Optimal)
-
-**Test coverage**: 31 tests covering:
-- getThetaZoneColor (6 tests)
-- getThetaZoneLabel (5 tests)
-- categorizeZScoreZone (5 tests)
-- formatZScore (5 tests)
-- Context integration (3 tests)
-- Color coding consistency (2 tests)
-- Display value formatting (2 tests)
-- Props interface (2 tests)
-- Value override (1 test)
-
-**Next steps**: Continue with Phase 7 Active Session Screen tasks
+**Next steps**: Create OnboardingScreen with swipeable tour (3 screens) as per Phase 5 task 8
 
