@@ -397,3 +397,57 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+## 2026-01-21
+
+### Task: Create QuickBoostButton component (one-tap 5-min session at 6Hz)
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created QuickBoostButton component in src/components/QuickBoostButton.tsx
+2. Implemented one-tap functionality to start a 5-minute theta entrainment session at 6Hz
+3. Integrated with SessionContext for session state management (setSessionConfig, setSessionState, setElapsedSeconds)
+4. Integrated with SettingsContext to use customizable boost_time, boost_frequency, and default_volume settings
+5. Integrated with DeviceContext to check device connection status and connecting state
+6. Added visual states for: idle (Quick Boost), connecting (Connecting...), session active (Session Active)
+7. Added "No device connected" warning when device is not connected
+8. Styled with theme colors from constants/theme.ts (primary blue button, disabled state, no-device state)
+9. Added proper accessibility support (accessibilityRole, accessibilityLabel, accessibilityHint, accessibilityState)
+10. Added testID prop for testing support
+11. Added optional onSessionStart callback prop
+12. Exported component and props type from src/components/index.ts
+13. Created comprehensive test suite with 27 tests covering all component logic (__tests__/QuickBoostButton.test.tsx)
+14. Verified all tests pass (203 tests passing across 10 test suites)
+
+**Files created/modified**:
+- src/components/QuickBoostButton.tsx (created - 151 lines)
+- src/components/index.ts (modified - added QuickBoostButton export)
+- __tests__/QuickBoostButton.test.tsx (created - 458 lines with 27 comprehensive tests)
+
+**Component features**:
+- Props: onSessionStart (callback), disabled (boolean), testID (string)
+- Default session config: 5 min duration, 6Hz frequency (from settings.boost_time and settings.boost_frequency)
+- Automatically disabled when: disabled prop is true, session is running/paused, device is connecting
+- Visual feedback: lightning bolt emoji icon, loading indicator when connecting
+- Theme integration: Uses Colors, Spacing, BorderRadius, Typography, Shadows from theme.ts
+
+**Session configuration on press**:
+- type: 'quick_boost'
+- duration_minutes: settings.boost_time (default: 5)
+- entrainment_freq: settings.boost_frequency (default: 6.0 Hz)
+- volume: settings.default_volume (default: 70)
+- target_zscore: settings.target_zscore (default: 1.0)
+- closed_loop_behavior: settings.closed_loop_behavior (default: 'reduce_intensity')
+
+**Test coverage**:
+- Quick Boost Configuration (6 tests) - verifies correct session config creation
+- Session State Management (3 tests) - verifies state changes on press
+- Disabled State Logic (4 tests) - verifies button disabled states
+- Device Connection State (3 tests) - verifies device detection
+- Settings Context Integration (5 tests) - verifies settings usage
+- Button Text Logic (4 tests) - verifies text display
+- SubText Logic (4 tests) - verifies subtitle display
+
+**Next steps**: Continue with remaining Phase 3 UI components
+

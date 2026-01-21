@@ -1,3 +1,3 @@
-// Components export placeholder
-// Export reusable components here as they are created
-export {};
+// Reusable components
+export { QuickBoostButton } from './QuickBoostButton';
+export type { QuickBoostButtonProps } from './QuickBoostButton';
