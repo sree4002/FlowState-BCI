@@ -461,50 +461,55 @@ Victory Native provides chart components for:
 **Next steps**: Continue with Phase 2 tasks
 
 
-### Task: Create visualization mode toggle (Numeric, Gauge, Chart)
+### Task: Create FrequencySlider component (4-8 Hz, 0.1 Hz increments)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created VisualizationModeToggle component (src/components/VisualizationModeToggle.tsx) - a segmented control for switching between visualization modes
-2. Component supports three modes: Numeric, Gauge, and Chart - matching the existing VisualizationMode type
-3. Implemented proper styling using the existing theme system (Colors, Spacing, BorderRadius, Typography, Shadows)
-4. Added full accessibility support with accessibilityRole, accessibilityLabel, accessibilityHint, and accessibilityState
-5. Integrated component into ActiveSessionScreen to allow users to toggle visualization mode during sessions
-6. Removed redundant static visualization mode display from Session Info section (toggle provides interactive control)
-7. Connected toggle to SessionContext via useSession hook (uses setVisualizationMode action)
-8. Added comprehensive test coverage with 23 tests covering rendering, mode selection, accessibility, and context integration
-9. Exported component and props type from components index.ts
-10. Verified component integrates with existing VisualizationMode type and SessionContext state
+1. Created FrequencySlider component in src/components/FrequencySlider.tsx
+2. Implemented theta frequency range (4.0 - 8.0 Hz) with 0.1 Hz step increments
+3. Used @react-native-community/slider as the underlying slider library (already installed)
+4. Applied secondary color theme (purple #7B68EE) for frequency-related controls
+5. Implemented value rounding to ensure clean 0.1 Hz increments (handles floating point precision)
+6. Added comprehensive accessibility support with ARIA labels and values
+7. Included optional props: value, onValueChange, onSlidingComplete, disabled, label, showRangeLabels, testID
+8. Used design tokens from theme.ts for consistent styling
+9. Added descriptive range labels ("Low Theta" and "High Theta")
+10. Created comprehensive test suite with 33 test cases (__tests__/FrequencySlider.test.tsx)
+11. Exported component and props type from src/components/index.ts
+12. All 33 tests pass
 
 **Files created/modified**:
-- src/components/VisualizationModeToggle.tsx (created - 116 lines, reusable segmented control component)
-- src/components/index.ts (modified - added VisualizationModeToggle export)
-- src/screens/ActiveSessionScreen.tsx (modified - integrated toggle component, added setVisualizationMode to context usage)
-- __tests__/VisualizationModeToggle.test.tsx (created - 23 comprehensive tests)
+- src/components/FrequencySlider.tsx (created - 161 lines)
+- __tests__/FrequencySlider.test.tsx (created - 264 lines with 33 tests)
+- src/components/index.ts (modified - added FrequencySlider export)
 
 **Component features**:
-- Props: selectedMode (VisualizationMode), onModeChange ((mode) => void), testID (optional)
-- Three toggle options: Numeric, Gauge, Chart
-- Visual feedback: Selected option highlighted with primary color and shadow
-- Consistent styling with other app components (card-like container with rounded corners)
-- Full keyboard and screen reader accessibility
-- Test IDs for automated testing support
+- Range: 4.0 Hz to 8.0 Hz (Theta brainwave range)
+- Step: 0.1 Hz increments for fine-grained control
+- Default: 6.0 Hz (middle of theta range)
+- Colors: Purple theme (secondary.main for track, secondary.light for thumb)
+- Display: Current frequency with 1 decimal place (e.g., "6.5 Hz")
+- Disabled state: Muted colors and disabled interactivity
 
-**Styling details**:
-- Container: Surface primary background, xl border radius, lg padding, md shadow
-- Toggle container: Surface secondary background with xs padding
-- Selected option: Primary main background with sm shadow
-- Text: Tertiary color for unselected, primary color with semibold weight for selected
+**Props interface**:
+- value?: number - Current frequency (default: 6.0)
+- onValueChange?: (value: number) => void - Called during sliding
+- onSlidingComplete?: (value: number) => void - Called when sliding ends
+- disabled?: boolean - Disables the slider
+- label?: string - Label text (default: "Frequency")
+- showRangeLabels?: boolean - Show min/max labels (default: true)
+- testID?: string - Test identifier
 
-**Test coverage**: 23 tests covering:
-- Rendering (4 tests) - all options, label, testIDs
-- Mode Selection (4 tests) - callback invocation for each mode
-- Accessibility (2 tests) - labels and selected state
-- Selected Mode Prop (3 tests) - validation for each mode value
-- Context Integration (5 tests) - default value, state updates, reset behavior
-- Mode Type Validation (3 tests) - valid mode strings
-- Full Integration (2 tests) - SessionProvider integration
+**Test coverage**: 33 tests covering:
+- Frequency range constants (4 tests)
+- Frequency formatting logic (4 tests)
+- Value rounding logic (3 tests)
+- Theme integration (4 tests)
+- Props interface (10 tests)
+- Accessibility (3 tests)
+- Theta range description (3 tests)
+- Callback behavior (3 tests)
 
-**Next steps**: Continue with remaining Phase 3 visualization components (gauge display, chart components)
+**Next steps**: Continue with remaining Phase 7 tasks
 
