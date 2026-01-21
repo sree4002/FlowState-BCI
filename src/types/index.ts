@@ -109,11 +109,24 @@ export interface AppSettings {
 
 /**
  * EEG data packet from BLE device
+ * Samples are interleaved by channel: [Ch0_S0, Ch1_S0, ..., Ch0_S1, Ch1_S1, ...]
  */
 export interface EEGDataPacket {
   timestamp: number;
   samples: number[];
   sequence_number: number;
+}
+
+/**
+ * Extended EEG data packet with channel-separated samples
+ * Used when processing requires per-channel access
+ */
+export interface EEGMultiChannelPacket extends EEGDataPacket {
+  channel_samples: number[][];
+  channel_count: number;
+  samples_per_channel: number;
+  device_type: 'headband' | 'earpiece';
+  sampling_rate: number;
 }
 
 /**
