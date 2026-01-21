@@ -397,3 +397,67 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create DeviceStatusWidget showing connection status, battery level, and signal quality
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created DeviceStatusWidget component in src/components/DeviceStatusWidget.tsx
+2. Widget displays connection status (Connected, Disconnected, Connecting..., Error)
+3. Shows device name and type (Headband/Earpiece) when connected
+4. Displays battery level with percentage and ASCII visual indicator
+5. Shows signal quality score with color-coded labels (Excellent, Good, Fair, Poor, Critical)
+6. Handles error states with error message display
+7. Shows "No device paired" message with instructions when no device is connected
+8. Uses theme colors from constants/theme.ts for consistent styling
+9. Integrates with DeviceContext via useDevice hook
+10. Implemented color-coding for signal quality:
+    - Excellent (green): 80-100
+    - Good (blue): 60-79
+    - Fair (yellow): 40-59
+    - Poor (orange): 20-39
+    - Critical (red): 0-19
+11. Implemented battery level color-coding:
+    - Green: 50-100%
+    - Yellow: 20-49%
+    - Red: 0-19%
+12. Created comprehensive test suite with 32 tests covering all functionality
+13. Created React Native mock for Jest testing (__mocks__/react-native.ts)
+14. Updated Jest configuration to include React Native mock
+15. Exported component from src/components/index.ts
+16. All tests pass (32 tests)
+
+**Files created/modified**:
+- src/components/DeviceStatusWidget.tsx (created - 260 lines)
+- src/components/index.ts (modified - added DeviceStatusWidget export)
+- __tests__/DeviceStatusWidget.test.tsx (created - 516 lines with 32 tests)
+- __mocks__/react-native.ts (created - React Native mock for testing)
+- jest.config.js (modified - added React Native mock to moduleNameMapper)
+
+**Component features**:
+- Connection status badge with colored dot indicator
+- Device info section showing name and type
+- Metrics row with battery and signal quality
+- Battery icon using ASCII art representation
+- Signal quality score with textual label
+- Error message container for connection errors
+- "No device paired" state with pairing instructions
+- Responsive to DeviceContext state changes
+- TypeScript interfaces for props
+- React Native StyleSheet styling with theme tokens
+
+**Test coverage**:
+- Basic rendering tests (4 tests)
+- No device state tests (4 tests)
+- Connected device state tests (7 tests)
+- Signal quality label tests (5 tests)
+- Connection states tests (3 tests)
+- Battery level indicator tests (3 tests)
+- Context integration tests (1 test)
+- Component export tests (2 tests)
+- DeviceContext hook integration tests (2 tests)
+- Helper function boundary tests (1 test)
+
+**Next steps**: Create TodaySummaryWidget as per Phase 6 task 2
+
