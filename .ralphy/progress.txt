@@ -397,3 +397,65 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Implement amplitude threshold artifact detection (±100 µV)
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created src/services/signalProcessing.ts with comprehensive amplitude threshold artifact detection
+2. Implemented detectAmplitudeArtifacts() function for analyzing arrays of voltage samples
+3. Implemented detectAmplitudeArtifactsInPacket() for processing EEGDataPacket objects
+4. Implemented detectAmplitudeArtifactsInWindow() for analyzing sliding windows of multiple packets
+5. Created AmplitudeArtifactResult interface with detailed detection statistics:
+   - hasArtifact: boolean flag for artifact presence
+   - artifactSampleCount: count of samples exceeding threshold
+   - totalSampleCount: total samples analyzed
+   - artifactPercentage: percentage of artifacts (0-100)
+   - maxAmplitude/minAmplitude: amplitude range tracking
+   - artifactIndices: array of indices where artifacts occurred
+6. Implemented utility functions:
+   - isAmplitudeArtifact(): single sample artifact check
+   - isValidThreshold(): threshold validation
+   - clampSamplesToThreshold(): artifact clamping for data cleaning
+   - createAmplitudeSignalQuality(): creates partial SignalQuality object
+7. Defined DEFAULT_AMPLITUDE_THRESHOLD_UV constant (100 µV) as per EEG standards
+8. Created comprehensive test suite with 51 test cases covering:
+   - Basic artifact detection (empty arrays, boundary conditions, positive/negative artifacts)
+   - Statistics calculation (percentages, min/max tracking)
+   - Custom threshold support
+   - Edge cases (zero values, large values, floating point precision)
+   - Realistic EEG scenarios (eye blinks, muscle artifacts, electrode pops)
+   - Multi-packet window analysis
+   - Integration with SignalQuality type
+9. Updated src/services/index.ts to export signalProcessing module
+10. Verified all 227 tests pass across 10 test suites
+11. Verified linting passes with no errors or warnings
+
+**Files created/modified**:
+- src/services/signalProcessing.ts (created - 203 lines)
+- __tests__/signal-processing.test.ts (created - 51 comprehensive test cases)
+- src/services/index.ts (modified - added signalProcessing export)
+
+**Key implementation details**:
+- Threshold: ±100 µV (samples with absolute value > 100 are artifacts)
+- Boundary condition: exactly ±100 µV is NOT flagged as artifact (uses > not >=)
+- Works with EEGDataPacket type from src/types/index.ts
+- Compatible with SignalQuality interface (has_amplitude_artifact, artifact_percentage fields)
+- Supports custom thresholds for specialized use cases
+- Efficient O(n) algorithm scanning all samples in single pass
+
+**Functions exported**:
+- detectAmplitudeArtifacts(samples, threshold): Main detection function
+- detectAmplitudeArtifactsInPacket(packet, threshold): Packet wrapper
+- detectAmplitudeArtifactsInWindow(packets, threshold): Window analysis
+- createAmplitudeSignalQuality(result): SignalQuality integration
+- isAmplitudeArtifact(sample, threshold): Single sample check
+- isValidThreshold(threshold): Threshold validation
+- clampSamplesToThreshold(samples, threshold): Artifact clamping
+- DEFAULT_AMPLITUDE_THRESHOLD_UV: 100 µV constant
+
+**Test coverage**: 51 tests covering all functions and edge cases
+
+**Next steps**: Implement gradient threshold artifact detection (>50 µV/sample) as per Phase 4 task 2
+
