@@ -9,6 +9,7 @@ import {
 import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
 import { useSession } from '../contexts/SessionContext';
 import { useDevice } from '../contexts/DeviceContext';
+import { VisualizationModeToggle } from '../components/VisualizationModeToggle';
 
 interface ActiveSessionScreenProps {
   navigation?: any;
@@ -27,6 +28,7 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
     elapsedSeconds,
     sessionConfig,
     visualizationMode,
+    setVisualizationMode,
   } = useSession();
   const { deviceInfo, signalQuality } = useDevice();
 
@@ -119,6 +121,15 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
         </Text>
       </View>
 
+      {/* Visualization Mode Toggle */}
+      <View style={styles.visualizationToggleContainer}>
+        <VisualizationModeToggle
+          selectedMode={visualizationMode}
+          onModeChange={setVisualizationMode}
+          testID="visualization-mode-toggle"
+        />
+      </View>
+
       {/* Signal Quality Card */}
       <View style={styles.infoCard}>
         <Text style={styles.sectionTitle}>Signal Quality</Text>
@@ -167,10 +178,6 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Status</Text>
           <Text style={styles.infoValue}>{sessionState}</Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Visualization</Text>
-          <Text style={styles.infoValue}>{visualizationMode}</Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Device</Text>
@@ -335,6 +342,9 @@ const styles = StyleSheet.create({
     color: Colors.text.primary,
     fontSize: Typography.fontSize.md,
     textTransform: 'capitalize',
+  },
+  visualizationToggleContainer: {
+    marginBottom: Spacing.lg,
   },
 });
 
