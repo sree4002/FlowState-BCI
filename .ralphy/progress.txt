@@ -397,3 +397,72 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+## 2026-01-21
+
+### Task: Create ThetaTrendWidget with sparkline chart of recent theta values
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created ThetaTrendWidget component in src/components/ThetaTrendWidget.tsx
+2. Implemented sparkline chart using victory-native (VictoryLine, VictoryArea, VictoryChart, VictoryAxis)
+3. Integrated with SessionContext to access recentSessions data
+4. Added configurable props: maxDataPoints, height, showStats, title
+5. Implemented theta z-score color coding using status colors (red < 0, yellow < 0.5, green < 1.5, blue >= 1.5)
+6. Added statistics display showing min, avg, max, and latest theta z-scores
+7. Implemented trend indicator (up/down/stable) based on comparing recent vs older sessions
+8. Applied dark theme styling using theme constants (Colors, Spacing, BorderRadius, Typography, Shadows)
+9. Added empty state with helpful message when no session data exists
+10. Used smooth interpolation (monotoneX) for sparkline curve
+11. Added semi-transparent area fill under the sparkline for visual depth
+12. Created comprehensive test suite with 15+ test cases (__tests__/ThetaTrendWidget.test.tsx)
+13. Mocked victory-native components and Dimensions for testing
+14. Updated src/components/index.ts to export ThetaTrendWidget and ThetaTrendWidgetProps
+
+**Files created/modified**:
+- src/components/ThetaTrendWidget.tsx (created - 270 lines)
+- src/components/index.ts (modified - added ThetaTrendWidget export)
+- __tests__/ThetaTrendWidget.test.tsx (created - 130+ lines with comprehensive tests)
+
+**Component API**:
+```typescript
+interface ThetaTrendWidgetProps {
+  maxDataPoints?: number;  // Maximum sessions to display (default: 10)
+  height?: number;         // Widget height in pixels (default: 120)
+  showStats?: boolean;     // Show statistics row (default: true)
+  title?: string;          // Widget title (default: 'Theta Trend')
+}
+```
+
+**Key features**:
+- Sparkline chart with VictoryLine and VictoryArea components
+- Data sourced from useSession() hook's recentSessions array
+- Color-coded values based on theta z-score zones:
+  - Red (#E74C3C): z-score < 0 (below target)
+  - Yellow (#F39C12): z-score 0-0.5 (approaching target)
+  - Green (#2ECC71): z-score 0.5-1.5 (target range)
+  - Blue (#3498DB): z-score >= 1.5 (above target)
+- Trend indicator comparing 3 most recent vs 3 oldest sessions
+- Statistics row with min/avg/max/latest values
+- Responsive width based on screen dimensions
+- Empty state handling with user guidance
+- Dark theme styling with surface background, rounded corners, shadow
+
+**Styling approach**:
+- Container: Colors.surface.primary background, BorderRadius.lg corners
+- Title: Typography.fontSize.lg, Colors.text.primary
+- Chart: Hidden axes for clean sparkline look, monotoneX interpolation
+- Stats: Colors.text.tertiary labels, color-coded values
+- Trend badge: Colors.surface.secondary background with colored indicator
+
+**Test coverage**:
+- Rendering tests (default title, custom title, empty state)
+- Props tests (maxDataPoints, height, showStats)
+- Component structure validation
+- Helper function integration
+- Provider integration tests
+- Accessibility tests (readable text)
+
+**Next steps**: Continue with Phase 6 widgets (ThetaTimeSeriesChart, ThetaGaugeDisplay, etc.)
+
