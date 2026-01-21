@@ -398,73 +398,76 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create SQLite database schema for circadian_patterns table
+### Task: Create theta (4-8 Hz), alpha (8-13 Hz), and beta (13-30 Hz) band power extraction
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created circadian_patterns table schema in src/services/database.ts with columns:
-   - id: INTEGER PRIMARY KEY AUTOINCREMENT
-   - hour_of_day: INTEGER NOT NULL (0-23, with CHECK constraint)
-   - avg_theta_mean: REAL NOT NULL (average theta band power mean)
-   - avg_theta_std: REAL NOT NULL (average theta band power standard deviation)
-   - session_count: INTEGER NOT NULL DEFAULT 0 (number of sessions at this hour)
-   - avg_subjective_rating: REAL (average subjective rating, nullable)
-   - created_at: INTEGER DEFAULT (strftime('%s', 'now'))
-   - updated_at: INTEGER DEFAULT (strftime('%s', 'now'))
-   - UNIQUE(hour_of_day) constraint for upsert support
-2. Created CircadianPatternRecord TypeScript interface matching database schema
-3. Implemented complete CRUD operations:
-   - upsertCircadianPattern: INSERT with ON CONFLICT DO UPDATE (upsert by hour_of_day)
-   - getCircadianPatternByHour: Retrieve pattern by hour
-   - getAllCircadianPatterns: Get all patterns ordered by hour
-   - getCircadianPatternsByHourRange: Get patterns within a time range
-   - updateCircadianPattern: Update existing pattern by ID (supports partial updates)
-   - deleteCircadianPattern: Delete by ID
-   - deleteCircadianPatternByHour: Delete by hour of day
-   - deleteAllCircadianPatterns: Clear all patterns
-   - getCircadianPatternsCount: Get count of patterns
-   - getPeakThetaHour: Get hour with highest avg_theta_mean
-   - getCircadianPatternsWithMinSessions: Get patterns with minimum session threshold
-4. Updated initializeDatabase to create circadian_patterns table on startup
-5. Updated dropAllTables to drop circadian_patterns table
-6. Created comprehensive test suite with 33 tests covering all operations (__tests__/database-circadian-patterns.test.ts)
-7. Updated expo-sqlite mock to support ON CONFLICT (upsert) queries, compound WHERE clauses, and circadian_patterns PRAGMA table_info
-8. Verified all tests pass (209 tests across 10 test suites)
-9. Verified linting passes with no errors or warnings
+1. Created comprehensive band power extraction module in src/utils/bandPower.ts
+2. Defined FrequencyBands constant with standard EEG frequency band definitions:
+   - Theta: 4-8 Hz (associated with deep relaxation, creativity, flow states)
+   - Alpha: 8-13 Hz (associated with relaxed awareness, calm focus)
+   - Beta: 13-30 Hz (associated with active thinking, concentration)
+3. Implemented core band power extraction functions:
+   - extractBandPower: Generic function using trapezoidal integration
+   - extractNamedBandPower: Extract power by band name
+   - extractThetaPower: Extract theta band power
+   - extractAlphaPower: Extract alpha band power
+   - extractBetaPower: Extract beta band power
+   - extractAllBandPowers: Extract all three bands in a single pass
+4. Implemented relative power calculation:
+   - extractRelativeBandPowers: Calculate power as percentage of total with band ratios
+5. Implemented peak frequency detection:
+   - findPeakFrequency: Find peak within any frequency range
+   - findPeakThetaFrequency: Find peak theta frequency for personalized entrainment
+6. Implemented power spectrum computation:
+   - computePowerSpectrum: Compute power spectrum using DFT with Hanning window
+   - applyHanningWindow: Apply Hanning window to reduce spectral leakage
+   - computeBandPowerFromSamples: Convenience function for raw EEG data
+7. Implemented statistical functions for baseline calibration:
+   - calculateMeanBandPower: Calculate mean across multiple epochs
+   - calculateStdBandPower: Calculate standard deviation for z-score normalization
+8. Created comprehensive TypeScript interfaces:
+   - BandPowerResult: Contains theta, alpha, beta, and total power
+   - RelativeBandPowerResult: Relative powers and band ratios
+   - PowerSpectrumPoint: Frequency-power pairs
+   - FrequencyBandName: Type for band names
+9. Updated src/utils/index.ts to export the new module
+10. Created comprehensive test suite with 42 tests (__tests__/band-power.test.ts)
+11. All tests passing, linting clean
 
 **Files created/modified**:
-- src/services/database.ts (modified - added circadian_patterns table schema and CRUD operations)
-- __tests__/database-circadian-patterns.test.ts (created - 33 comprehensive tests)
-- __mocks__/expo-sqlite.ts (modified - added upsert support, compound WHERE, PRAGMA for circadian_patterns)
+- src/utils/bandPower.ts (created - 400+ lines with complete band power extraction implementation)
+- src/utils/index.ts (modified - added bandPower export)
+- __tests__/band-power.test.ts (created - 42 comprehensive test cases)
 
-**Database schema details**:
-- Table: circadian_patterns
-- Purpose: Store aggregated theta statistics by hour of day for circadian rhythm analysis
-- Unique constraint on hour_of_day enables efficient upsert operations
-- CHECK constraint ensures hour_of_day is valid (0-23)
+**Key features**:
+- Trapezoidal integration for accurate band power calculation
+- Support for both headband (500 Hz) and earpiece (250 Hz) sampling rates
+- Hanning window for reduced spectral leakage
+- Statistical functions for baseline calibration (mean, std)
+- Peak frequency detection for personalized entrainment
+- Relative power and ratio calculations for brain state assessment
+- Full TypeScript support with comprehensive type definitions
 
-**CRUD operations implemented**:
-- Create/Update: upsertCircadianPattern() - uses ON CONFLICT for atomic upsert
-- Read: getCircadianPatternByHour(), getAllCircadianPatterns(), getCircadianPatternsByHourRange()
-- Update: updateCircadianPattern() - supports partial updates
-- Delete: deleteCircadianPattern(), deleteCircadianPatternByHour(), deleteAllCircadianPatterns()
-- Analytics: getPeakThetaHour(), getCircadianPatternsWithMinSessions(), getCircadianPatternsCount()
+**Test coverage**: 42 tests covering:
+- FrequencyBands constant (3 tests)
+- calculateFrequencyResolution (2 tests)
+- extractBandPower (6 tests)
+- extractNamedBandPower (3 tests)
+- extractThetaPower (2 tests)
+- extractAlphaPower (1 test)
+- extractBetaPower (1 test)
+- extractAllBandPowers (2 tests)
+- extractRelativeBandPowers (3 tests)
+- findPeakFrequency (3 tests)
+- findPeakThetaFrequency (1 test)
+- applyHanningWindow (2 tests)
+- computePowerSpectrum (4 tests)
+- computeBandPowerFromSamples (2 tests)
+- calculateMeanBandPower (2 tests)
+- calculateStdBandPower (3 tests)
+- Integration tests (2 tests)
 
-**Test coverage**: 33 test cases covering:
-- Table creation (2 tests)
-- Table schema validation (2 tests)
-- Upsert operations including update on conflict (4 tests)
-- Get by hour (2 tests)
-- Get all patterns (2 tests)
-- Get by hour range (3 tests)
-- Update operations (4 tests)
-- Delete operations (3 tests)
-- Delete all patterns (1 test)
-- Count operations (3 tests)
-- Peak theta hour (2 tests)
-- Minimum sessions filter (3 tests)
-- Data integrity (2 tests)
-
-**Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 3
+**Next steps**: Implement z-score normalization function using baseline mean and std as per Phase 4 task 5
 
