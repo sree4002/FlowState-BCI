@@ -461,69 +461,84 @@ Victory Native provides chart components for:
 **Next steps**: Continue with Phase 2 tasks
 
 
-### Task: Implement widget layout with ScrollView and proper spacing
+### Task: Create ThetaGaugeDisplay with circular gauge and color-coded zones (red/yellow/green/blue)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Updated DashboardScreen to use a proper ScrollView-based widget layout
-2. Integrated all 7 dashboard widget components:
-   - DeviceStatusWidget: Shows device connection status, battery, signal quality
-   - TodaySummaryWidget: Shows today's session count, total time, and average theta
-   - ThetaTrendWidget: Sparkline chart showing recent theta z-score trends
-   - NextSessionWidget: Circadian-aware session suggestions
-   - QuickBoostButton: One-tap 5-minute session at 6Hz
-   - CalibrateButton: Button to initiate calibration flow
-   - CustomSessionButton: Configure and start custom sessions
-3. Implemented proper spacing using theme constants (Spacing.md = 16px between sections)
-4. Added safe area handling with useSafeAreaInsets for proper bottom padding
-5. Added RefreshControl for pull-to-refresh functionality
-6. Updated components index.ts to export all widget components
-7. Created mock files for testing dependencies:
-   - react-native-safe-area-context mock
-   - @react-navigation/native mock
-   - @react-native-community/slider mock
-   - victory-native mock
-8. Updated react-native mock to properly support testID props
-9. Updated DashboardScreen tests with 28 comprehensive test cases
-10. All tests pass successfully
+1. Created ThetaGaugeDisplay component in src/components/ThetaGaugeDisplay.tsx (377 lines)
+2. Implemented circular gauge visualization with animated needle
+3. Added four color-coded theta zones:
+   - Red (zscore < 0): Below target - theta activity below baseline
+   - Yellow (0 ≤ zscore < 0.5): Approaching target - getting close to optimal
+   - Green (0.5 ≤ zscore < 1.5): Optimal - theta in target range
+   - Blue (zscore ≥ 1.5): High theta - elevated theta activity
+4. Used React Native Animated API for smooth needle transitions
+5. Added comprehensive props interface with 10 configurable options:
+   - value: Current theta z-score to display
+   - minValue/maxValue: Gauge scale range (default: -1 to 2)
+   - size: Gauge size in pixels (default: 200)
+   - showLabel/title: Title display configuration
+   - animated/animationDuration: Animation settings
+   - showZoneLabels: Toggle zone labels around gauge
+   - showValue: Toggle value display below gauge
+   - testID: Test ID for component testing
+6. Implemented zone labels (Low, Near, Good, High) positioned around gauge
+7. Added value display showing current z-score with zone name
+8. Used theme colors from constants/theme.ts (Colors.status.red/yellow/green/blue)
+9. Applied consistent styling with shadows, borders, and typography from theme
+10. Created comprehensive test suite with 54 tests covering all functionality
+11. Updated react-native mock to include Easing functions for animation testing
+12. Exported component from src/components/index.ts
+13. All 54 tests pass
 
 **Files created/modified**:
-- src/screens/DashboardScreen.tsx (completely rewritten with widget layout)
-- src/components/index.ts (added exports for all widget components)
-- __tests__/DashboardScreen.test.tsx (updated with 28 tests for widget layout)
-- __mocks__/react-native.ts (updated with testID support and RefreshControl)
-- __mocks__/react-native-safe-area-context.ts (created - safe area hooks)
-- __mocks__/@react-navigation/native.ts (created - navigation hooks)
-- __mocks__/@react-native-community/slider.ts (created - slider component)
-- __mocks__/victory-native.ts (created - chart components)
-- jest.config.js (updated with new module mappings)
+- src/components/ThetaGaugeDisplay.tsx (created - 377 lines)
+- __tests__/ThetaGaugeDisplay.test.tsx (created - 408 lines, 54 tests)
+- src/components/index.ts (modified - added ThetaGaugeDisplay export)
+- __mocks__/react-native.ts (modified - added Easing mock, improved testID handling)
 
-**Widget layout structure**:
-- ScrollView container with dark background (#0F1419)
-- Horizontal padding: 16px (Spacing.md)
-- Bottom padding: safe area inset + 48px (Spacing.xxl)
-- Section margin: 16px between widgets
-- Actions section:
-  - Primary action (QuickBoostButton) centered
-  - Secondary actions row (Calibrate, Custom Session) with flex layout
+**Component features**:
+- Circular gauge with 270-degree arc (-135° to +135°)
+- Four color-coded zone segments using View borders
+- Animated needle with configurable duration (default 500ms)
+- Center dot matching current zone color
+- Zone labels positioned around gauge perimeter
+- Value display with 2 decimal precision
+- Dynamic zone label text (Below Target, Approaching, Optimal, High Theta)
+- Full dark theme integration
+- Responsive sizing based on size prop
 
-**Key features implemented**:
-- ScrollView with showsVerticalScrollIndicator={false} for clean UI
-- RefreshControl with primary theme color tint
-- Safe area insets integration for proper bottom padding on notched devices
-- Navigation integration (handleCalibrate → Calibration screen, handleSessionStart → Session screen)
-- Proper disabled states based on device connection and session state
-- All widgets have testID props for comprehensive testing
+**Props interface**:
+```typescript
+interface ThetaGaugeDisplayProps {
+  value?: number | null;       // Current theta z-score
+  minValue?: number;           // Gauge minimum (default: -1)
+  maxValue?: number;           // Gauge maximum (default: 2)
+  size?: number;               // Gauge size in pixels (default: 200)
+  showLabel?: boolean;         // Show title (default: true)
+  title?: string;              // Title text (default: "Theta Level")
+  animated?: boolean;          // Animate needle (default: true)
+  animationDuration?: number;  // Animation ms (default: 500)
+  showZoneLabels?: boolean;    // Show zone labels (default: true)
+  showValue?: boolean;         // Show value text (default: true)
+  testID?: string;             // Test ID (default: "theta-gauge-display")
+}
+```
 
-**Test coverage**: 28 tests covering:
-- Widget Layout Structure (4 tests)
-- Widget Components rendering (7 tests)
-- Widget Content verification (7 tests)
-- Context Integration (5 tests)
-- Refresh Control (1 test)
-- ScrollView Styling (3 tests)
-- Component Export (1 test)
+**Test coverage**:
+- Basic rendering (8 tests)
+- Color-coded zones (5 tests)
+- Value display (8 tests)
+- Zone color mapping (5 tests)
+- Boundary values (6 tests)
+- Size configuration (3 tests)
+- Min/max value configuration (4 tests)
+- Animation configuration (3 tests)
+- Component export (2 tests)
+- Edge cases (6 tests)
+- Accessibility (2 tests)
+- Props interface (3 tests)
 
-**Next steps**: Add pull-to-refresh for updating dashboard data (Phase 6 task 9)
+**Next steps**: Continue with Phase 7 Active Session Screen tasks (ThetaNumericDisplay, ThetaTimeSeriesChart, etc.)
 
