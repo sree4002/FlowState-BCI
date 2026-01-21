@@ -1,207 +1,208 @@
-// Signal processing utilities for FlowState BCI application
-// Provides artifact detection and signal quality analysis for EEG data
-
-import type { EEGDataPacket, SignalQuality } from '../types';
+/**
+ * Signal processing utilities for EEG artifact detection
+ * Provides functions to detect various types of artifacts in EEG data
+ */
 
 /**
- * Default threshold for amplitude artifact detection in microvolts (µV)
- * Values exceeding ±100 µV are typically considered artifacts in EEG
+ * Threshold for gradient artifact detection in microvolts per sample
+ * Values exceeding this indicate rapid voltage changes typically caused by
+ * muscle artifacts, electrode pops, or movement
  */
-export const DEFAULT_AMPLITUDE_THRESHOLD_UV = 100;
+export const GRADIENT_THRESHOLD_UV = 50;
 
 /**
- * Result of amplitude artifact detection
+ * Result of gradient artifact detection analysis
  */
-export interface AmplitudeArtifactResult {
-  /** Whether any samples exceeded the amplitude threshold */
-  hasArtifact: boolean;
-  /** Number of samples that exceeded the threshold */
-  artifactSampleCount: number;
-  /** Total number of samples analyzed */
-  totalSampleCount: number;
-  /** Percentage of samples that were artifacts (0-100) */
+export interface GradientArtifactResult {
+  /** True if any gradient violations were detected */
+  hasGradientArtifact: boolean;
+  /** Percentage of sample transitions that exceeded the threshold (0-100) */
   artifactPercentage: number;
-  /** Maximum absolute amplitude found in the samples */
-  maxAmplitude: number;
-  /** Minimum amplitude found in the samples (can be negative) */
-  minAmplitude: number;
-  /** Indices of samples that exceeded the threshold */
-  artifactIndices: number[];
+  /** Number of gradient violations detected */
+  violationCount: number;
+  /** Indices of samples where violations occurred (index of the second sample in each violating pair) */
+  violationIndices: number[];
+  /** Maximum gradient magnitude found in the data (absolute value in µV) */
+  maxGradient: number;
 }
 
 /**
- * Detects amplitude artifacts in EEG samples
+ * Detects gradient artifacts in EEG samples
  *
- * An amplitude artifact occurs when a sample exceeds the threshold value (±100 µV by default).
- * This is a common indicator of movement artifacts, muscle artifacts, or electrode issues.
+ * Gradient artifacts occur when the voltage change between consecutive samples
+ * exceeds a threshold (default: 50 µV per sample). This typically indicates:
+ * - Muscle artifacts (EMG contamination)
+ * - Electrode pops or movement artifacts
+ * - Electrical interference
  *
- * @param samples - Array of voltage samples in microvolts (µV)
- * @param thresholdUv - Amplitude threshold in microvolts (default: 100 µV)
- * @returns AmplitudeArtifactResult containing detection results and statistics
+ * @param samples - Array of EEG voltage samples in microvolts (µV)
+ * @returns GradientArtifactResult containing detection results and statistics
  *
  * @example
  * ```typescript
- * const samples = [50, -30, 120, 45, -110, 60]; // µV values
- * const result = detectAmplitudeArtifacts(samples);
- * // result.hasArtifact === true (120 and -110 exceed ±100 µV)
- * // result.artifactSampleCount === 2
- * // result.artifactIndices === [2, 4]
+ * const samples = [10, 20, 80, 85, 90]; // 80-20=60µV exceeds threshold
+ * const result = detectGradientArtifacts(samples);
+ * // result.hasGradientArtifact = true
+ * // result.violationIndices = [2]
  * ```
  */
-export function detectAmplitudeArtifacts(
-  samples: number[],
-  thresholdUv: number = DEFAULT_AMPLITUDE_THRESHOLD_UV
-): AmplitudeArtifactResult {
-  // Handle empty samples array
-  if (samples.length === 0) {
+export function detectGradientArtifacts(
+  samples: number[]
+): GradientArtifactResult {
+  // Handle edge cases
+  if (!samples || samples.length === 0) {
     return {
-      hasArtifact: false,
-      artifactSampleCount: 0,
-      totalSampleCount: 0,
+      hasGradientArtifact: false,
       artifactPercentage: 0,
-      maxAmplitude: 0,
-      minAmplitude: 0,
-      artifactIndices: [],
+      violationCount: 0,
+      violationIndices: [],
+      maxGradient: 0,
     };
   }
 
-  const artifactIndices: number[] = [];
-  let maxAmplitude = samples[0];
-  let minAmplitude = samples[0];
+  if (samples.length === 1) {
+    return {
+      hasGradientArtifact: false,
+      artifactPercentage: 0,
+      violationCount: 0,
+      violationIndices: [],
+      maxGradient: 0,
+    };
+  }
 
-  // Scan through all samples
-  for (let i = 0; i < samples.length; i++) {
-    const sample = samples[i];
+  const violationIndices: number[] = [];
+  let maxGradient = 0;
 
-    // Track min/max
-    if (sample > maxAmplitude) {
-      maxAmplitude = sample;
+  // Calculate gradients between consecutive samples
+  for (let i = 1; i < samples.length; i++) {
+    const gradient = Math.abs(samples[i] - samples[i - 1]);
+
+    // Track maximum gradient
+    if (gradient > maxGradient) {
+      maxGradient = gradient;
     }
-    if (sample < minAmplitude) {
-      minAmplitude = sample;
-    }
 
-    // Check if sample exceeds threshold (either positive or negative)
-    if (Math.abs(sample) > thresholdUv) {
-      artifactIndices.push(i);
+    // Check if gradient exceeds threshold
+    if (gradient > GRADIENT_THRESHOLD_UV) {
+      violationIndices.push(i);
     }
   }
 
-  const artifactSampleCount = artifactIndices.length;
-  const totalSampleCount = samples.length;
-  const artifactPercentage = (artifactSampleCount / totalSampleCount) * 100;
+  const violationCount = violationIndices.length;
+  const totalTransitions = samples.length - 1;
+
+  // Calculate percentage of transitions that exceeded threshold
+  const artifactPercentage =
+    totalTransitions > 0 ? (violationCount / totalTransitions) * 100 : 0;
 
   return {
-    hasArtifact: artifactSampleCount > 0,
-    artifactSampleCount,
-    totalSampleCount,
+    hasGradientArtifact: violationCount > 0,
     artifactPercentage,
-    maxAmplitude,
-    minAmplitude,
-    artifactIndices,
+    violationCount,
+    violationIndices,
+    maxGradient,
   };
 }
 
 /**
- * Detects amplitude artifacts in an EEG data packet
+ * Detects gradient artifacts with a custom threshold
  *
- * Convenience wrapper that extracts samples from an EEGDataPacket
- * and performs amplitude artifact detection.
- *
- * @param packet - EEG data packet containing samples
- * @param thresholdUv - Amplitude threshold in microvolts (default: 100 µV)
- * @returns AmplitudeArtifactResult containing detection results
+ * @param samples - Array of EEG voltage samples in microvolts (µV)
+ * @param threshold - Custom threshold in µV per sample (default: 50 µV)
+ * @returns GradientArtifactResult containing detection results and statistics
  */
-export function detectAmplitudeArtifactsInPacket(
-  packet: EEGDataPacket,
-  thresholdUv: number = DEFAULT_AMPLITUDE_THRESHOLD_UV
-): AmplitudeArtifactResult {
-  return detectAmplitudeArtifacts(packet.samples, thresholdUv);
-}
-
-/**
- * Detects amplitude artifacts across multiple consecutive packets (sliding window)
- *
- * Useful for analyzing signal quality over a time window (e.g., 2-4 seconds).
- *
- * @param packets - Array of EEG data packets
- * @param thresholdUv - Amplitude threshold in microvolts (default: 100 µV)
- * @returns AmplitudeArtifactResult for the combined samples
- */
-export function detectAmplitudeArtifactsInWindow(
-  packets: EEGDataPacket[],
-  thresholdUv: number = DEFAULT_AMPLITUDE_THRESHOLD_UV
-): AmplitudeArtifactResult {
-  // Combine all samples from all packets
-  const allSamples: number[] = [];
-  for (const packet of packets) {
-    allSamples.push(...packet.samples);
+export function detectGradientArtifactsWithThreshold(
+  samples: number[],
+  threshold: number
+): GradientArtifactResult {
+  // Handle edge cases
+  if (!samples || samples.length === 0) {
+    return {
+      hasGradientArtifact: false,
+      artifactPercentage: 0,
+      violationCount: 0,
+      violationIndices: [],
+      maxGradient: 0,
+    };
   }
 
-  return detectAmplitudeArtifacts(allSamples, thresholdUv);
-}
+  if (samples.length === 1) {
+    return {
+      hasGradientArtifact: false,
+      artifactPercentage: 0,
+      violationCount: 0,
+      violationIndices: [],
+      maxGradient: 0,
+    };
+  }
 
-/**
- * Creates a partial SignalQuality object with amplitude artifact information
- *
- * This can be merged with other artifact detection results to build
- * the complete SignalQuality object.
- *
- * @param result - Result from amplitude artifact detection
- * @returns Partial SignalQuality with amplitude-related fields populated
- */
-export function createAmplitudeSignalQuality(
-  result: AmplitudeArtifactResult
-): Pick<SignalQuality, 'has_amplitude_artifact' | 'artifact_percentage'> {
+  // Validate threshold
+  const effectiveThreshold = threshold > 0 ? threshold : GRADIENT_THRESHOLD_UV;
+
+  const violationIndices: number[] = [];
+  let maxGradient = 0;
+
+  // Calculate gradients between consecutive samples
+  for (let i = 1; i < samples.length; i++) {
+    const gradient = Math.abs(samples[i] - samples[i - 1]);
+
+    // Track maximum gradient
+    if (gradient > maxGradient) {
+      maxGradient = gradient;
+    }
+
+    // Check if gradient exceeds threshold
+    if (gradient > effectiveThreshold) {
+      violationIndices.push(i);
+    }
+  }
+
+  const violationCount = violationIndices.length;
+  const totalTransitions = samples.length - 1;
+
+  // Calculate percentage of transitions that exceeded threshold
+  const artifactPercentage =
+    totalTransitions > 0 ? (violationCount / totalTransitions) * 100 : 0;
+
   return {
-    has_amplitude_artifact: result.hasArtifact,
-    artifact_percentage: result.artifactPercentage,
+    hasGradientArtifact: violationCount > 0,
+    artifactPercentage,
+    violationCount,
+    violationIndices,
+    maxGradient,
   };
 }
 
 /**
- * Checks if a single sample exceeds the amplitude threshold
+ * Calculates all gradients in the sample array
+ * Useful for visualization and debugging
  *
- * Utility function for real-time sample-by-sample analysis.
- *
- * @param sample - Single voltage sample in microvolts (µV)
- * @param thresholdUv - Amplitude threshold in microvolts (default: 100 µV)
- * @returns true if the sample exceeds the threshold
+ * @param samples - Array of EEG voltage samples in microvolts (µV)
+ * @returns Array of absolute gradient values between consecutive samples
  */
-export function isAmplitudeArtifact(
-  sample: number,
-  thresholdUv: number = DEFAULT_AMPLITUDE_THRESHOLD_UV
+export function calculateGradients(samples: number[]): number[] {
+  if (!samples || samples.length < 2) {
+    return [];
+  }
+
+  const gradients: number[] = [];
+  for (let i = 1; i < samples.length; i++) {
+    gradients.push(Math.abs(samples[i] - samples[i - 1]));
+  }
+
+  return gradients;
+}
+
+/**
+ * Checks if a single gradient value exceeds the threshold
+ *
+ * @param gradient - Absolute gradient value in µV
+ * @param threshold - Optional custom threshold (default: 50 µV)
+ * @returns True if gradient exceeds threshold
+ */
+export function isGradientArtifact(
+  gradient: number,
+  threshold: number = GRADIENT_THRESHOLD_UV
 ): boolean {
-  return Math.abs(sample) > thresholdUv;
-}
-
-/**
- * Validates that the threshold is a positive number
- *
- * @param thresholdUv - Threshold value to validate
- * @returns true if threshold is valid (positive number)
- */
-export function isValidThreshold(thresholdUv: number): boolean {
-  return (
-    typeof thresholdUv === 'number' && thresholdUv > 0 && isFinite(thresholdUv)
-  );
-}
-
-/**
- * Clamps samples to the threshold range
- *
- * Useful for cleaning data by limiting extreme values to the threshold bounds.
- * Note: This modifies artifacts rather than detecting them - use with caution.
- *
- * @param samples - Array of voltage samples in microvolts
- * @param thresholdUv - Amplitude threshold in microvolts (default: 100 µV)
- * @returns New array with samples clamped to [-threshold, +threshold]
- */
-export function clampSamplesToThreshold(
-  samples: number[],
-  thresholdUv: number = DEFAULT_AMPLITUDE_THRESHOLD_UV
-): number[] {
-  return samples.map((sample) =>
-    Math.max(-thresholdUv, Math.min(thresholdUv, sample))
-  );
+  return Math.abs(gradient) > threshold;
 }

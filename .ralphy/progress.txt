@@ -398,67 +398,59 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create CalibrationScreen placeholder for calibration flow
+### Task: Implement gradient threshold artifact detection (>50 µV per sample)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created CalibrationScreen.tsx component in src/screens/ with full calibration flow UI placeholder
-2. Implemented all 5 calibration states: instructions, countdown, recording, processing, complete
-3. Integrated with SessionContext for calibration state management (calibrationState, setCalibrationState)
-4. Used dark theme colors from src/constants/theme.ts (Colors, Spacing, Typography, BorderRadius, Shadows)
-5. Added CalibrationScreenProps interface with optional onComplete and onCancel callbacks
-6. Implemented step indicator showing current step (1 of 5)
-7. Created UI for each calibration state:
-   - Instructions: setup guidance with numbered steps and "Begin Calibration" button
-   - Countdown: countdown display (placeholder shows 30) with instructions to relax
-   - Recording: progress bar indicator with signal quality display
-   - Processing: loading state with "Analyzing" message
-   - Complete: success message with quality score card and "Continue" button
-8. Added header with Cancel button for user navigation
-9. Updated src/screens/index.ts to export CalibrationScreen
-10. Created comprehensive test suite with 17 tests (__tests__/calibration-screen.test.ts)
-11. Tests verify file structure, component content, context usage, theme integration, and all calibration flow steps
-12. Verified all tests pass (193 tests passing across 10 test suites)
+1. Created src/services/signalProcessing.ts with gradient artifact detection implementation
+2. Defined GRADIENT_THRESHOLD_UV constant at 50 µV per sample as specified
+3. Implemented detectGradientArtifacts() function that:
+   - Calculates absolute differences between consecutive EEG samples
+   - Identifies samples exceeding 50 µV threshold
+   - Returns detection results including hasGradientArtifact boolean, artifact percentage, violation count, violation indices, and max gradient
+4. Implemented detectGradientArtifactsWithThreshold() for custom threshold support
+5. Implemented calculateGradients() utility to return all gradient values for visualization/debugging
+6. Implemented isGradientArtifact() helper to check single gradient values
+7. Created GradientArtifactResult TypeScript interface matching SignalQuality type requirements
+8. Updated src/services/index.ts to export the new signal processing module
+9. Created comprehensive test suite with 41 tests covering:
+   - Edge cases (empty array, null input, single sample)
+   - Clean data scenarios (stable signal, constant signal, threshold boundary)
+   - Artifact detection (single, multiple, negative gradients)
+   - Artifact percentage calculation (100%, 50%, 25%, fractional)
+   - Real-world EEG scenarios (theta waves, muscle artifacts, 500Hz/250Hz sampling rates)
+   - Custom threshold support
+   - Integration with SignalQuality type
+   - Performance testing (5000 samples in <100ms)
+10. Verified all 217 project tests pass (including 41 new signal processing tests)
 
 **Files created/modified**:
-- src/screens/CalibrationScreen.tsx (created - 268 lines with full calibration flow placeholder)
-- src/screens/index.ts (modified - added CalibrationScreen export)
-- __tests__/calibration-screen.test.ts (created - 17 comprehensive tests)
+- src/services/signalProcessing.ts (created - 175 lines with full gradient detection implementation)
+- src/services/index.ts (modified - added signalProcessing export)
+- __tests__/signal-processing-gradient.test.ts (created - 330 lines with 41 comprehensive tests)
 
-**Component features**:
-- React.FC functional component with TypeScript types
-- Uses useSession hook from SessionContext for state management
-- Initializes calibrationState to 'instructions' on mount
-- Cleans up calibrationState to null on unmount
-- getStepNumber helper function maps CalibrationState to step numbers 1-5
-- Styled with dark theme colors for calming BCI experience
-- SafeAreaView wrapper for proper screen layout
-- TouchableOpacity buttons for navigation actions
+**Implementation details**:
+- Threshold: >50 µV per sample (uses strict greater-than, not greater-than-or-equal)
+- Formula: |sample[i+1] - sample[i]| > 50 µV
+- Supports both headband (500 Hz) and earpiece (250 Hz) sampling rates
+- Handles edge cases gracefully (empty arrays, single samples, null input)
+- Returns violation indices for debugging/visualization
+- Provides artifact percentage for quality scoring integration
 
-**Calibration flow states**:
-1. instructions (Step 1): Shows 3 setup instructions, "Begin Calibration" button
-2. countdown (Step 2): Shows countdown number, relax instructions
-3. recording (Step 3): Shows progress bar, signal quality indicator
-4. processing (Step 4): Shows "Analyzing" message
-5. complete (Step 5): Shows quality score result card, "Continue" button
+**Functions exported**:
+- detectGradientArtifacts(samples: number[]): GradientArtifactResult
+- detectGradientArtifactsWithThreshold(samples: number[], threshold: number): GradientArtifactResult
+- calculateGradients(samples: number[]): number[]
+- isGradientArtifact(gradient: number, threshold?: number): boolean
+- GRADIENT_THRESHOLD_UV: 50 (constant)
 
-**Style system used**:
-- Colors.background.primary (#0F1419) - main background
-- Colors.surface.primary/elevated - cards and containers
-- Colors.text.primary/secondary/tertiary - text hierarchy
-- Colors.primary.main - buttons and accent
-- Colors.signal.good - signal quality indicator
-- Colors.accent.success - quality score display
-- Spacing.xs/sm/md/lg/xl - consistent spacing
-- Typography.fontSize/fontWeight - text styling
-- BorderRadius.lg/round - rounded corners
-- Shadows.md - elevated elements
+**Integration points**:
+- Result.hasGradientArtifact maps directly to SignalQuality.has_gradient_artifact
+- Result.artifactPercentage can be used in SignalQuality.artifact_percentage calculation
+- Ready for integration with DeviceContext for real-time signal quality display
 
-**Test coverage**:
-- File Structure (2 tests): CalibrationScreen.tsx exists, exported from index
-- Component Content (9 tests): React.FC, SessionContext, theme imports, all states, props, SafeAreaView, styled components, default export
-- Calibration Flow Steps (6 tests): instructions, countdown, recording, processing, complete states, step indicator
+**Test coverage**: 41 tests covering all functions and scenarios
 
-**Next steps**: Continue with Phase 2 - create sessions table schema
+**Next steps**: Continue with remaining Phase 4 artifact detection tasks (amplitude threshold, frequency ratio)
 
