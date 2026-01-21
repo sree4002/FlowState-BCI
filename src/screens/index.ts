@@ -1,3 +1,2 @@
-// Screens export placeholder
-// Export screen components here as they are created
-export {};
+// Screen exports
+export { DevicePairingScreen } from './DevicePairingScreen';

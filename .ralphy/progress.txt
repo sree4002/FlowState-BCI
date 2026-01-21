@@ -397,3 +397,74 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create DevicePairingScreen for BLE device setup
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created comprehensive DevicePairingScreen component in src/screens/DevicePairingScreen.tsx (600+ lines)
+2. Implemented BLE device scanning simulation with mock device discovery
+3. Built discovered devices list UI with FlatList and pull-to-refresh support
+4. Added device information display showing:
+   - Device name and icon (headband/earpiece/unknown)
+   - Signal strength indicator with color-coded RSSI labels (Excellent/Good/Fair/Weak)
+   - Device type and sampling rate (Headband 500Hz, Earpiece 250Hz)
+5. Implemented complete pairing/connection flow with states: idle, scanning, connecting, connected, error
+6. Added loading states with animated pulse indicator during scanning
+7. Created connection success screen showing device stats (battery, sample rate, firmware version)
+8. Added error handling with retry functionality
+9. Implemented skip confirmation with Alert dialog
+10. Added helpful pairing tips section
+11. Used theme constants (Colors, Spacing, BorderRadius, Typography, Shadows) throughout
+12. Integrated with DeviceContext for global device state management
+13. Created helper functions for device type detection and signal strength mapping
+14. Updated src/screens/index.ts to export the new component
+15. Created comprehensive test suite with 96 tests covering:
+    - File structure and exports
+    - Required imports and dependencies
+    - React Native components used
+    - TypeScript interfaces and types
+    - Props interface
+    - Context integration
+    - State management
+    - Core functions (startScan, stopScan, connectToDevice, retryConnection, cancelPairing)
+    - Helper functions
+    - Render functions
+    - UI elements and text content
+    - Signal strength and device type handling
+    - Animation implementation
+    - Effects and refs
+    - Error handling
+    - Skip functionality
+    - Theme-based styling
+16. Fixed all ESLint and Prettier warnings
+17. Verified all tests pass (96/96)
+
+**Files created/modified**:
+- src/screens/DevicePairingScreen.tsx (created - 615 lines, comprehensive BLE pairing screen)
+- src/screens/index.ts (modified - added DevicePairingScreen export)
+- __tests__/DevicePairingScreen.test.ts (created - 330 lines with 96 test cases)
+
+**Component features**:
+- **Scanning**: Animated scanning indicator with progress bar, 10-second timeout
+- **Device Discovery**: Mock device list showing FlowState Headband, FlowState Earpiece, and BCI Monitor Pro
+- **Signal Strength**: Color-coded RSSI display (Excellent ≥-50, Good ≥-60, Fair ≥-70, Weak <-70)
+- **Connection Flow**: Visual feedback during connection with ActivityIndicator
+- **Success State**: Shows connected device info with battery, sample rate, and firmware
+- **Error Handling**: Error state with retry button and clear error messages
+- **Skip Option**: Confirmation dialog warning about limited features
+- **Pairing Tips**: Helpful hints for successful device pairing
+- **Theme Integration**: Full use of theme colors, spacing, typography, and shadows
+- **Animations**: Pulse animation for scanning indicator using Animated API
+- **Pull-to-refresh**: RefreshControl for rescanning devices
+
+**TypeScript types defined**:
+- DiscoveredDevice: Interface for BLE devices found during scan
+- PairingState: Type for screen state machine ('idle' | 'scanning' | 'connecting' | 'connected' | 'error')
+- DevicePairingScreenProps: Interface for component props (onPairingComplete, onSkip callbacks)
+
+**Test coverage**: 96 test cases covering module structure, component exports, imports, React Native components, TypeScript interfaces, props, context integration, state management, functions, render methods, UI elements, signal strength logic, device type detection, animations, effects, error handling, skip functionality, and styling.
+
+**Next steps**: Create OnboardingScreen with swipeable tour (3 screens) as per Phase 5 task 8
+
