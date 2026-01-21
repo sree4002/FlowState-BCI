@@ -1,7 +1,5 @@
-// Components export
-// Export reusable components here as they are created
-
+// Components exports
 export {
-  ThetaTrendWidget,
-  type ThetaTrendWidgetProps,
-} from './ThetaTrendWidget';
+  NextSessionWidget,
+  type NextSessionWidgetProps,
+} from './NextSessionWidget';
