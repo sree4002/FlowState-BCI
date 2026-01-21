@@ -397,3 +397,59 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create ActiveSessionScreen placeholder with basic layout
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created ActiveSessionScreen.tsx component in src/screens/ with complete TypeScript implementation
+2. Implemented basic layout structure with ScrollView container and multiple sections:
+   - Header status bar showing device connection and signal quality status
+   - Session timer card displaying elapsed time in MM:SS format
+   - Theta Z-Score display card with color-coded zone indicator (Optimal/Good/Below Target)
+   - Signal quality card showing overall score and artifact percentage
+   - Session control buttons (Start/Pause and Stop)
+   - Session info card showing state, visualization mode, and device name
+3. Integrated with existing contexts (useSession, useDevice) for state management
+4. Applied dark theme styling using Colors, Spacing, BorderRadius, Typography, and Shadows from theme.ts
+5. Added accessibility labels and roles to control buttons
+6. Created helper functions for time formatting, signal quality colors, and theta zone determination
+7. Exported ActiveSessionScreen from src/screens/index.ts
+8. Created comprehensive test suite with 14 tests covering rendering and accessibility (__tests__/ActiveSessionScreen.test.tsx)
+
+**Files created/modified**:
+- src/screens/ActiveSessionScreen.tsx (created - 278 lines)
+- src/screens/index.ts (modified - added ActiveSessionScreen export)
+- __tests__/ActiveSessionScreen.test.tsx (created - 115 lines with 14 test cases)
+
+**Component structure**:
+- Status bar: Connection indicator + Signal quality indicator
+- Timer card: Session Time label, MM:SS display, session type
+- Theta card: Z-Score value (color-coded), zone badge, target hint
+- Signal card: Overall score, artifact percentage
+- Controls: Start/Pause button, Stop button (styled with theme colors)
+- Info card: Session state, visualization mode, device name
+
+**Styling applied**:
+- Container: Colors.background.primary (#0F1419)
+- Cards: Colors.surface.primary (#1E2433) with BorderRadius.xl and Shadows.md
+- Text: Colors.text.primary/secondary/tertiary for proper hierarchy
+- Status indicators: Colors.signal and Colors.status for color-coded feedback
+- Buttons: Colors.primary.main, Colors.secondary.main, Colors.accent.error
+
+**Test coverage**:
+- Basic rendering (1 test)
+- Timer section display (2 tests)
+- Theta z-score section (4 tests)
+- Signal quality section (1 test)
+- Session info section (3 tests)
+- Control buttons (1 test)
+- Accessibility (2 tests)
+
+**Context integration**:
+- useSession: sessionState, currentThetaZScore, elapsedSeconds, sessionConfig, visualizationMode
+- useDevice: deviceInfo, signalQuality
+
+**Next steps**: Continue with remaining Phase 3 tasks
+
