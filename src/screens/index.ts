@@ -1,2 +1,2 @@
 // Screens exports
-export { ActiveSessionScreen } from './ActiveSessionScreen';
+export { default as SettingsScreen } from './SettingsScreen';
