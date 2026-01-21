@@ -460,3 +460,69 @@ Victory Native provides chart components for:
 
 **Next steps**: Continue with Phase 2 tasks
 
+
+### Task: Create ThetaNumericDisplay showing current z-score value with color coding
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created ThetaNumericDisplay component in src/components/ThetaNumericDisplay.tsx
+2. Implemented z-score color coding with 4 zones:
+   - Red (< -0.5): Low/Below target
+   - Yellow (-0.5 to 0.5): Baseline
+   - Green (0.5 to 1.5): Elevated/Good
+   - Blue (>= 1.5): High/Optimal
+3. Added getThetaZoneColor helper function that maps z-scores to Colors.status colors
+4. Added getThetaZoneLabel helper function that returns human-readable zone labels (Waiting, Low, Baseline, Elevated, Optimal)
+5. Added categorizeZScoreZone helper function that returns zone type ('low' | 'baseline' | 'elevated' | 'high')
+6. Added formatZScore helper function that formats values with sign prefix (+/-) and 2 decimal places
+7. Implemented 3 size variants (small, medium, large) with appropriate styling
+8. Component uses SessionContext by default but accepts optional value prop for testing
+9. Optional showLabel prop to display "Theta Z-Score" label
+10. Optional showZone prop to display colored zone badge with label
+11. Updated src/components/index.ts to export component and helper functions
+12. Created comprehensive test suite with 31 tests covering all functionality
+13. All tests pass (31 tests in ThetaNumericDisplay.test.tsx)
+
+**Files created/modified**:
+- src/components/ThetaNumericDisplay.tsx (created - 190 lines)
+- src/components/index.ts (modified - added exports for ThetaNumericDisplay)
+- __tests__/ThetaNumericDisplay.test.tsx (created - 250 lines with 31 tests)
+
+**Component API**:
+```typescript
+interface ThetaNumericDisplayProps {
+  value?: number | null;      // Optional z-score value (uses context if not provided)
+  size?: 'small' | 'medium' | 'large';  // Display size variant (default: 'medium')
+  showLabel?: boolean;        // Show "Theta Z-Score" label (default: true)
+  showZone?: boolean;         // Show zone badge (default: true)
+  testID?: string;            // For testing purposes
+}
+```
+
+**Exported helper functions**:
+- getThetaZoneColor(zscore: number | null): string
+- getThetaZoneLabel(zscore: number | null): string
+- categorizeZScoreZone(zscore: number | null): ThetaZone | null
+- formatZScore(zscore: number | null): string
+
+**Color zone mapping**:
+- null → Colors.text.tertiary (Waiting)
+- < -0.5 → Colors.status.red (Low)
+- -0.5 to 0.5 → Colors.status.yellow (Baseline)
+- 0.5 to 1.5 → Colors.status.green (Elevated)
+- >= 1.5 → Colors.status.blue (Optimal)
+
+**Test coverage**: 31 tests covering:
+- getThetaZoneColor (6 tests)
+- getThetaZoneLabel (5 tests)
+- categorizeZScoreZone (5 tests)
+- formatZScore (5 tests)
+- Context integration (3 tests)
+- Color coding consistency (2 tests)
+- Display value formatting (2 tests)
+- Props interface (2 tests)
+- Value override (1 test)
+
+**Next steps**: Continue with Phase 7 Active Session Screen tasks
+
