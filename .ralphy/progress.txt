@@ -397,3 +397,81 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create BLEService class with device scanning, connection, and disconnection methods
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created comprehensive BLEService class in src/services/BLEService.ts (450+ lines)
+2. Implemented device scanning functionality with configurable options:
+   - Name pattern filtering (FlowState, BCI, EEG by default)
+   - Service UUID filtering
+   - Configurable timeout (default 10 seconds)
+   - Duplicate device handling
+3. Implemented device connection with features:
+   - MTU negotiation support
+   - Connection timeout handling
+   - Auto-discovery of services and characteristics
+   - DeviceInfo conversion (headband vs earpiece detection, sampling rates)
+4. Implemented device disconnection with cleanup:
+   - Graceful disconnection handling
+   - Automatic cleanup of subscriptions
+   - State transition management
+5. Implemented event-based architecture with listener management:
+   - Scan result listeners
+   - Connection state listeners (disconnected, connecting, connected, disconnecting)
+   - Bluetooth state change listeners
+   - Error listeners
+6. Added platform-specific permission handling for Android (API 23+ and 31+)
+7. Implemented singleton pattern with getBLEService() and resetBLEService() helpers
+8. Exported BLE service UUIDs and device name patterns as constants
+9. Created comprehensive TypeScript types and interfaces:
+   - DiscoveredDevice, ScanOptions, ConnectionOptions
+   - ConnectionState type alias
+   - ScanListener, ConnectionStateListener, StateChangeListener, ErrorListener
+10. Created comprehensive test suite with 41 tests covering all functionality
+11. Created mock implementations for react-native-ble-plx and react-native
+12. Updated jest.config.js with module name mappings for new mocks
+13. Updated src/services/index.ts to export BLEService module
+14. Verified all 217 tests pass across all test suites
+15. Verified linting passes with no errors or warnings
+
+**Files created/modified**:
+- src/services/BLEService.ts (created - 450+ lines with full BLE service implementation)
+- src/services/index.ts (modified - added BLEService export)
+- __tests__/BLEService.test.ts (created - 588 lines with 41 comprehensive tests)
+- __mocks__/react-native-ble-plx.ts (created - mock for BLE library)
+- __mocks__/react-native.ts (created - mock for React Native platform/permissions)
+- jest.config.js (modified - added module name mappings for new mocks)
+
+**BLEService features**:
+- Device scanning with configurable filters and timeout
+- Device connection with MTU negotiation and timeout
+- Device disconnection with proper cleanup
+- Event listeners for scan results, connection state, BLE state, and errors
+- Singleton pattern for global access
+- Platform-specific permission handling (Android)
+- TypeScript types for all interfaces and options
+
+**Exported constants**:
+- BLE_SERVICE_UUIDS: EEG_SERVICE, DEVICE_INFO_SERVICE, BATTERY_SERVICE
+- BLE_DEVICE_NAME_PATTERNS: ['FlowState', 'BCI', 'EEG']
+- DEFAULT_SCAN_TIMEOUT_MS: 10000
+
+**Test coverage**: 41 tests covering:
+- Constants validation (3 tests)
+- Initialization (5 tests)
+- Singleton behavior (2 tests)
+- Permission handling (1 test)
+- Bluetooth state (4 tests)
+- Scanning (6 tests)
+- Connection (7 tests)
+- Disconnection (4 tests)
+- Error handling (1 test)
+- Cleanup (2 tests)
+- Type validation (4 tests)
+- Integration (2 tests)
+
+**Next steps**: Implement auto-reconnect logic with exponential backoff as per Phase 3 task 2
+

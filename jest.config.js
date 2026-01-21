@@ -27,6 +27,8 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.ts',
+    '^react-native-ble-plx$': '<rootDir>/__mocks__/react-native-ble-plx.ts',
+    '^react-native$': '<rootDir>/__mocks__/react-native.ts',
   },
   testTimeout: 10000,
   maxWorkers: 1,
