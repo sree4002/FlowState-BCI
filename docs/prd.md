@@ -14,70 +14,70 @@
 ## Phase 2: Database & Storage Layer
 
 - [x] Create SQLite database schema for baselines table (theta_mean, theta_std, alpha_mean, beta_mean, peak_theta_freq, optimal_freq, calibration_timestamp, quality_score)
-- [ ] Create SQLite database schema for sessions table (id, session_type, start_time, end_time, duration_seconds, avg_theta_zscore, max_theta_zscore, entrainment_freq, volume, signal_quality_avg, subjective_rating, notes)
-- [ ] Create SQLite database schema for circadian_patterns table (hour_of_day, avg_theta_mean, avg_theta_std, session_count, avg_subjective_rating)
-- [ ] Implement DatabaseService with CRUD operations for all tables
-- [ ] Implement AsyncStorage wrapper for user settings and device pairing info
-- [ ] Create data export utilities for CSV, JSON, and EDF formats
-- [ ] Add database migration support for future schema updates
+- [x] Create SQLite database schema for sessions table (id, session_type, start_time, end_time, duration_seconds, avg_theta_zscore, max_theta_zscore, entrainment_freq, volume, signal_quality_avg, subjective_rating, notes)
+- [x] Create SQLite database schema for circadian_patterns table (hour_of_day, avg_theta_mean, avg_theta_std, session_count, avg_subjective_rating)
+- [x] Implement DatabaseService with CRUD operations for all tables
+- [x] Implement AsyncStorage wrapper for user settings and device pairing info
+- [x] Create data export utilities for CSV, JSON, and EDF formats
+- [x] Add database migration support for future schema updates
 
 ## Phase 3: BLE Device Communication
 
-- [ ] Create BLEService class with device scanning, connection, and disconnection methods
-- [ ] Implement auto-reconnect logic with exponential backoff (2s, 4s, 8s intervals)
-- [ ] Create BLE characteristic handlers for EEG data stream (notify), entrainment control (write), device status (read/notify)
-- [ ] Implement connection quality monitoring using RSSI values
-- [ ] Add paired device storage and retrieval from AsyncStorage
-- [ ] Create mock BLE service for development/testing without hardware
-- [ ] Implement BLE data packet parsing for EEG samples (500Hz headband, 250Hz earpiece)
+- [x] Create BLEService class with device scanning, connection, and disconnection methods
+- [x] Implement auto-reconnect logic with exponential backoff (2s, 4s, 8s intervals)
+- [x] Create BLE characteristic handlers for EEG data stream (notify), entrainment control (write), device status (read/notify)
+- [x] Implement connection quality monitoring using RSSI values
+- [x] Add paired device storage and retrieval from AsyncStorage
+- [x] Create mock BLE service for development/testing without hardware
+- [x] Implement BLE data packet parsing for EEG samples (500Hz headband, 250Hz earpiece)
 
 ## Phase 4: Signal Processing (Mobile)
 
-- [ ] Implement DC offset removal function for EEG data epochs
-- [ ] Create Butterworth bandpass filter (0.5-50 Hz) using typed arrays
-- [ ] Implement Welch's periodogram for power spectrum estimation (2-4 second windows)
-- [ ] Create theta (4-8 Hz), alpha (8-13 Hz), and beta (13-30 Hz) band power extraction
-- [ ] Implement z-score normalization function using baseline mean and std
-- [ ] Create sliding buffer manager for real-time EEG processing (last 2-4 seconds)
-- [ ] Implement amplitude threshold artifact detection (±100 µV)
-- [ ] Implement gradient threshold artifact detection (>50 µV per sample)
-- [ ] Implement frequency ratio artifact detection (30-50 Hz vs 4-30 Hz ratio >2.0)
-- [ ] Create signal quality score calculator (0-100 based on artifact percentage)
+- [x] Implement DC offset removal function for EEG data epochs
+- [x] Create Butterworth bandpass filter (0.5-50 Hz) using typed arrays
+- [x] Implement Welch's periodogram for power spectrum estimation (2-4 second windows)
+- [x] Create theta (4-8 Hz), alpha (8-13 Hz), and beta (13-30 Hz) band power extraction
+- [x] Implement z-score normalization function using baseline mean and std
+- [x] Create sliding buffer manager for real-time EEG processing (last 2-4 seconds)
+- [x] Implement amplitude threshold artifact detection (±100 µV)
+- [x] Implement gradient threshold artifact detection (>50 µV per sample)
+- [x] Implement frequency ratio artifact detection (30-50 Hz vs 4-30 Hz ratio >2.0)
+- [x] Create signal quality score calculator (0-100 based on artifact percentage)
 
 ## Phase 5: Navigation & Screen Structure
 
-- [ ] Set up React Navigation with bottom tab navigator (Dashboard, Session, History, Settings)
-- [ ] Create navigation types for TypeScript type-safe navigation
-- [ ] Create DashboardScreen placeholder with basic layout
-- [ ] Create ActiveSessionScreen placeholder with basic layout
-- [ ] Create HistoryScreen placeholder with tab navigation (List, Calendar, Trends, Stats)
-- [ ] Create SettingsScreen placeholder with section categories
-- [ ] Create CalibrationScreen placeholder for calibration flow
-- [ ] Create DevicePairingScreen for BLE device setup
-- [ ] Create OnboardingScreen with swipeable tour (3 screens)
+- [x] Set up React Navigation with bottom tab navigator (Dashboard, Session, History, Settings)
+- [x] Create navigation types for TypeScript type-safe navigation
+- [x] Create DashboardScreen placeholder with basic layout
+- [x] Create ActiveSessionScreen placeholder with basic layout
+- [x] Create HistoryScreen placeholder with tab navigation (List, Calendar, Trends, Stats)
+- [x] Create SettingsScreen placeholder with section categories
+- [x] Create CalibrationScreen placeholder for calibration flow
+- [x] Create DevicePairingScreen for BLE device setup
+- [x] Create OnboardingScreen with swipeable tour (3 screens)
 
 ## Phase 6: Dashboard Screen
 
-- [ ] Create DeviceStatusWidget showing connection status, battery level, and signal quality
-- [ ] Create TodaySummaryWidget showing session count, total time, and avg theta
-- [ ] Create ThetaTrendWidget with sparkline chart of recent theta values
-- [ ] Create NextSessionWidget showing circadian-aware session suggestion
-- [ ] Create QuickBoostButton component (one-tap 5-min session at 6Hz)
-- [ ] Create CalibrateButton component linking to calibration flow
-- [ ] Create CustomSessionButton component for configurable sessions
-- [ ] Implement widget layout with ScrollView and proper spacing
-- [ ] Add pull-to-refresh for updating dashboard data
+- [x] Create DeviceStatusWidget showing connection status, battery level, and signal quality
+- [x] Create TodaySummaryWidget showing session count, total time, and avg theta
+- [x] Create ThetaTrendWidget with sparkline chart of recent theta values
+- [x] Create NextSessionWidget showing circadian-aware session suggestion
+- [x] Create QuickBoostButton component (one-tap 5-min session at 6Hz)
+- [x] Create CalibrateButton component linking to calibration flow
+- [x] Create CustomSessionButton component for configurable sessions
+- [x] Implement widget layout with ScrollView and proper spacing
+- [x] Add pull-to-refresh for updating dashboard data
 
 ## Phase 7: Active Session Screen
 
-- [ ] Create SessionTimer component with elapsed/total time display
-- [ ] Create ThetaNumericDisplay showing current z-score value with color coding
-- [ ] Create ThetaGaugeDisplay with circular gauge and color-coded zones (red/yellow/green/blue)
-- [ ] Create ThetaTimeSeriesChart with scrolling line chart (last 1-5 minutes)
-- [ ] Create visualization mode toggle (Numeric, Gauge, Chart)
-- [ ] Create FrequencySlider component (4-8 Hz, 0.1 Hz increments)
-- [ ] Create VolumeSlider component (0-100%)
-- [ ] Create large Pause/Resume button with clear visual state
+- [x] Create SessionTimer component with elapsed/total time display
+- [x] Create ThetaNumericDisplay showing current z-score value with color coding
+- [x] Create ThetaGaugeDisplay with circular gauge and color-coded zones (red/yellow/green/blue)
+- [x] Create ThetaTimeSeriesChart with scrolling line chart (last 1-5 minutes)
+- [x] Create visualization mode toggle (Numeric, Gauge, Chart)
+- [x] Create FrequencySlider component (4-8 Hz, 0.1 Hz increments)
+- [x] Create VolumeSlider component (0-100%)
+- [x] Create large Pause/Resume button with clear visual state
 - [ ] Create Stop button for ending session early
 - [ ] Create SignalQualityIndicator (corner placement, tap for details)
 - [ ] Create EntrainmentStateDisplay showing current frequency prominently

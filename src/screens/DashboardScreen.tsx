@@ -13,18 +13,28 @@
  */
 
 import React, { useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useDevice } from '../contexts';
 import { useSession } from '../contexts';
-import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
+import { Colors, Spacing } from '../constants/theme';
+import { DeviceStatusWidget } from '../components/DeviceStatusWidget';
+import { TodaySummaryWidget } from '../components/TodaySummaryWidget';
+import { ThetaTrendWidget } from '../components/ThetaTrendWidget';
+import { NextSessionWidget } from '../components/NextSessionWidget';
+import { QuickBoostButton } from '../components/QuickBoostButton';
+import { CalibrateButton } from '../components/CalibrateButton';
+import { CustomSessionButton } from '../components/CustomSessionButton';
 
-export default function DashboardScreen() {
-  const { deviceInfo, signalQuality, isConnected } = useDevice();
+interface DashboardScreenProps {
+  navigation?: {
+    navigate: (screen: string) => void;
+  };
+}
+
+export default function DashboardScreen({ navigation }: DashboardScreenProps) {
+  const { isConnected } = useDevice();
   const {
-    currentSession,
     sessionState,
-    currentThetaZScore: thetaZScore,
-    recentSessions,
     isRefreshing,
     refreshRecentSessions,
   } = useSession();
@@ -33,26 +43,14 @@ export default function DashboardScreen() {
     refreshRecentSessions();
   }, [refreshRecentSessions]);
 
-  const [refreshing, setRefreshing] = React.useState(false);
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    // Simulate refresh - in production this would fetch latest data
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
-  }, []);
-
   const handleCalibrate = useCallback(() => {
     // Navigate to calibration screen
-    // @ts-expect-error Navigation type will be properly set up in navigation config
-    navigation.navigate('Calibration');
+    navigation?.navigate('Calibration');
   }, [navigation]);
 
   const handleSessionStart = useCallback(() => {
     // Navigate to active session screen
-    // @ts-expect-error Navigation type will be properly set up in navigation config
-    navigation.navigate('Session');
+    navigation?.navigate('Session');
   }, [navigation]);
 
   const isSessionActive = sessionState === 'running' || sessionState === 'paused';
@@ -82,9 +80,7 @@ export default function DashboardScreen() {
             },
           ]}
         />
-      }
-      testID="dashboard-scroll-view"
-    >
+      </View>
       {/* Device Status Section */}
       <View style={styles.section}>
         <DeviceStatusWidget testID="device-status-widget" />
@@ -153,15 +149,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background.primary,
   },
-  contentContainer: {
+  connectionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.md,
+    paddingVertical: Spacing.sm,
+  },
+  connectionDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: Spacing.sm,
   },
   section: {
     marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.md,
   },
   actionsSection: {
     marginTop: Spacing.sm,
+    paddingHorizontal: Spacing.md,
   },
   primaryAction: {
     alignItems: 'center',
