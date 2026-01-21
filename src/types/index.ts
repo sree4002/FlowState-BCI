@@ -1,5 +1,8 @@
 // Core TypeScript types for FlowState BCI application
 
+// Re-export navigation types
+export * from './navigation';
+
 /**
  * Baseline profile containing calibrated EEG statistics
  * Used to normalize real-time theta measurements
