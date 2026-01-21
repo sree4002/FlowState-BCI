@@ -398,56 +398,94 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-## 2026-01-21
-
-### Task: Create QuickBoostButton component (one-tap 5-min session at 6Hz)
+### Task: Implement BLE data packet parsing for EEG samples (500Hz headband, 250Hz earpiece)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created QuickBoostButton component in src/components/QuickBoostButton.tsx
-2. Implemented one-tap functionality to start a 5-minute theta entrainment session at 6Hz
-3. Integrated with SessionContext for session state management (setSessionConfig, setSessionState, setElapsedSeconds)
-4. Integrated with SettingsContext to use customizable boost_time, boost_frequency, and default_volume settings
-5. Integrated with DeviceContext to check device connection status and connecting state
-6. Added visual states for: idle (Quick Boost), connecting (Connecting...), session active (Session Active)
-7. Added "No device connected" warning when device is not connected
-8. Styled with theme colors from constants/theme.ts (primary blue button, disabled state, no-device state)
-9. Added proper accessibility support (accessibilityRole, accessibilityLabel, accessibilityHint, accessibilityState)
-10. Added testID prop for testing support
-11. Added optional onSessionStart callback prop
-12. Exported component and props type from src/components/index.ts
-13. Created comprehensive test suite with 27 tests covering all component logic (__tests__/QuickBoostButton.test.tsx)
-14. Verified all tests pass (203 tests passing across 10 test suites)
+1. Created comprehensive BLE packet parser module in src/services/BlePacketParser.ts (580+ lines)
+2. Designed packet format specification with header, metadata, interleaved samples, and CRC-16 checksum
+3. Implemented device-specific parsing for 500Hz headband (4 channels) and 250Hz earpiece (2 channels)
+4. Created packet format constants (PACKET_HEADER, device types, sampling rates, channel configs)
+5. Implemented CRC-16/CCITT-FALSE checksum calculation with lookup table for fast validation
+6. Created packet validation functions: validateHeader(), validateCRC(), parseMetadata(), parseChannelSamples()
+7. Implemented main parsePacket() function with comprehensive error handling and ParseResult type
+8. Created ParserState management for tracking sequence numbers and detecting dropped packets
+9. Implemented signal quality calculation with artifact detection (amplitude, gradient, flatline)
+10. Created BlePacketParser class with callbacks (onPacketParsed, onPacketError, onSignalQuality)
+11. Added mock packet generation for testing (createMockPacket) with simulated EEG waveforms
+12. Created helper function getDeviceInfoFromMetadata() to populate DeviceInfo from parsed metadata
+13. Extended src/types/index.ts with EEGMultiChannelPacket interface for channel-separated data
+14. Updated src/services/index.ts to export BlePacketParser module
+15. Created comprehensive test suite with 60 test cases covering all parsing functionality
+16. Verified all tests pass (60 tests across ble-packet-parser test suite)
+17. Verified linting passes with no errors or warnings
 
 **Files created/modified**:
-- src/components/QuickBoostButton.tsx (created - 151 lines)
-- src/components/index.ts (modified - added QuickBoostButton export)
-- __tests__/QuickBoostButton.test.tsx (created - 458 lines with 27 comprehensive tests)
+- src/services/BlePacketParser.ts (created - 580+ lines with complete packet parsing implementation)
+- src/services/index.ts (modified - added BlePacketParser export)
+- src/types/index.ts (modified - added EEGMultiChannelPacket interface)
+- __tests__/ble-packet-parser.test.ts (created - 700+ lines with 60 comprehensive tests)
 
-**Component features**:
-- Props: onSessionStart (callback), disabled (boolean), testID (string)
-- Default session config: 5 min duration, 6Hz frequency (from settings.boost_time and settings.boost_frequency)
-- Automatically disabled when: disabled prop is true, session is running/paused, device is connecting
-- Visual feedback: lightning bolt emoji icon, loading indicator when connecting
-- Theme integration: Uses Colors, Spacing, BorderRadius, Typography, Shadows from theme.ts
+**Packet format specification**:
+```
+┌─────────────┬──────────┬────────────────────────────────────────────┬──────────┐
+│ Header (2B) │ Meta (6B)│ Samples (variable)                         │ CRC (2B) │
+├─────────────┼──────────┼────────────────────────────────────────────┼──────────┤
+│ 0xAA 0x55   │ See below│ Int16 samples per channel, interleaved     │ CRC16    │
+└─────────────┴──────────┴────────────────────────────────────────────┴──────────┘
 
-**Session configuration on press**:
-- type: 'quick_boost'
-- duration_minutes: settings.boost_time (default: 5)
-- entrainment_freq: settings.boost_frequency (default: 6.0 Hz)
-- volume: settings.default_volume (default: 70)
-- target_zscore: settings.target_zscore (default: 1.0)
-- closed_loop_behavior: settings.closed_loop_behavior (default: 'reduce_intensity')
+Meta bytes:
+- Byte 0: Device type (0x01 = headband, 0x02 = earpiece)
+- Byte 1: Channel count
+- Byte 2-3: Sequence number (uint16, little-endian)
+- Byte 4-5: Samples per channel in this packet (uint16, little-endian)
+```
 
-**Test coverage**:
-- Quick Boost Configuration (6 tests) - verifies correct session config creation
-- Session State Management (3 tests) - verifies state changes on press
-- Disabled State Logic (4 tests) - verifies button disabled states
-- Device Connection State (3 tests) - verifies device detection
-- Settings Context Integration (5 tests) - verifies settings usage
-- Button Text Logic (4 tests) - verifies text display
-- SubText Logic (4 tests) - verifies subtitle display
+**Device specifications**:
+- Headband: 500Hz sampling rate, 4 channels (frontal and temporal electrodes)
+- Earpiece: 250Hz sampling rate, 2 channels (in-ear electrodes)
+- ADC resolution: 16-bit signed (-32768 to 32767)
+- Microvolts conversion: ±200µV full scale
 
-**Next steps**: Continue with remaining Phase 3 UI components
+**Key features implemented**:
+- CRC-16/CCITT-FALSE checksum with fast lookup table
+- Header byte validation (0xAA 0x55 sync pattern)
+- Device type auto-detection from packet metadata
+- Interleaved sample parsing (Ch0_S0, Ch1_S0, ... Ch0_S1, Ch1_S1, ...)
+- ADC to microvolt conversion (MICROVOLTS_PER_UNIT constant)
+- Sequence number tracking with wrap-around handling (16-bit)
+- Dropped packet detection and statistics
+- Signal quality scoring (0-100) with artifact percentage
+- Amplitude artifact detection (>150µV threshold)
+- Gradient artifact detection (>50µV/sample sudden changes)
+- Flatline/frequency artifact detection (no signal variation)
+- Mock packet generation with simulated theta (6Hz) and alpha (10Hz) waves
+- BlePacketParser class with callback-based event handling
+- Parser state reset for device switching
+- Comprehensive error messages for debugging
+
+**Types exported**:
+- PacketMetadata: Parsed header metadata (device type, channels, sequence, samples)
+- RawParsedPacket: Complete parsed data before EEGDataPacket conversion
+- ParseResult: Success/failure result with packet, metadata, channel data, or error
+- ParserState: Sequence tracking and dropped packet statistics
+
+**Test coverage** (60 tests):
+- Constants validation (5 tests)
+- CRC calculation (3 tests)
+- Header validation (5 tests)
+- CRC validation (4 tests)
+- Metadata parsing (5 tests)
+- Channel sample parsing (4 tests)
+- Full packet parsing (7 tests)
+- Parser state management (5 tests)
+- Signal quality calculation (6 tests)
+- Mock packet creation (3 tests)
+- Device info from metadata (2 tests)
+- BlePacketParser class (6 tests)
+- Sampling rate integration (2 tests)
+- Edge cases (3 tests)
+
+**Next steps**: Create BLE service class with device scanning and connection management as per Phase 3 task 2
 
