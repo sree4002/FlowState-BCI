@@ -461,84 +461,65 @@ Victory Native provides chart components for:
 **Next steps**: Continue with Phase 2 tasks
 
 
-### Task: Create ThetaGaugeDisplay with circular gauge and color-coded zones (red/yellow/green/blue)
+### Task: Create ThetaTimeSeriesChart with scrolling line chart (last 1-5 minutes)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created ThetaGaugeDisplay component in src/components/ThetaGaugeDisplay.tsx (377 lines)
-2. Implemented circular gauge visualization with animated needle
-3. Added four color-coded theta zones:
-   - Red (zscore < 0): Below target - theta activity below baseline
-   - Yellow (0 ≤ zscore < 0.5): Approaching target - getting close to optimal
-   - Green (0.5 ≤ zscore < 1.5): Optimal - theta in target range
-   - Blue (zscore ≥ 1.5): High theta - elevated theta activity
-4. Used React Native Animated API for smooth needle transitions
-5. Added comprehensive props interface with 10 configurable options:
-   - value: Current theta z-score to display
-   - minValue/maxValue: Gauge scale range (default: -1 to 2)
-   - size: Gauge size in pixels (default: 200)
-   - showLabel/title: Title display configuration
-   - animated/animationDuration: Animation settings
-   - showZoneLabels: Toggle zone labels around gauge
-   - showValue: Toggle value display below gauge
-   - testID: Test ID for component testing
-6. Implemented zone labels (Low, Near, Good, High) positioned around gauge
-7. Added value display showing current z-score with zone name
-8. Used theme colors from constants/theme.ts (Colors.status.red/yellow/green/blue)
-9. Applied consistent styling with shadows, borders, and typography from theme
-10. Created comprehensive test suite with 54 tests covering all functionality
-11. Updated react-native mock to include Easing functions for animation testing
-12. Exported component from src/components/index.ts
-13. All 54 tests pass
+1. Created ThetaTimeSeriesChart component in src/components/ThetaTimeSeriesChart.tsx
+2. Implemented real-time scrolling line chart using Victory Native (VictoryChart, VictoryLine, VictoryArea, VictoryAxis, VictoryScatter)
+3. Added time window selector (1, 2, 3, or 5 minutes) with touchable buttons
+4. Implemented data buffer to collect theta z-score values during active sessions
+5. Added color-coded line based on theta z-score zones (red: <0, yellow: 0-0.5, green: 0.5-1.5, blue: >1.5)
+6. Added zone reference lines for visual guidance (dotted lines at z-score 0, 0.5, and 1.5)
+7. Implemented current value indicator with animated dot at the latest data point
+8. Added current z-score display with zone badge in the header
+9. Implemented empty state when no active session is running
+10. Added smooth monotoneX interpolation for line rendering
+11. Used useMemo for performance optimization on data transformations
+12. Configurable props: height, timeWindowMinutes, showTimeSelector, showCurrentValue, showZoneLines, title, updateInterval, onTimeWindowChange
+13. Created comprehensive test suite with 24 tests covering all component behavior
+14. Exported component and types from src/components/index.ts
+15. All 24 tests pass
 
 **Files created/modified**:
-- src/components/ThetaGaugeDisplay.tsx (created - 377 lines)
-- __tests__/ThetaGaugeDisplay.test.tsx (created - 408 lines, 54 tests)
-- src/components/index.ts (modified - added ThetaGaugeDisplay export)
-- __mocks__/react-native.ts (modified - added Easing mock, improved testID handling)
+- src/components/ThetaTimeSeriesChart.tsx (created - 387 lines)
+- src/components/index.ts (modified - added ThetaTimeSeriesChart export)
+- __tests__/ThetaTimeSeriesChart.test.tsx (created - 24 comprehensive tests)
 
 **Component features**:
-- Circular gauge with 270-degree arc (-135° to +135°)
-- Four color-coded zone segments using View borders
-- Animated needle with configurable duration (default 500ms)
-- Center dot matching current zone color
-- Zone labels positioned around gauge perimeter
-- Value display with 2 decimal precision
-- Dynamic zone label text (Below Target, Approaching, Optimal, High Theta)
-- Full dark theme integration
-- Responsive sizing based on size prop
+- TimeSeriesDataPoint interface: { x: number (seconds), y: number (z-score) }
+- TimeWindowMinutes type: 1 | 2 | 3 | 5
+- Real-time data collection when session is running
+- Throttled updates based on updateInterval prop (default 500ms)
+- Rolling data buffer (max 600 points for 5 minutes at 2Hz)
+- Automatic domain calculation with padding
+- X-axis formatted as MM:SS time labels
+- Y-axis shows z-score values
+- Grid lines with dashed styling
+- Area fill under the line with transparency
+- Responsive width calculation based on screen dimensions
+- Dark theme integration using Colors from theme.ts
 
-**Props interface**:
-```typescript
-interface ThetaGaugeDisplayProps {
-  value?: number | null;       // Current theta z-score
-  minValue?: number;           // Gauge minimum (default: -1)
-  maxValue?: number;           // Gauge maximum (default: 2)
-  size?: number;               // Gauge size in pixels (default: 200)
-  showLabel?: boolean;         // Show title (default: true)
-  title?: string;              // Title text (default: "Theta Level")
-  animated?: boolean;          // Animate needle (default: true)
-  animationDuration?: number;  // Animation ms (default: 500)
-  showZoneLabels?: boolean;    // Show zone labels (default: true)
-  showValue?: boolean;         // Show value text (default: true)
-  testID?: string;             // Test ID (default: "theta-gauge-display")
-}
-```
+**Props**:
+- height: number (default 200) - Chart height in pixels
+- timeWindowMinutes: 1 | 2 | 3 | 5 (default 1) - Time window to display
+- showTimeSelector: boolean (default true) - Show time window buttons
+- showCurrentValue: boolean (default true) - Show current z-score in header
+- showZoneLines: boolean (default true) - Show zone reference lines
+- title: string (default "Theta Z-Score") - Chart title
+- updateInterval: number (default 500) - Update throttle in ms
+- onTimeWindowChange: callback - Called when user changes time window
 
-**Test coverage**:
-- Basic rendering (8 tests)
-- Color-coded zones (5 tests)
-- Value display (8 tests)
-- Zone color mapping (5 tests)
-- Boundary values (6 tests)
-- Size configuration (3 tests)
-- Min/max value configuration (4 tests)
-- Animation configuration (3 tests)
-- Component export (2 tests)
-- Edge cases (6 tests)
-- Accessibility (2 tests)
-- Props interface (3 tests)
+**Test coverage**: 24 tests covering:
+- Rendering (4 tests) - default title, custom title, empty state
+- Props (6 tests) - all configurable props
+- Time Selector (2 tests) - selector visibility and interaction
+- Component Structure (2 tests) - container elements, all props combined
+- Type Exports (2 tests) - TimeSeriesDataPoint, TimeWindowMinutes
+- Integration (3 tests) - SessionProvider, no throw, all props
+- Accessibility (3 tests) - readable text, title, subtext
+- Default Values (3 tests) - default props, title, empty state
 
-**Next steps**: Continue with Phase 7 Active Session Screen tasks (ThetaNumericDisplay, ThetaTimeSeriesChart, etc.)
+**Next steps**: Continue with remaining Active Session Screen components (ThetaNumericDisplay, ThetaGaugeDisplay, etc.)
 
