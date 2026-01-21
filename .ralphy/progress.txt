@@ -398,88 +398,65 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Implement frequency ratio artifact detection (30-50 Hz vs 4-30 Hz ratio >2.0)
+### Task: Create OnboardingScreen with swipeable tour (3 screens)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created src/utils/signalProcessing.ts with comprehensive signal processing utilities
-2. Implemented FFT-based frequency analysis using a radix-2 Cooley-Tukey algorithm
-3. Defined FrequencyBands constants for EEG frequency bands (delta, theta, alpha, beta, gamma)
-4. Implemented core signal processing functions:
-   - fft(): Fast Fourier Transform for real-valued signals
-   - computePowerSpectrum(): Calculate power from FFT results
-   - getFrequencyBins(): Map FFT bins to frequency values in Hz
-   - calculateBandPower(): Calculate mean power in a specific frequency band
-5. Implemented detectFrequencyRatioArtifact() main function:
-   - Calculates ratio of high frequency (30-50 Hz) to low frequency (4-30 Hz) power
-   - Default threshold of 2.0 for artifact detection
-   - Returns FrequencyRatioResult with power values, ratio, hasArtifact flag, and threshold
-   - Handles edge cases: short signals, low sampling rates, DC offset removal
-6. Added helper functions for testing:
-   - generateSineWave(): Generate single-frequency test signals
-   - generateSyntheticEEG(): Generate multi-band EEG-like signals with controllable amplitudes
-7. Updated src/utils/index.ts to export the new module
-8. Created comprehensive test suite with 48 tests (__tests__/signal-processing.test.ts)
-9. Verified all tests pass (48 tests in signal-processing.test.ts)
-10. Ran Prettier to format code
+1. Created OnboardingScreen component at src/screens/OnboardingScreen.tsx
+2. Implemented swipeable tour with 3 screens covering:
+   - Screen 1: "Monitor Your Theta Waves" - Introduces real-time theta wave monitoring
+   - Screen 2: "Personalized Audio Entrainment" - Explains adaptive audio technology
+   - Screen 3: "Track Your Progress" - Highlights progress tracking and optimization
+3. Used FlatList with pagingEnabled for smooth horizontal swipe navigation
+4. Added pagination dots that indicate current slide and allow tapping to navigate
+5. Implemented Skip button for users who want to bypass onboarding
+6. Implemented Next button that changes to "Get Started" on the last slide
+7. Added proper accessibility labels and roles for screen readers
+8. Used theme colors (calming blues/purples) from src/constants/theme.ts
+9. Added onComplete and onSkip callback props for navigation control
+10. Exported component from src/screens/index.ts
+11. Created comprehensive test suite with 34 tests covering:
+    - File structure validation
+    - Component exports
+    - Slide content verification
+    - UI elements
+    - Accessibility features
+    - Styling and navigation functionality
+12. Updated folder-structure test to handle React Native component imports
+13. All 210 tests pass
 
 **Files created/modified**:
-- src/utils/signalProcessing.ts (created - 297 lines with FFT and artifact detection)
-- src/utils/index.ts (modified - added export for signalProcessing)
-- __tests__/signal-processing.test.ts (created - 354 lines with 48 comprehensive tests)
+- src/screens/OnboardingScreen.tsx (created - 298 lines)
+- src/screens/index.ts (modified - added OnboardingScreen export)
+- __tests__/onboarding-screen.test.ts (created - 34 comprehensive tests)
+- __tests__/folder-structure.test.ts (modified - updated import test)
 
-**Key implementation details**:
-- Frequency ratio artifact detection identifies muscle (EMG) artifacts in EEG data
-- High frequency (30-50 Hz) power dominance indicates muscle contamination
-- Ratio > 2.0 threshold based on typical EEG characteristics
-- Supports sampling rates from 100 Hz to 500+ Hz (common EEG ranges)
-- Includes DC offset removal before FFT analysis
-- Returns structured result with all relevant metrics
+**Component features**:
+- 3 onboarding slides with icons, titles, and descriptions
+- Horizontal swipeable FlatList with paging
+- Pagination dots with active state indication
+- Skip button (top right)
+- Next/Get Started button (bottom center)
+- Responsive layout using Dimensions
+- Theme-aware styling (Colors, Spacing, BorderRadius, Typography)
+- TypeScript types: OnboardingSlide interface, OnboardingScreenProps interface
 
-**Algorithm**:
-1. Remove DC offset (mean) from signal
-2. Compute FFT using radix-2 Cooley-Tukey algorithm
-3. Calculate power spectrum (|FFT|²)
-4. Calculate mean power in low frequency band (4-30 Hz)
-5. Calculate mean power in high frequency band (30-50 Hz)
-6. Compute ratio = highFrequencyPower / lowFrequencyPower
-7. Flag artifact if ratio > threshold (default 2.0)
+**Props**:
+- onComplete?: () => void - Called when user completes onboarding
+- onSkip?: () => void - Called when user skips onboarding
 
-**Test coverage**:
-- FrequencyBands constants validation (7 tests)
-- FREQUENCY_RATIO_ARTIFACT_THRESHOLD validation (1 test)
-- generateSineWave function (3 tests)
-- generateSyntheticEEG function (3 tests)
-- FFT implementation (4 tests)
-- computePowerSpectrum function (2 tests)
-- getFrequencyBins function (4 tests)
-- calculateBandPower function (3 tests)
-- detectFrequencyRatioArtifact main function (14 tests)
-- Edge cases (5 tests)
-- FrequencyRatioResult interface (1 test)
-- Integration with SignalQuality type (1 test)
+**Test coverage**: 34 test cases covering:
+- File structure (2 tests)
+- Component exports (3 tests)
+- Screen index exports (2 tests)
+- Slide content (4 tests)
+- Component props (2 tests)
+- UI elements (5 tests)
+- Accessibility (3 tests)
+- Styling (4 tests)
+- Navigation functionality (6 tests)
+- TypeScript types (3 tests)
 
-**Usage example**:
-```typescript
-import { detectFrequencyRatioArtifact } from './utils/signalProcessing';
-
-const eegData = [...]; // EEG samples at 200 Hz
-const result = detectFrequencyRatioArtifact(eegData, 200);
-
-if (result.hasArtifact) {
-  console.log(`Muscle artifact detected! Ratio: ${result.ratio.toFixed(2)}`);
-}
-
-// Use with SignalQuality interface
-const signalQuality: SignalQuality = {
-  score: 85,
-  artifact_percentage: 5,
-  has_amplitude_artifact: false,
-  has_gradient_artifact: false,
-  has_frequency_artifact: result.hasArtifact,
-};
-```
-
-**Next steps**: Continue with remaining signal processing and artifact detection tasks
+**Next steps**: Create DevicePairingScreen for BLE device setup as per Phase 5 task
 
