@@ -398,76 +398,58 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create theta (4-8 Hz), alpha (8-13 Hz), and beta (13-30 Hz) band power extraction
+### Task: Create ActiveSessionScreen placeholder with basic layout
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created comprehensive band power extraction module in src/utils/bandPower.ts
-2. Defined FrequencyBands constant with standard EEG frequency band definitions:
-   - Theta: 4-8 Hz (associated with deep relaxation, creativity, flow states)
-   - Alpha: 8-13 Hz (associated with relaxed awareness, calm focus)
-   - Beta: 13-30 Hz (associated with active thinking, concentration)
-3. Implemented core band power extraction functions:
-   - extractBandPower: Generic function using trapezoidal integration
-   - extractNamedBandPower: Extract power by band name
-   - extractThetaPower: Extract theta band power
-   - extractAlphaPower: Extract alpha band power
-   - extractBetaPower: Extract beta band power
-   - extractAllBandPowers: Extract all three bands in a single pass
-4. Implemented relative power calculation:
-   - extractRelativeBandPowers: Calculate power as percentage of total with band ratios
-5. Implemented peak frequency detection:
-   - findPeakFrequency: Find peak within any frequency range
-   - findPeakThetaFrequency: Find peak theta frequency for personalized entrainment
-6. Implemented power spectrum computation:
-   - computePowerSpectrum: Compute power spectrum using DFT with Hanning window
-   - applyHanningWindow: Apply Hanning window to reduce spectral leakage
-   - computeBandPowerFromSamples: Convenience function for raw EEG data
-7. Implemented statistical functions for baseline calibration:
-   - calculateMeanBandPower: Calculate mean across multiple epochs
-   - calculateStdBandPower: Calculate standard deviation for z-score normalization
-8. Created comprehensive TypeScript interfaces:
-   - BandPowerResult: Contains theta, alpha, beta, and total power
-   - RelativeBandPowerResult: Relative powers and band ratios
-   - PowerSpectrumPoint: Frequency-power pairs
-   - FrequencyBandName: Type for band names
-9. Updated src/utils/index.ts to export the new module
-10. Created comprehensive test suite with 42 tests (__tests__/band-power.test.ts)
-11. All tests passing, linting clean
+1. Created ActiveSessionScreen.tsx component in src/screens/ with complete TypeScript implementation
+2. Implemented basic layout structure with ScrollView container and multiple sections:
+   - Header status bar showing device connection and signal quality status
+   - Session timer card displaying elapsed time in MM:SS format
+   - Theta Z-Score display card with color-coded zone indicator (Optimal/Good/Below Target)
+   - Signal quality card showing overall score and artifact percentage
+   - Session control buttons (Start/Pause and Stop)
+   - Session info card showing state, visualization mode, and device name
+3. Integrated with existing contexts (useSession, useDevice) for state management
+4. Applied dark theme styling using Colors, Spacing, BorderRadius, Typography, and Shadows from theme.ts
+5. Added accessibility labels and roles to control buttons
+6. Created helper functions for time formatting, signal quality colors, and theta zone determination
+7. Exported ActiveSessionScreen from src/screens/index.ts
+8. Created comprehensive test suite with 14 tests covering rendering and accessibility (__tests__/ActiveSessionScreen.test.tsx)
 
 **Files created/modified**:
-- src/utils/bandPower.ts (created - 400+ lines with complete band power extraction implementation)
-- src/utils/index.ts (modified - added bandPower export)
-- __tests__/band-power.test.ts (created - 42 comprehensive test cases)
+- src/screens/ActiveSessionScreen.tsx (created - 278 lines)
+- src/screens/index.ts (modified - added ActiveSessionScreen export)
+- __tests__/ActiveSessionScreen.test.tsx (created - 115 lines with 14 test cases)
 
-**Key features**:
-- Trapezoidal integration for accurate band power calculation
-- Support for both headband (500 Hz) and earpiece (250 Hz) sampling rates
-- Hanning window for reduced spectral leakage
-- Statistical functions for baseline calibration (mean, std)
-- Peak frequency detection for personalized entrainment
-- Relative power and ratio calculations for brain state assessment
-- Full TypeScript support with comprehensive type definitions
+**Component structure**:
+- Status bar: Connection indicator + Signal quality indicator
+- Timer card: Session Time label, MM:SS display, session type
+- Theta card: Z-Score value (color-coded), zone badge, target hint
+- Signal card: Overall score, artifact percentage
+- Controls: Start/Pause button, Stop button (styled with theme colors)
+- Info card: Session state, visualization mode, device name
 
-**Test coverage**: 42 tests covering:
-- FrequencyBands constant (3 tests)
-- calculateFrequencyResolution (2 tests)
-- extractBandPower (6 tests)
-- extractNamedBandPower (3 tests)
-- extractThetaPower (2 tests)
-- extractAlphaPower (1 test)
-- extractBetaPower (1 test)
-- extractAllBandPowers (2 tests)
-- extractRelativeBandPowers (3 tests)
-- findPeakFrequency (3 tests)
-- findPeakThetaFrequency (1 test)
-- applyHanningWindow (2 tests)
-- computePowerSpectrum (4 tests)
-- computeBandPowerFromSamples (2 tests)
-- calculateMeanBandPower (2 tests)
-- calculateStdBandPower (3 tests)
-- Integration tests (2 tests)
+**Styling applied**:
+- Container: Colors.background.primary (#0F1419)
+- Cards: Colors.surface.primary (#1E2433) with BorderRadius.xl and Shadows.md
+- Text: Colors.text.primary/secondary/tertiary for proper hierarchy
+- Status indicators: Colors.signal and Colors.status for color-coded feedback
+- Buttons: Colors.primary.main, Colors.secondary.main, Colors.accent.error
 
-**Next steps**: Implement z-score normalization function using baseline mean and std as per Phase 4 task 5
+**Test coverage**:
+- Basic rendering (1 test)
+- Timer section display (2 tests)
+- Theta z-score section (4 tests)
+- Signal quality section (1 test)
+- Session info section (3 tests)
+- Control buttons (1 test)
+- Accessibility (2 tests)
+
+**Context integration**:
+- useSession: sessionState, currentThetaZScore, elapsedSeconds, sessionConfig, visualizationMode
+- useDevice: deviceInfo, signalQuality
+
+**Next steps**: Continue with remaining Phase 3 tasks
 
