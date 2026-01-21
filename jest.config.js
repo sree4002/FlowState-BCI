@@ -13,7 +13,7 @@ module.exports = {
     ],
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(expo-sqlite|react-native|@react-native|@testing-library/react-native)/)',
+    'node_modules/(?!(expo-sqlite|react-native|@react-native|@react-navigation)/)',
   ],
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
@@ -32,6 +32,7 @@ module.exports = {
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.ts',
     '^react-native$': '<rootDir>/__mocks__/react-native.ts',
   },
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testTimeout: 10000,
   maxWorkers: 1,
 };

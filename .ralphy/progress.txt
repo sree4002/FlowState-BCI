@@ -398,94 +398,55 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Implement BLE data packet parsing for EEG samples (500Hz headband, 250Hz earpiece)
+### Task: Create CalibrateButton component linking to calibration flow
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created comprehensive BLE packet parser module in src/services/BlePacketParser.ts (580+ lines)
-2. Designed packet format specification with header, metadata, interleaved samples, and CRC-16 checksum
-3. Implemented device-specific parsing for 500Hz headband (4 channels) and 250Hz earpiece (2 channels)
-4. Created packet format constants (PACKET_HEADER, device types, sampling rates, channel configs)
-5. Implemented CRC-16/CCITT-FALSE checksum calculation with lookup table for fast validation
-6. Created packet validation functions: validateHeader(), validateCRC(), parseMetadata(), parseChannelSamples()
-7. Implemented main parsePacket() function with comprehensive error handling and ParseResult type
-8. Created ParserState management for tracking sequence numbers and detecting dropped packets
-9. Implemented signal quality calculation with artifact detection (amplitude, gradient, flatline)
-10. Created BlePacketParser class with callbacks (onPacketParsed, onPacketError, onSignalQuality)
-11. Added mock packet generation for testing (createMockPacket) with simulated EEG waveforms
-12. Created helper function getDeviceInfoFromMetadata() to populate DeviceInfo from parsed metadata
-13. Extended src/types/index.ts with EEGMultiChannelPacket interface for channel-separated data
-14. Updated src/services/index.ts to export BlePacketParser module
-15. Created comprehensive test suite with 60 test cases covering all parsing functionality
-16. Verified all tests pass (60 tests across ble-packet-parser test suite)
-17. Verified linting passes with no errors or warnings
+1. Created CalibrateButton component in src/components/CalibrateButton.tsx
+2. Component provides a styled button for initiating the calibration flow
+3. Supports two variants: 'primary' (accent colors) and 'secondary' (subtle)
+4. Supports three sizes: 'sm', 'md', 'lg' with appropriate padding and min-width
+5. Includes proper accessibility support (accessibilityLabel, accessibilityRole, accessibilityState)
+6. Uses design tokens from theme.ts (Colors, Spacing, BorderRadius, Typography, Shadows)
+7. Properly handles disabled state with reduced opacity and disabled styling
+8. Updated src/components/index.ts to export CalibrateButton and CalibrateButtonProps
+9. Created comprehensive test suite with 19 tests covering all functionality
+10. Updated Jest configuration to support React Native component testing
+11. Created React Native mock at __mocks__/react-native.ts for testing
+12. Updated jest.setup.js to use CommonJS require syntax
+13. All 195 tests pass across 10 test suites
+14. ESLint passes with no errors or warnings
 
 **Files created/modified**:
-- src/services/BlePacketParser.ts (created - 580+ lines with complete packet parsing implementation)
-- src/services/index.ts (modified - added BlePacketParser export)
-- src/types/index.ts (modified - added EEGMultiChannelPacket interface)
-- __tests__/ble-packet-parser.test.ts (created - 700+ lines with 60 comprehensive tests)
+- src/components/CalibrateButton.tsx (created - 137 lines)
+- src/components/index.ts (modified - added CalibrateButton export)
+- __tests__/CalibrateButton.test.tsx (created - 19 comprehensive tests)
+- __mocks__/react-native.ts (created - mock for testing)
+- jest.config.js (modified - added React Native mock mapping)
+- jest.setup.js (modified - changed import to require)
 
-**Packet format specification**:
-```
-┌─────────────┬──────────┬────────────────────────────────────────────┬──────────┐
-│ Header (2B) │ Meta (6B)│ Samples (variable)                         │ CRC (2B) │
-├─────────────┼──────────┼────────────────────────────────────────────┼──────────┤
-│ 0xAA 0x55   │ See below│ Int16 samples per channel, interleaved     │ CRC16    │
-└─────────────┴──────────┴────────────────────────────────────────────┴──────────┘
+**Component features**:
+- Props:
+  - onPress: () => void - Required callback when button is pressed
+  - disabled?: boolean - Optional disabled state
+  - variant?: 'primary' | 'secondary' - Visual variant (default: 'primary')
+  - size?: 'sm' | 'md' | 'lg' - Button size (default: 'md')
+  - label?: string - Button label (default: 'Calibrate')
+  - testID?: string - Test identifier (default: 'calibrate-button')
+- Uses theme constants for consistent styling
+- Includes shadow effects for depth
+- Fully accessible with proper ARIA attributes
 
-Meta bytes:
-- Byte 0: Device type (0x01 = headband, 0x02 = earpiece)
-- Byte 1: Channel count
-- Byte 2-3: Sequence number (uint16, little-endian)
-- Byte 4-5: Samples per channel in this packet (uint16, little-endian)
-```
+**Test coverage**:
+- Rendering tests (3 tests)
+- Variant tests (2 tests)
+- Size tests (3 tests)
+- Interaction tests (2 tests)
+- Disabled state tests (1 test)
+- Accessibility tests (4 tests)
+- Props combination tests (2 tests)
+- Component file structure tests (2 tests)
 
-**Device specifications**:
-- Headband: 500Hz sampling rate, 4 channels (frontal and temporal electrodes)
-- Earpiece: 250Hz sampling rate, 2 channels (in-ear electrodes)
-- ADC resolution: 16-bit signed (-32768 to 32767)
-- Microvolts conversion: ±200µV full scale
-
-**Key features implemented**:
-- CRC-16/CCITT-FALSE checksum with fast lookup table
-- Header byte validation (0xAA 0x55 sync pattern)
-- Device type auto-detection from packet metadata
-- Interleaved sample parsing (Ch0_S0, Ch1_S0, ... Ch0_S1, Ch1_S1, ...)
-- ADC to microvolt conversion (MICROVOLTS_PER_UNIT constant)
-- Sequence number tracking with wrap-around handling (16-bit)
-- Dropped packet detection and statistics
-- Signal quality scoring (0-100) with artifact percentage
-- Amplitude artifact detection (>150µV threshold)
-- Gradient artifact detection (>50µV/sample sudden changes)
-- Flatline/frequency artifact detection (no signal variation)
-- Mock packet generation with simulated theta (6Hz) and alpha (10Hz) waves
-- BlePacketParser class with callback-based event handling
-- Parser state reset for device switching
-- Comprehensive error messages for debugging
-
-**Types exported**:
-- PacketMetadata: Parsed header metadata (device type, channels, sequence, samples)
-- RawParsedPacket: Complete parsed data before EEGDataPacket conversion
-- ParseResult: Success/failure result with packet, metadata, channel data, or error
-- ParserState: Sequence tracking and dropped packet statistics
-
-**Test coverage** (60 tests):
-- Constants validation (5 tests)
-- CRC calculation (3 tests)
-- Header validation (5 tests)
-- CRC validation (4 tests)
-- Metadata parsing (5 tests)
-- Channel sample parsing (4 tests)
-- Full packet parsing (7 tests)
-- Parser state management (5 tests)
-- Signal quality calculation (6 tests)
-- Mock packet creation (3 tests)
-- Device info from metadata (2 tests)
-- BlePacketParser class (6 tests)
-- Sampling rate integration (2 tests)
-- Edge cases (3 tests)
-
-**Next steps**: Create BLE service class with device scanning and connection management as per Phase 3 task 2
+**Next steps**: Continue with other Phase 2 or Phase 3 tasks as needed
 
