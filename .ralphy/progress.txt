@@ -398,72 +398,93 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create SQLite database schema for sessions table
+### Task: Implement Welch's periodogram for power spectrum estimation (2-4 second windows)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Added SessionType type alias for valid session types ('calibration', 'quick_boost', 'custom', 'scheduled', 'sham')
-2. Implemented createSessionsTable function with 13 columns matching the spec
-3. Created SessionRecord TypeScript interface matching database schema
-4. Implemented complete CRUD operations for sessions table:
-   - insertSession: Insert new session record
-   - getLatestSession: Retrieve most recent session by start_time
-   - getAllSessions: Get all sessions ordered by start_time (newest first)
-   - getSessionById: Retrieve session by ID
-   - getSessionsByType: Retrieve sessions filtered by session_type
-   - updateSession: Update existing session (supports partial updates)
-   - deleteSession: Delete session by ID
-   - deleteAllSessions: Clear all sessions
-   - getSessionsCount: Get count of sessions
-5. Updated initializeDatabase to create sessions table
-6. Updated dropAllTables to drop sessions table
-7. Created comprehensive test suite with 29 test cases (__tests__/database-sessions.test.ts)
-8. Updated expo-sqlite mock to support sessions table PRAGMA and WHERE session_type queries
-9. Verified all tests pass (205 tests passing across 10 test suites)
+1. Created src/services/signalProcessing.ts with complete Welch's periodogram implementation
+2. Implemented TypeScript interfaces:
+   - WelchConfig: Configuration parameters (samplingRate, windowSizeSeconds, overlapRatio, windowFunction)
+   - WelchResult: Output containing frequencies, PSD, frequencyResolution, segmentCount
+   - BandPower: Band power metrics (absolutePower, relativePower, peakFrequency, peakPower)
+   - EEGBandPowers: Combined theta, alpha, beta band powers
+3. Implemented window functions:
+   - hannWindow(): Hann window for spectral leakage reduction
+   - hammingWindow(): Hamming window alternative
+   - rectangularWindow(): No tapering (all ones)
+   - getWindowFunction(): Factory function for window selection
+   - windowPower(): Calculate window normalization factor
+4. Implemented FFT using Cooley-Tukey algorithm:
+   - fft(): In-place radix-2 decimation-in-time FFT
+   - rfft(): Real FFT returning positive frequencies only
+   - computePowerSpectrum(): Magnitude squared from FFT result
+   - rfftFrequencies(): Generate frequency bin array
+5. Implemented Welch's periodogram algorithm:
+   - welchPeriodogram(): Main function with configurable window size (2-4 seconds), overlap ratio (default 50%), and window function
+   - Supports 500 Hz headband and 250 Hz earpiece sampling rates
+   - Proper PSD normalization for one-sided spectrum
+6. Implemented band power extraction:
+   - extractBandPower(): Extract power for any frequency range
+   - extractThetaPower(): Theta band (4-8 Hz)
+   - extractAlphaPower(): Alpha band (8-13 Hz)
+   - extractBetaPower(): Beta band (13-30 Hz)
+   - extractAllBandPowers(): All three bands at once
+7. Implemented test signal generation utilities:
+   - generateSineWave(): Pure sine wave for testing
+   - generateSyntheticEEG(): Multi-band EEG-like signal with configurable power ratios
+8. Created comprehensive test suite with 55 tests covering all functions
+9. Updated src/services/index.ts to export signalProcessing module
+10. Verified all 231 tests pass across 10 test suites
+11. Verified linting passes with no errors or warnings
 
 **Files created/modified**:
-- src/services/database.ts (modified - added 188 lines for sessions table implementation)
-- __tests__/database-sessions.test.ts (created - 29 comprehensive test cases)
-- __mocks__/expo-sqlite.ts (modified - added sessions table PRAGMA support and session_type filter)
+- src/services/signalProcessing.ts (created - 571 lines with complete implementation)
+- src/services/index.ts (modified - added signalProcessing export)
+- __tests__/signal-processing.test.ts (created - 634 lines with 55 comprehensive tests)
 
-**Database schema details**:
-- Table: sessions
-- Columns:
-  - id: INTEGER PRIMARY KEY AUTOINCREMENT
-  - session_type: TEXT NOT NULL CHECK constraint (calibration, quick_boost, custom, scheduled, sham)
-  - start_time: INTEGER NOT NULL (Unix timestamp when session started)
-  - end_time: INTEGER NOT NULL (Unix timestamp when session ended)
-  - duration_seconds: INTEGER NOT NULL (session duration in seconds)
-  - avg_theta_zscore: REAL NOT NULL (average theta z-score during session)
-  - max_theta_zscore: REAL NOT NULL (maximum theta z-score achieved)
-  - entrainment_freq: REAL NOT NULL (entrainment frequency used in Hz)
-  - volume: REAL NOT NULL (audio volume level 0-1)
-  - signal_quality_avg: REAL NOT NULL (average signal quality score)
-  - subjective_rating: INTEGER (optional user rating 1-5)
-  - notes: TEXT (optional user notes)
-  - created_at: INTEGER DEFAULT (strftime('%s', 'now')) (record creation timestamp)
+**Implementation details**:
 
-**CRUD operations implemented**:
-- Create: insertSession() - returns auto-increment ID
-- Read: getLatestSession(), getAllSessions(), getSessionById(), getSessionsByType()
-- Update: updateSession() - supports partial updates of any field
-- Delete: deleteSession(), deleteAllSessions()
-- Utility: getSessionsCount()
+Window Functions:
+- Hann window: 0.5 * (1 - cos(2π * n / (N-1))) - reduces spectral leakage
+- Hamming window: 0.54 - 0.46 * cos(2π * n / (N-1)) - non-zero endpoints
+- Window power calculation for proper PSD normalization
 
-**Test coverage**: 29 test cases covering:
-- Database initialization (2 tests)
-- Table schema validation (2 tests)
-- Insert operations (4 tests)
-- Get latest session (2 tests)
-- Get all sessions (2 tests)
-- Get session by ID (2 tests)
-- Get sessions by type (2 tests)
-- Update operations (4 tests)
-- Delete operations (2 tests)
-- Delete all sessions (1 test)
-- Count operations (3 tests)
-- Data integrity (3 tests)
+FFT Implementation:
+- Cooley-Tukey radix-2 decimation-in-time algorithm
+- Bit reversal permutation for in-place computation
+- Butterfly operations with twiddle factors
+- Real FFT optimization (returns N/2 + 1 positive frequencies)
 
-**Next steps**: Create SQLite database schema for circadian_patterns table as per Phase 2 task 3
+Welch's Periodogram:
+- Configurable window size: 2-4 seconds for EEG analysis
+- Default 50% overlap for variance reduction
+- Zero-padding to next power of 2 for efficient FFT
+- Proper scaling: 2/(fs * U * K) where U = window power, K = segment count
+- One-sided spectrum with correct DC and Nyquist handling
+
+Band Power Extraction:
+- Trapezoidal integration for accurate power estimation
+- Relative power calculation (band / total)
+- Peak frequency detection within band
+- Standard EEG bands: theta (4-8 Hz), alpha (8-13 Hz), beta (13-30 Hz)
+
+**Test coverage**: 55 test cases covering:
+- Window Functions (14 tests): Hann, Hamming, rectangular windows, symmetry, power calculation
+- Utility Functions (6 tests): nextPowerOf2, zeroPad edge cases
+- FFT Functions (8 tests): Error handling, DC signal, single frequency detection
+- Welch's Periodogram (6 tests): Valid input, error on short data, peak detection, window/overlap variations
+- Band Power Extraction (7 tests): Frequency ranges, peak detection, relative power
+- Test Signal Generation (6 tests): Sample count, amplitude, frequency accuracy
+- TypeScript Types (3 tests): Interface validation
+- Integration Tests (5 tests): 2s/4s windows at 500Hz, 250Hz earpiece rate, mixed signals
+
+**Algorithm configuration for EEG**:
+- Default sampling rate: 500 Hz (headband), also supports 250 Hz (earpiece)
+- Default window size: 2 seconds (1000 samples at 500 Hz)
+- NFFT: 1024 (next power of 2) giving ~0.49 Hz frequency resolution
+- 4 second window: NFFT = 2048 giving ~0.24 Hz frequency resolution
+- 50% overlap reduces variance while maintaining efficiency
+
+**Next steps**: Create theta (4-8 Hz), alpha (8-13 Hz), and beta (13-30 Hz) band power extraction as per Phase 4 task 39
 
