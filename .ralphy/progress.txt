@@ -397,3 +397,86 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create Butterworth bandpass filter (0.5-50 Hz) using typed arrays
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created src/services/signalProcessing.ts with comprehensive Butterworth bandpass filter implementation
+2. Implemented filter coefficient calculation using analog prototype design with bilinear transform
+3. Used Float64Array typed arrays throughout for high-precision signal processing
+4. Implemented key mathematical functions:
+   - butterworthPoles: Analog lowpass prototype pole calculation
+   - lowpassToBandpass: Frequency transformation for bandpass response
+   - bilinearTransform: Analog-to-digital conversion
+   - prewarpFrequency: Frequency prewarping for accurate cutoff mapping
+   - expandPolesReal: Polynomial expansion from poles to coefficients
+5. Implemented filtering functions:
+   - designButterworthBandpass: Calculate filter coefficients for given config
+   - createFilterState: Initialize filter state for streaming processing
+   - applyFilter: Apply IIR filter using Direct Form I implementation
+   - applyZeroPhaseFilter: Forward-backward filtering for zero phase distortion
+6. Created high-level convenience functions:
+   - filterEEG: One-liner to filter EEG data with default 0.5-50 Hz bandpass
+   - createEEGBandpassFilter: Factory for reusable streaming filter
+   - toFloat64Array/toNumberArray: Conversion utilities
+7. Implemented ButterworthBandpassFilter class for stateful streaming processing
+8. Added comprehensive input validation (cutoff frequencies, Nyquist limit, filter order)
+9. Exported DEFAULT_BANDPASS_CONFIG with EEG-appropriate defaults (0.5-50 Hz, order 4)
+10. Updated src/services/index.ts to export signalProcessing module
+11. Created comprehensive test suite with 40 test cases (__tests__/butterworth-filter.test.ts)
+12. Verified all tests pass (216 tests passing across 10 test suites)
+13. Verified linting passes with no errors or warnings
+
+**Files created/modified**:
+- src/services/signalProcessing.ts (created - 470 lines with complete filter implementation)
+- src/services/index.ts (modified - added signalProcessing export)
+- __tests__/butterworth-filter.test.ts (created - 700+ lines with 40 comprehensive tests)
+
+**Implementation details**:
+- Filter design: Butterworth IIR bandpass using bilinear transform method
+- Default passband: 0.5-50 Hz (captures all EEG bands while removing DC and line noise)
+- Default order: 4 (8th order effective for bandpass, good balance of steepness vs stability)
+- Data types: Float64Array for all signal processing (64-bit double precision)
+- Streaming support: Maintains filter state between chunks for real-time processing
+- Zero-phase option: Forward-backward filtering eliminates phase distortion
+
+**Exported interfaces**:
+- FilterCoefficients: { b: Float64Array, a: Float64Array }
+- ButterworthConfig: { lowCutoff, highCutoff, sampleRate, order }
+- FilterState: { x: Float64Array, y: Float64Array }
+
+**Exported functions**:
+- designButterworthBandpass(config): Calculate filter coefficients
+- createFilterState(coefficients): Initialize filter state
+- applyFilter(input, coefficients, state): Apply filter to samples
+- applyZeroPhaseFilter(input, coefficients): Zero-phase filtering
+- filterEEG(samples, sampleRate, useZeroPhase?): High-level EEG filtering
+- createEEGBandpassFilter(sampleRate): Create streaming filter instance
+- toFloat64Array(input): Convert number[] to Float64Array
+- toNumberArray(input): Convert Float64Array to number[]
+
+**Exported class**:
+- ButterworthBandpassFilter: Stateful filter for streaming processing
+  - constructor(config): Initialize with configuration
+  - getConfig(): Get filter configuration
+  - getCoefficients(): Get filter coefficients
+  - process(samples): Filter chunk of samples
+  - reset(): Reset filter state
+
+**Test coverage (40 tests)**:
+- DEFAULT_BANDPASS_CONFIG validation (1 test)
+- designButterworthBandpass (9 tests): coefficient validation, error handling
+- createFilterState (2 tests): state initialization
+- applyFilter (5 tests): output format, state maintenance, frequency response
+- applyZeroPhaseFilter (3 tests): symmetry, attenuation characteristics
+- toFloat64Array/toNumberArray (4 tests): conversion utilities
+- filterEEG (5 tests): high-level function, DC removal, noise filtering
+- ButterworthBandpassFilter class (6 tests): construction, processing, reset
+- createEEGBandpassFilter (2 tests): factory function
+- Filter frequency response (3 tests): passband, stopband verification
+- Integration with EEG workflow (2 tests): typical data packets, streaming
+
+**Next steps**: Implement Welch's periodogram (2-4 second windows) as per Phase 4 task 3
+
