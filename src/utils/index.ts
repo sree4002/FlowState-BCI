@@ -1,2 +1,13 @@
 // Utils exports
-export * from './signalProcessing';
+export {
+  calculateSignalQualityScore,
+  calculateSignalQuality,
+  calculateArtifactPercentage,
+  detectAmplitudeArtifact,
+  detectGradientArtifact,
+  getQualityCategory,
+  isQualitySufficientForCalibration,
+  shouldPromptRecalibration,
+  ARTIFACT_THRESHOLDS,
+  QUALITY_THRESHOLDS,
+} from './signalQuality';

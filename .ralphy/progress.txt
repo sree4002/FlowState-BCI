@@ -398,65 +398,69 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create OnboardingScreen with swipeable tour (3 screens)
+### Task: Create signal quality score calculator (0-100 based on artifact percentage)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created OnboardingScreen component at src/screens/OnboardingScreen.tsx
-2. Implemented swipeable tour with 3 screens covering:
-   - Screen 1: "Monitor Your Theta Waves" - Introduces real-time theta wave monitoring
-   - Screen 2: "Personalized Audio Entrainment" - Explains adaptive audio technology
-   - Screen 3: "Track Your Progress" - Highlights progress tracking and optimization
-3. Used FlatList with pagingEnabled for smooth horizontal swipe navigation
-4. Added pagination dots that indicate current slide and allow tapping to navigate
-5. Implemented Skip button for users who want to bypass onboarding
-6. Implemented Next button that changes to "Get Started" on the last slide
-7. Added proper accessibility labels and roles for screen readers
-8. Used theme colors (calming blues/purples) from src/constants/theme.ts
-9. Added onComplete and onSkip callback props for navigation control
-10. Exported component from src/screens/index.ts
-11. Created comprehensive test suite with 34 tests covering:
-    - File structure validation
-    - Component exports
-    - Slide content verification
-    - UI elements
-    - Accessibility features
-    - Styling and navigation functionality
-12. Updated folder-structure test to handle React Native component imports
-13. All 210 tests pass
+1. Created src/utils/signalQuality.ts with comprehensive signal quality calculation functions
+2. Implemented calculateSignalQualityScore() - converts artifact percentage (0-100) to quality score (0-100) via inverse relationship
+3. Implemented detectAmplitudeArtifact() - detects samples exceeding ±100 µV amplitude threshold
+4. Implemented detectGradientArtifact() - detects sample-to-sample changes exceeding 50 µV/sample
+5. Implemented calculateArtifactPercentage() - calculates percentage of samples with artifacts
+6. Implemented calculateSignalQuality() - creates complete SignalQuality object from EEG samples
+7. Implemented getQualityCategory() - returns quality category (excellent/good/fair/poor/unusable)
+8. Implemented isQualitySufficientForCalibration() - checks if quality >= AUTO_PAUSE threshold (20)
+9. Implemented shouldPromptRecalibration() - checks if quality < RECALIBRATION_PROMPT threshold (50)
+10. Exported ARTIFACT_THRESHOLDS and QUALITY_THRESHOLDS constants per PRD specifications
+11. Updated src/utils/index.ts to export all signal quality functions and constants
+12. Created comprehensive test suite with 57 tests covering all functions (__tests__/signal-quality.test.ts)
+13. Tests include real-world scenarios: clean EEG signal, eye blink artifacts, muscle movement artifacts, electrode disconnection
+14. Verified all tests pass (57 tests in signal quality suite, all passing)
+15. Verified linting passes with no errors or warnings
 
 **Files created/modified**:
-- src/screens/OnboardingScreen.tsx (created - 298 lines)
-- src/screens/index.ts (modified - added OnboardingScreen export)
-- __tests__/onboarding-screen.test.ts (created - 34 comprehensive tests)
-- __tests__/folder-structure.test.ts (modified - updated import test)
+- src/utils/signalQuality.ts (created - 182 lines with complete signal quality calculator)
+- src/utils/index.ts (modified - replaced placeholder with exports for all signal quality functions)
+- __tests__/signal-quality.test.ts (created - 310 lines with 57 comprehensive test cases)
 
-**Component features**:
-- 3 onboarding slides with icons, titles, and descriptions
-- Horizontal swipeable FlatList with paging
-- Pagination dots with active state indication
-- Skip button (top right)
-- Next/Get Started button (bottom center)
-- Responsive layout using Dimensions
-- Theme-aware styling (Colors, Spacing, BorderRadius, Typography)
-- TypeScript types: OnboardingSlide interface, OnboardingScreenProps interface
+**Functions implemented**:
+- calculateSignalQualityScore(artifactPercentage: number): number
+- detectAmplitudeArtifact(samples: number[]): boolean
+- detectGradientArtifact(samples: number[]): boolean
+- calculateArtifactPercentage(samples: number[]): number
+- calculateSignalQuality(samples: number[]): SignalQuality
+- getQualityCategory(score: number): 'excellent' | 'good' | 'fair' | 'poor' | 'unusable'
+- isQualitySufficientForCalibration(score: number): boolean
+- shouldPromptRecalibration(score: number): boolean
 
-**Props**:
-- onComplete?: () => void - Called when user completes onboarding
-- onSkip?: () => void - Called when user skips onboarding
+**Constants exported**:
+- ARTIFACT_THRESHOLDS: { AMPLITUDE_UV: 100, GRADIENT_UV_PER_SAMPLE: 50, FREQUENCY_RATIO: 2.0 }
+- QUALITY_THRESHOLDS: { AUTO_PAUSE: 20, RECALIBRATION_PROMPT: 50, MINIMUM_ACCEPTABLE: 70, EXCELLENT: 90 }
 
-**Test coverage**: 34 test cases covering:
-- File structure (2 tests)
-- Component exports (3 tests)
-- Screen index exports (2 tests)
-- Slide content (4 tests)
-- Component props (2 tests)
-- UI elements (5 tests)
-- Accessibility (3 tests)
-- Styling (4 tests)
-- Navigation functionality (6 tests)
-- TypeScript types (3 tests)
+**Quality score calculation**:
+- Score = 100 - artifact_percentage
+- 0% artifacts = 100 score (perfect signal)
+- 100% artifacts = 0 score (unusable signal)
+- Scores rounded to 2 decimal places
 
-**Next steps**: Create DevicePairingScreen for BLE device setup as per Phase 5 task
+**Artifact detection thresholds (per PRD)**:
+- Amplitude: ±100 µV (samples exceeding this are flagged)
+- Gradient: >50 µV per sample (sudden changes flagged)
+- Frequency ratio: 2.0 (30-50 Hz vs 4-30 Hz, not yet implemented - set to false)
+
+**Test coverage**: 57 test cases covering:
+- calculateSignalQualityScore: 9 tests (edge cases, decimals, errors)
+- detectAmplitudeArtifact: 7 tests (thresholds, edge cases)
+- detectGradientArtifact: 8 tests (gradients, thresholds)
+- calculateArtifactPercentage: 6 tests (counting, edge cases)
+- calculateSignalQuality: 5 tests (full quality object creation)
+- getQualityCategory: 5 tests (all categories)
+- isQualitySufficientForCalibration: 3 tests
+- shouldPromptRecalibration: 3 tests
+- ARTIFACT_THRESHOLDS: 3 tests (constant validation)
+- QUALITY_THRESHOLDS: 4 tests (constant validation)
+- Integration scenarios: 4 tests (realistic EEG signals)
+
+**Next steps**: Phase 4 signal processing tasks continue
 
