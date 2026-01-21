@@ -32,6 +32,10 @@ module.exports = {
   moduleNameMapper: {
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.ts',
     '^react-native$': '<rootDir>/__mocks__/react-native.ts',
+    '^react-native-safe-area-context$': '<rootDir>/__mocks__/react-native-safe-area-context.ts',
+    '^@react-navigation/native$': '<rootDir>/__mocks__/@react-navigation/native.ts',
+    '^@react-native-community/slider$': '<rootDir>/__mocks__/@react-native-community/slider.ts',
+    '^victory-native$': '<rootDir>/__mocks__/victory-native.ts',
   },
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testTimeout: 10000,

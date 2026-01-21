@@ -460,3 +460,70 @@ Victory Native provides chart components for:
 
 **Next steps**: Continue with Phase 2 tasks
 
+
+### Task: Implement widget layout with ScrollView and proper spacing
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Updated DashboardScreen to use a proper ScrollView-based widget layout
+2. Integrated all 7 dashboard widget components:
+   - DeviceStatusWidget: Shows device connection status, battery, signal quality
+   - TodaySummaryWidget: Shows today's session count, total time, and average theta
+   - ThetaTrendWidget: Sparkline chart showing recent theta z-score trends
+   - NextSessionWidget: Circadian-aware session suggestions
+   - QuickBoostButton: One-tap 5-minute session at 6Hz
+   - CalibrateButton: Button to initiate calibration flow
+   - CustomSessionButton: Configure and start custom sessions
+3. Implemented proper spacing using theme constants (Spacing.md = 16px between sections)
+4. Added safe area handling with useSafeAreaInsets for proper bottom padding
+5. Added RefreshControl for pull-to-refresh functionality
+6. Updated components index.ts to export all widget components
+7. Created mock files for testing dependencies:
+   - react-native-safe-area-context mock
+   - @react-navigation/native mock
+   - @react-native-community/slider mock
+   - victory-native mock
+8. Updated react-native mock to properly support testID props
+9. Updated DashboardScreen tests with 28 comprehensive test cases
+10. All tests pass successfully
+
+**Files created/modified**:
+- src/screens/DashboardScreen.tsx (completely rewritten with widget layout)
+- src/components/index.ts (added exports for all widget components)
+- __tests__/DashboardScreen.test.tsx (updated with 28 tests for widget layout)
+- __mocks__/react-native.ts (updated with testID support and RefreshControl)
+- __mocks__/react-native-safe-area-context.ts (created - safe area hooks)
+- __mocks__/@react-navigation/native.ts (created - navigation hooks)
+- __mocks__/@react-native-community/slider.ts (created - slider component)
+- __mocks__/victory-native.ts (created - chart components)
+- jest.config.js (updated with new module mappings)
+
+**Widget layout structure**:
+- ScrollView container with dark background (#0F1419)
+- Horizontal padding: 16px (Spacing.md)
+- Bottom padding: safe area inset + 48px (Spacing.xxl)
+- Section margin: 16px between widgets
+- Actions section:
+  - Primary action (QuickBoostButton) centered
+  - Secondary actions row (Calibrate, Custom Session) with flex layout
+
+**Key features implemented**:
+- ScrollView with showsVerticalScrollIndicator={false} for clean UI
+- RefreshControl with primary theme color tint
+- Safe area insets integration for proper bottom padding on notched devices
+- Navigation integration (handleCalibrate → Calibration screen, handleSessionStart → Session screen)
+- Proper disabled states based on device connection and session state
+- All widgets have testID props for comprehensive testing
+
+**Test coverage**: 28 tests covering:
+- Widget Layout Structure (4 tests)
+- Widget Components rendering (7 tests)
+- Widget Content verification (7 tests)
+- Context Integration (5 tests)
+- Refresh Control (1 test)
+- ScrollView Styling (3 tests)
+- Component Export (1 test)
+
+**Next steps**: Add pull-to-refresh for updating dashboard data (Phase 6 task 9)
+
