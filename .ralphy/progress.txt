@@ -461,68 +461,68 @@ Victory Native provides chart components for:
 **Next steps**: Continue with Phase 2 tasks
 
 
-### Task: Create SessionTimer component with elapsed/total time display
+### Task: Create ThetaNumericDisplay showing current z-score value with color coding
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created src/components/SessionTimer.tsx with comprehensive time display functionality
-2. Implemented elapsed time display in MM:SS format using `elapsedSeconds` from SessionContext
-3. Implemented total session duration display based on `sessionConfig.duration_minutes`
-4. Added optional remaining time display mode via `showRemaining` prop
-5. Implemented visual progress bar with dynamic color coding based on progress percentage
-6. Created `formatTime` utility function to format seconds to MM:SS with zero-padding
-7. Created `calculateProgress` utility function to compute progress percentage (0-100)
-8. Added progress color transitions: muted blue (0-25%) → primary blue (25-50%) → yellow (50-75%) → green (75-99%) → success green (100%)
-9. Implemented two size variants: 'large' (default with percentage text) and 'compact' (minimal)
-10. Added accessibility support with `accessibilityRole="timer"` and descriptive `accessibilityLabel`
-11. Used tabular-nums font variant for stable number widths during updates
-12. Exported helper functions (formatTime, calculateProgress) for use in other components
-13. Added comprehensive testID props for all elements (container, progress bar, elapsed, total)
-14. Updated src/components/index.ts to export SessionTimer and helper functions
-15. Created comprehensive test suite with 46 tests covering all functionality
-16. All tests pass (46 tests in SessionTimer.test.tsx)
-17. Verified linting passes with no errors
+1. Created ThetaNumericDisplay component in src/components/ThetaNumericDisplay.tsx
+2. Implemented z-score color coding with 4 zones:
+   - Red (< -0.5): Low/Below target
+   - Yellow (-0.5 to 0.5): Baseline
+   - Green (0.5 to 1.5): Elevated/Good
+   - Blue (>= 1.5): High/Optimal
+3. Added getThetaZoneColor helper function that maps z-scores to Colors.status colors
+4. Added getThetaZoneLabel helper function that returns human-readable zone labels (Waiting, Low, Baseline, Elevated, Optimal)
+5. Added categorizeZScoreZone helper function that returns zone type ('low' | 'baseline' | 'elevated' | 'high')
+6. Added formatZScore helper function that formats values with sign prefix (+/-) and 2 decimal places
+7. Implemented 3 size variants (small, medium, large) with appropriate styling
+8. Component uses SessionContext by default but accepts optional value prop for testing
+9. Optional showLabel prop to display "Theta Z-Score" label
+10. Optional showZone prop to display colored zone badge with label
+11. Updated src/components/index.ts to export component and helper functions
+12. Created comprehensive test suite with 31 tests covering all functionality
+13. All tests pass (31 tests in ThetaNumericDisplay.test.tsx)
 
 **Files created/modified**:
-- src/components/SessionTimer.tsx (created - 209 lines)
-- src/components/index.ts (modified - added SessionTimer exports)
-- __tests__/SessionTimer.test.tsx (created - 46 comprehensive tests)
+- src/components/ThetaNumericDisplay.tsx (created - 190 lines)
+- src/components/index.ts (modified - added exports for ThetaNumericDisplay)
+- __tests__/ThetaNumericDisplay.test.tsx (created - 250 lines with 31 tests)
 
-**Component features**:
-- Props: `size` ('compact' | 'large'), `showRemaining` (boolean), `testID` (string)
-- Displays elapsed time from SessionContext.elapsedSeconds
-- Displays total time from SessionContext.sessionConfig.duration_minutes
-- Optional remaining time mode (total - elapsed)
-- Visual progress bar with percentage fill
-- Dynamic color coding based on progress
-- Compact mode hides percentage text
-- Large mode shows "X% complete" text
-- Full accessibility support
-- Uses theme constants (Colors, Spacing, BorderRadius, Typography, Shadows)
+**Component API**:
+```typescript
+interface ThetaNumericDisplayProps {
+  value?: number | null;      // Optional z-score value (uses context if not provided)
+  size?: 'small' | 'medium' | 'large';  // Display size variant (default: 'medium')
+  showLabel?: boolean;        // Show "Theta Z-Score" label (default: true)
+  showZone?: boolean;         // Show zone badge (default: true)
+  testID?: string;            // For testing purposes
+}
+```
 
-**Helper functions exported**:
-- formatTime(seconds: number): string - Formats seconds to MM:SS
-- calculateProgress(elapsed: number, total: number): number - Returns 0-100
+**Exported helper functions**:
+- getThetaZoneColor(zscore: number | null): string
+- getThetaZoneLabel(zscore: number | null): string
+- categorizeZScoreZone(zscore: number | null): ThetaZone | null
+- formatZScore(zscore: number | null): string
 
-**Test coverage**: 46 tests covering:
-- formatTime helper (8 tests): 0 seconds, 30 seconds, 60 seconds, 90 seconds, 10 minutes, 61+ minutes, negative numbers, padding
-- calculateProgress helper (7 tests): 0%, 50%, 100%, over 100%, zero total, negative total, fractional progress
-- Basic rendering (6 tests): container, labels, Total/Remaining label, progress text visibility
-- Initial state (2 tests): 00:00 elapsed, 0% progress
-- Active session display (6 tests): elapsed time, total time, remaining time, progress percentages
-- Different session durations (2 tests): 5 min and 30 min sessions
-- Size variants (2 tests): large vs compact mode
-- Context integration (3 tests): provider requirement, state updates
-- Component exports (4 tests): named exports, function names
-- TestID props (2 tests): custom testID, progress testID
-- Progress boundaries (4 tests): 0%, 25%, 75%, 100%+
+**Color zone mapping**:
+- null → Colors.text.tertiary (Waiting)
+- < -0.5 → Colors.status.red (Low)
+- -0.5 to 0.5 → Colors.status.yellow (Baseline)
+- 0.5 to 1.5 → Colors.status.green (Elevated)
+- >= 1.5 → Colors.status.blue (Optimal)
 
-**Design alignment**:
-- Follows DeviceStatusWidget component pattern
-- Uses same styling conventions (surface background, shadows, border radius)
-- Consistent with theme color system
-- Matches existing test file structure and conventions
+**Test coverage**: 31 tests covering:
+- getThetaZoneColor (6 tests)
+- getThetaZoneLabel (5 tests)
+- categorizeZScoreZone (5 tests)
+- formatZScore (5 tests)
+- Context integration (3 tests)
+- Color coding consistency (2 tests)
+- Display value formatting (2 tests)
+- Props interface (2 tests)
+- Value override (1 test)
 
-**Next steps**: Continue with remaining Phase 3 tasks
+**Next steps**: Continue with Phase 7 Active Session Screen tasks
 

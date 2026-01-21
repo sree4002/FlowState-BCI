@@ -3,5 +3,15 @@
 export { DeviceStatusWidget } from './DeviceStatusWidget';
 export type { DeviceStatusWidgetProps } from './DeviceStatusWidget';
 
-export { SessionTimer, formatTime, calculateProgress } from './SessionTimer';
-export type { SessionTimerProps } from './SessionTimer';
+export { ThetaNumericDisplay } from './ThetaNumericDisplay';
+export type {
+  ThetaNumericDisplayProps,
+  ThetaNumericDisplaySize,
+  ThetaZone,
+} from './ThetaNumericDisplay';
+export {
+  getThetaZoneColor,
+  getThetaZoneLabel,
+  categorizeZScoreZone,
+  formatZScore,
+} from './ThetaNumericDisplay';
