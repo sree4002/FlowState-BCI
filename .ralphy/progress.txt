@@ -398,79 +398,72 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create navigation types for TypeScript type-safe navigation
+### Task: Create SQLite database schema for sessions table
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created src/types/navigation.ts with comprehensive navigation type definitions for type-safe navigation
-2. Defined RootStackParamList for the root stack navigator (MainTabs, Onboarding, DevicePairing, Calibration, SessionDetail)
-3. Defined MainTabParamList for the main bottom tab navigator (Dashboard, Session, History, Settings)
-4. Defined SessionTabParams type allowing optional session configuration, auto-start, and preset name
-5. Defined HistoryTabParamList for History tab sub-navigation (List, Calendar, Trends, Stats)
-6. Defined OnboardingStackParamList for the onboarding flow (Welcome, Tour1-3, Permissions, DevicePairingPrompt, FirstSessionSuggestion)
-7. Defined CalibrationStackParamList for the calibration flow (Instructions, Countdown, Progress, Summary)
-8. Defined SettingsStackParamList for settings sub-screens (11 screens including DeviceManagement, NotificationPreferences, etc.)
-9. Created typed screen props for all navigators: RootStackScreenProps, MainTabScreenProps, HistoryTabScreenProps, OnboardingScreenProps, CalibrationScreenProps, SettingsScreenProps
-10. Created helper types: AllScreenNames (union of all screen names) and RouteParams (generic params getter)
-11. Added global type declaration for ReactNavigation namespace to enable useNavigation() type checking
-12. Installed @react-navigation/native-stack@^6 as dependency for NativeStackScreenProps type
-13. Updated tsconfig.json to include src/**/*.ts and src/**/*.tsx and changed moduleResolution to "bundler"
-14. Updated src/types/index.ts to re-export navigation types
-15. Created comprehensive test suite with 59 tests covering all navigation types (__tests__/navigation-types.test.ts)
-16. Verified all tests pass (235 tests across 10 test suites)
-17. Verified ESLint passes with no errors or warnings
+1. Added SessionType type alias for valid session types ('calibration', 'quick_boost', 'custom', 'scheduled', 'sham')
+2. Implemented createSessionsTable function with 13 columns matching the spec
+3. Created SessionRecord TypeScript interface matching database schema
+4. Implemented complete CRUD operations for sessions table:
+   - insertSession: Insert new session record
+   - getLatestSession: Retrieve most recent session by start_time
+   - getAllSessions: Get all sessions ordered by start_time (newest first)
+   - getSessionById: Retrieve session by ID
+   - getSessionsByType: Retrieve sessions filtered by session_type
+   - updateSession: Update existing session (supports partial updates)
+   - deleteSession: Delete session by ID
+   - deleteAllSessions: Clear all sessions
+   - getSessionsCount: Get count of sessions
+5. Updated initializeDatabase to create sessions table
+6. Updated dropAllTables to drop sessions table
+7. Created comprehensive test suite with 29 test cases (__tests__/database-sessions.test.ts)
+8. Updated expo-sqlite mock to support sessions table PRAGMA and WHERE session_type queries
+9. Verified all tests pass (205 tests passing across 10 test suites)
 
 **Files created/modified**:
-- src/types/navigation.ts (created - 220 lines with complete navigation type system)
-- src/types/index.ts (modified - added re-export for navigation types)
-- tsconfig.json (modified - added src files to include, changed moduleResolution to bundler)
-- __tests__/navigation-types.test.ts (created - 59 comprehensive tests)
-- package.json (modified - added @react-navigation/native-stack: ^6.6.2)
+- src/services/database.ts (modified - added 188 lines for sessions table implementation)
+- __tests__/database-sessions.test.ts (created - 29 comprehensive test cases)
+- __mocks__/expo-sqlite.ts (modified - added sessions table PRAGMA support and session_type filter)
 
-**Navigation types created**:
-- RootStackParamList: 5 screens (MainTabs, Onboarding, DevicePairing, Calibration, SessionDetail)
-- MainTabParamList: 4 tabs (Dashboard, Session, History, Settings)
-- SessionTabParams: Optional config, autoStart, presetName parameters
-- HistoryTabParamList: 4 screens (List, Calendar, Trends, Stats) with optional params
-- OnboardingStackParamList: 7 screens for onboarding flow
-- CalibrationStackParamList: 4 screens (Instructions, Countdown, Progress, Summary) with typed params
-- SettingsStackParamList: 11 settings sub-screens
+**Database schema details**:
+- Table: sessions
+- Columns:
+  - id: INTEGER PRIMARY KEY AUTOINCREMENT
+  - session_type: TEXT NOT NULL CHECK constraint (calibration, quick_boost, custom, scheduled, sham)
+  - start_time: INTEGER NOT NULL (Unix timestamp when session started)
+  - end_time: INTEGER NOT NULL (Unix timestamp when session ended)
+  - duration_seconds: INTEGER NOT NULL (session duration in seconds)
+  - avg_theta_zscore: REAL NOT NULL (average theta z-score during session)
+  - max_theta_zscore: REAL NOT NULL (maximum theta z-score achieved)
+  - entrainment_freq: REAL NOT NULL (entrainment frequency used in Hz)
+  - volume: REAL NOT NULL (audio volume level 0-1)
+  - signal_quality_avg: REAL NOT NULL (average signal quality score)
+  - subjective_rating: INTEGER (optional user rating 1-5)
+  - notes: TEXT (optional user notes)
+  - created_at: INTEGER DEFAULT (strftime('%s', 'now')) (record creation timestamp)
 
-**Screen Props Types**:
-- RootStackScreenProps<T>: Props for root stack screens
-- MainTabScreenProps<T>: Props for main tab screens with CompositeScreenProps
-- HistoryTabScreenProps<T>: Props for history tab screens with nested composition
-- OnboardingScreenProps<T>: Props for onboarding screens
-- CalibrationScreenProps<T>: Props for calibration flow screens
-- SettingsScreenProps<T>: Props for settings sub-screens
+**CRUD operations implemented**:
+- Create: insertSession() - returns auto-increment ID
+- Read: getLatestSession(), getAllSessions(), getSessionById(), getSessionsByType()
+- Update: updateSession() - supports partial updates of any field
+- Delete: deleteSession(), deleteAllSessions()
+- Utility: getSessionsCount()
 
-**Helper Types**:
-- AllScreenNames: Union type of all screen names in the app
-- RouteParams<T>: Generic type to get params for any screen name
+**Test coverage**: 29 test cases covering:
+- Database initialization (2 tests)
+- Table schema validation (2 tests)
+- Insert operations (4 tests)
+- Get latest session (2 tests)
+- Get all sessions (2 tests)
+- Get session by ID (2 tests)
+- Get sessions by type (2 tests)
+- Update operations (4 tests)
+- Delete operations (2 tests)
+- Delete all sessions (1 test)
+- Count operations (3 tests)
+- Data integrity (3 tests)
 
-**Key features**:
-- Full TypeScript type safety for all navigation operations
-- NavigatorScreenParams for nested navigators
-- CompositeScreenProps for screens in nested navigators
-- Global ReactNavigation namespace declaration for useNavigation() hook
-- Proper imports from @react-navigation packages (native, native-stack, bottom-tabs)
-- Integration with existing types (Session, SessionConfig, BaselineProfile)
-
-**Test coverage**: 59 test cases covering:
-- File structure (2 tests)
-- RootStackParamList (5 tests)
-- MainTabParamList (4 tests)
-- SessionTabParams (4 tests)
-- HistoryTabParamList (4 tests)
-- OnboardingStackParamList (5 tests)
-- CalibrationStackParamList (4 tests)
-- SettingsStackParamList (11 tests)
-- Screen Props Types (6 tests)
-- Navigation Helpers (2 tests)
-- Type imports (5 tests)
-- Global type declarations (1 test)
-- JSDoc comments (6 tests)
-
-**Next steps**: Create DashboardScreen placeholder with basic layout as per Phase 5 task 3
+**Next steps**: Create SQLite database schema for circadian_patterns table as per Phase 2 task 3
 
