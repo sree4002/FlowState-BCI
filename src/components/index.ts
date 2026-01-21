@@ -1,3 +1,5 @@
-// Components export placeholder
-// Export reusable components here as they are created
-export {};
+// Export reusable components
+export {
+  TodaySummaryWidget,
+  type TodaySummaryWidgetProps,
+} from './TodaySummaryWidget';

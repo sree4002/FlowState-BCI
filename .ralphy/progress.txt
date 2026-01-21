@@ -397,3 +397,72 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+## 2026-01-21
+
+### Task: Create TodaySummaryWidget showing session count, total time, and avg theta
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created TodaySummaryWidget React Native component in src/components/TodaySummaryWidget.tsx
+2. Component displays three metrics for today's sessions:
+   - Session count: Number of sessions completed today
+   - Total time: Cumulative duration formatted as minutes or hours+minutes
+   - Average theta: Mean theta z-score with +/- sign and color-coded display
+3. Implemented session filtering to include only sessions from today (based on start_time timestamp)
+4. Used SessionContext via useSession() hook to access recentSessions data
+5. Added optional sessions prop for testing/flexibility when sessions are passed from parent
+6. Applied proper styling using theme constants (Colors, Spacing, BorderRadius, Typography, Shadows)
+7. Color-coded average theta display:
+   - Green (>= 0.5): Target range achieved
+   - Yellow (>= 0): Approaching target
+   - Red (< 0): Below target
+8. Implemented helper functions: formatDuration, formatTheta, filterTodaySessions, calculateTodayStats, getThetaColor
+9. Used useMemo for performance optimization of stats calculation
+10. Updated src/components/index.ts to export TodaySummaryWidget and TodaySummaryWidgetProps
+11. Created comprehensive test suite with 31 tests (__tests__/TodaySummaryWidget.test.tsx)
+12. Tests cover: filtering logic, session count calculation, total time summation, average theta computation, formatting functions, and edge cases
+13. Verified all tests pass (31 new tests, 207 total across test suites)
+14. Verified TypeScript compilation passes without errors
+
+**Files created/modified**:
+- src/components/TodaySummaryWidget.tsx (created - 160 lines with React Native component)
+- src/components/index.ts (modified - added TodaySummaryWidget export)
+- __tests__/TodaySummaryWidget.test.tsx (created - 512 lines with 31 comprehensive test cases)
+
+**Component API**:
+```typescript
+interface TodaySummaryWidgetProps {
+  sessions?: Session[];  // Optional: use instead of context data
+}
+
+<TodaySummaryWidget />              // Uses SessionContext
+<TodaySummaryWidget sessions={[]}  /> // Uses provided sessions
+```
+
+**Widget display format**:
+```
+┌─────────────────────────────────┐
+│ Today                           │
+├────────────────┬────────────────┤
+│       3        │     1h 30m     │
+│   Sessions     │   Total Time   │
+├────────────────┴────────────────┤
+│            +0.75                │
+│          Avg Theta              │
+└─────────────────────────────────┘
+```
+
+**Test coverage**: 31 test cases covering:
+- filterTodaySessions (4 tests): empty array, yesterday filtering, all today, any time today
+- calculateTodayStats - Empty State (3 tests): zero count, zero time, null theta
+- calculateTodayStats - Session Count (3 tests): today only, single session, all types
+- calculateTodayStats - Total Time (3 tests): single session, multiple sessions, exclude yesterday
+- calculateTodayStats - Average Theta (5 tests): single session, multiple sessions, negative, exclude yesterday, zero
+- formatDuration (4 tests): zero, minutes, hours+minutes, just hours
+- formatTheta (5 tests): null, positive, negative, zero, rounding
+- Edge Cases (4 tests): midnight, long sessions, many sessions, mixed theta values
+
+**Next steps**: Continue with Phase 3 tasks as per PRD
+
