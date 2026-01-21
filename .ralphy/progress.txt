@@ -397,3 +397,56 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create CalibrateButton component linking to calibration flow
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created CalibrateButton component in src/components/CalibrateButton.tsx
+2. Component provides a styled button for initiating the calibration flow
+3. Supports two variants: 'primary' (accent colors) and 'secondary' (subtle)
+4. Supports three sizes: 'sm', 'md', 'lg' with appropriate padding and min-width
+5. Includes proper accessibility support (accessibilityLabel, accessibilityRole, accessibilityState)
+6. Uses design tokens from theme.ts (Colors, Spacing, BorderRadius, Typography, Shadows)
+7. Properly handles disabled state with reduced opacity and disabled styling
+8. Updated src/components/index.ts to export CalibrateButton and CalibrateButtonProps
+9. Created comprehensive test suite with 19 tests covering all functionality
+10. Updated Jest configuration to support React Native component testing
+11. Created React Native mock at __mocks__/react-native.ts for testing
+12. Updated jest.setup.js to use CommonJS require syntax
+13. All 195 tests pass across 10 test suites
+14. ESLint passes with no errors or warnings
+
+**Files created/modified**:
+- src/components/CalibrateButton.tsx (created - 137 lines)
+- src/components/index.ts (modified - added CalibrateButton export)
+- __tests__/CalibrateButton.test.tsx (created - 19 comprehensive tests)
+- __mocks__/react-native.ts (created - mock for testing)
+- jest.config.js (modified - added React Native mock mapping)
+- jest.setup.js (modified - changed import to require)
+
+**Component features**:
+- Props:
+  - onPress: () => void - Required callback when button is pressed
+  - disabled?: boolean - Optional disabled state
+  - variant?: 'primary' | 'secondary' - Visual variant (default: 'primary')
+  - size?: 'sm' | 'md' | 'lg' - Button size (default: 'md')
+  - label?: string - Button label (default: 'Calibrate')
+  - testID?: string - Test identifier (default: 'calibrate-button')
+- Uses theme constants for consistent styling
+- Includes shadow effects for depth
+- Fully accessible with proper ARIA attributes
+
+**Test coverage**:
+- Rendering tests (3 tests)
+- Variant tests (2 tests)
+- Size tests (3 tests)
+- Interaction tests (2 tests)
+- Disabled state tests (1 test)
+- Accessibility tests (4 tests)
+- Props combination tests (2 tests)
+- Component file structure tests (2 tests)
+
+**Next steps**: Continue with other Phase 2 or Phase 3 tasks as needed
+
