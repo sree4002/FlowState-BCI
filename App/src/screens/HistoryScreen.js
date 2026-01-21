@@ -1,10 +1,11 @@
 /**
  * FlowState BCI - History Screen
- * 
- * Shows past sessions and trends:
- * - Session list
- * - Weekly summary
- * - Performance trends
+ *
+ * Shows past sessions and trends with tab navigation:
+ * - List: Session list view
+ * - Calendar: Calendar heat map view
+ * - Trends: Performance trends over time
+ * - Stats: Detailed statistics
  */
 
 import React, { useState, useEffect } from 'react';
@@ -16,6 +17,9 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Tab types
+const TABS = ['List', 'Calendar', 'Trends', 'Stats'];
 
 // Mock data for development
 const MOCK_SESSIONS = [
@@ -55,19 +59,17 @@ const MOCK_SESSIONS = [
 
 export default function HistoryScreen() {
   const [sessions, setSessions] = useState(MOCK_SESSIONS);
-  const [selectedPeriod, setSelectedPeriod] = useState('week');
-  
-  // In production, load from AsyncStorage
+  const [activeTab, setActiveTab] = useState('List');
+
   useEffect(() => {
     loadSessions();
   }, []);
-  
+
   const loadSessions = async () => {
     try {
       const stored = await AsyncStorage.getItem('flowstate_sessions');
       if (stored) {
         const parsed = JSON.parse(stored);
-        // Convert date strings back to Date objects
         const withDates = parsed.map(s => ({
           ...s,
           date: new Date(s.date),
@@ -78,7 +80,7 @@ export default function HistoryScreen() {
       console.log('Using mock data');
     }
   };
-  
+
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60);
     if (mins < 60) return `${mins} min`;
@@ -86,12 +88,12 @@ export default function HistoryScreen() {
     const remainMins = mins % 60;
     return `${hrs}h ${remainMins}m`;
   };
-  
+
   const formatDate = (date) => {
     const now = new Date();
     const diff = now - date;
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
+
     if (days === 0) {
       return 'Today, ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } else if (days === 1) {
@@ -102,15 +104,15 @@ export default function HistoryScreen() {
       return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
     }
   };
-  
+
   const getWeeklyStats = () => {
     const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const weekSessions = sessions.filter(s => s.date >= weekAgo);
-    
+
     if (weekSessions.length === 0) {
       return { totalTime: 0, totalEntrainment: 0, avgImprovement: 0, count: 0 };
     }
-    
+
     return {
       count: weekSessions.length,
       totalTime: weekSessions.reduce((sum, s) => sum + s.duration, 0),
@@ -118,16 +120,16 @@ export default function HistoryScreen() {
       avgImprovement: weekSessions.reduce((sum, s) => sum + s.improvement, 0) / weekSessions.length,
     };
   };
-  
+
   const weeklyStats = getWeeklyStats();
-  
+
   const renderSessionCard = (session) => (
     <TouchableOpacity key={session.id} style={styles.sessionCard}>
       <View style={styles.sessionHeader}>
         <Text style={styles.sessionDate}>{formatDate(session.date)}</Text>
         <Text style={styles.sessionDuration}>{formatDuration(session.duration)}</Text>
       </View>
-      
+
       <View style={styles.sessionStats}>
         <View style={styles.stat}>
           <Text style={styles.statValue}>{formatDuration(session.entrainmentTime)}</Text>
@@ -151,13 +153,40 @@ export default function HistoryScreen() {
       </View>
     </TouchableOpacity>
   );
-  
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+
+  // Tab Navigation Component
+  const renderTabBar = () => (
+    <View style={styles.tabBar}>
+      {TABS.map((tab) => (
+        <TouchableOpacity
+          key={tab}
+          style={[
+            styles.tabButton,
+            activeTab === tab && styles.tabButtonActive,
+          ]}
+          onPress={() => setActiveTab(tab)}
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeTab === tab }}
+          accessibilityLabel={`${tab} tab`}
+        >
+          <Text style={[
+            styles.tabButtonText,
+            activeTab === tab && styles.tabButtonTextActive,
+          ]}>
+            {tab}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+
+  // List Tab Content
+  const renderListTab = () => (
+    <>
       {/* Weekly Summary */}
       <View style={styles.summaryCard}>
         <Text style={styles.summaryTitle}>This Week</Text>
-        
+
         <View style={styles.summaryGrid}>
           <View style={styles.summaryItem}>
             <Text style={styles.summaryValue}>{weeklyStats.count}</Text>
@@ -179,31 +208,10 @@ export default function HistoryScreen() {
           </View>
         </View>
       </View>
-      
-      {/* Period Selector */}
-      <View style={styles.periodSelector}>
-        {['week', 'month', 'all'].map((period) => (
-          <TouchableOpacity
-            key={period}
-            style={[
-              styles.periodButton,
-              selectedPeriod === period && styles.periodButtonActive,
-            ]}
-            onPress={() => setSelectedPeriod(period)}
-          >
-            <Text style={[
-              styles.periodButtonText,
-              selectedPeriod === period && styles.periodButtonTextActive,
-            ]}>
-              {period === 'week' ? 'Week' : period === 'month' ? 'Month' : 'All'}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-      
+
       {/* Session List */}
       <Text style={styles.sectionTitle}>Recent Sessions</Text>
-      
+
       {sessions.length === 0 ? (
         <View style={styles.emptyState}>
           <Text style={styles.emptyEmoji}>📊</Text>
@@ -215,16 +223,104 @@ export default function HistoryScreen() {
       ) : (
         sessions.map(renderSessionCard)
       )}
-      
-      {/* Tips Card */}
-      <View style={styles.tipsCard}>
-        <Text style={styles.tipsTitle}>💡 Insight</Text>
-        <Text style={styles.tipsText}>
-          Your theta power tends to be highest in the morning. 
-          Consider scheduling important learning tasks between 9-11 AM.
-        </Text>
+    </>
+  );
+
+  // Calendar Tab Content (Placeholder)
+  const renderCalendarTab = () => (
+    <View style={styles.placeholderContainer}>
+      <Text style={styles.placeholderEmoji}>📅</Text>
+      <Text style={styles.placeholderTitle}>Calendar View</Text>
+      <Text style={styles.placeholderText}>
+        View your sessions on a calendar heat map.
+        See patterns in your practice over days, weeks, and months.
+      </Text>
+      <View style={styles.placeholderFeatures}>
+        <Text style={styles.featureItem}>• Daily session indicators</Text>
+        <Text style={styles.featureItem}>• Heat map visualization</Text>
+        <Text style={styles.featureItem}>• Streak tracking</Text>
+        <Text style={styles.featureItem}>• Monthly overview</Text>
       </View>
-    </ScrollView>
+    </View>
+  );
+
+  // Trends Tab Content (Placeholder)
+  const renderTrendsTab = () => (
+    <View style={styles.placeholderContainer}>
+      <Text style={styles.placeholderEmoji}>📈</Text>
+      <Text style={styles.placeholderTitle}>Performance Trends</Text>
+      <Text style={styles.placeholderText}>
+        Track your theta power and entrainment trends over time.
+        Identify your optimal training patterns.
+      </Text>
+      <View style={styles.placeholderFeatures}>
+        <Text style={styles.featureItem}>• Theta power progression</Text>
+        <Text style={styles.featureItem}>• Entrainment efficiency</Text>
+        <Text style={styles.featureItem}>• Session duration trends</Text>
+        <Text style={styles.featureItem}>• Circadian patterns</Text>
+      </View>
+    </View>
+  );
+
+  // Stats Tab Content (Placeholder)
+  const renderStatsTab = () => (
+    <View style={styles.placeholderContainer}>
+      <Text style={styles.placeholderEmoji}>📊</Text>
+      <Text style={styles.placeholderTitle}>Detailed Statistics</Text>
+      <Text style={styles.placeholderText}>
+        Comprehensive analytics about your training progress
+        and performance metrics.
+      </Text>
+      <View style={styles.placeholderFeatures}>
+        <Text style={styles.featureItem}>• Total sessions & time</Text>
+        <Text style={styles.featureItem}>• Average z-score trends</Text>
+        <Text style={styles.featureItem}>• Best performing times</Text>
+        <Text style={styles.featureItem}>• Personal records</Text>
+      </View>
+    </View>
+  );
+
+  // Render content based on active tab
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'List':
+        return renderListTab();
+      case 'Calendar':
+        return renderCalendarTab();
+      case 'Trends':
+        return renderTrendsTab();
+      case 'Stats':
+        return renderStatsTab();
+      default:
+        return renderListTab();
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      {/* Tab Navigation */}
+      {renderTabBar()}
+
+      {/* Tab Content */}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {renderTabContent()}
+
+        {/* Tips Card - shown on List tab only */}
+        {activeTab === 'List' && (
+          <View style={styles.tipsCard}>
+            <Text style={styles.tipsTitle}>💡 Insight</Text>
+            <Text style={styles.tipsText}>
+              Your theta power tends to be highest in the morning.
+              Consider scheduling important learning tasks between 9-11 AM.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -233,9 +329,42 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1a1a2e',
   },
+  scrollView: {
+    flex: 1,
+  },
   content: {
     padding: 20,
+    paddingTop: 12,
   },
+  // Tab Bar Styles
+  tabBar: {
+    flexDirection: 'row',
+    backgroundColor: '#16213e',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#0f3460',
+  },
+  tabButton: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+    marginHorizontal: 4,
+  },
+  tabButtonActive: {
+    backgroundColor: '#0f3460',
+  },
+  tabButtonText: {
+    color: '#8892b0',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  tabButtonTextActive: {
+    color: '#64ffda',
+  },
+  // Summary Card Styles
   summaryCard: {
     backgroundColor: '#16213e',
     borderRadius: 16,
@@ -271,36 +400,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 4,
   },
-  periodSelector: {
-    flexDirection: 'row',
-    backgroundColor: '#16213e',
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 20,
-  },
-  periodButton: {
-    flex: 1,
-    paddingVertical: 10,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  periodButtonActive: {
-    backgroundColor: '#0f3460',
-  },
-  periodButtonText: {
-    color: '#8892b0',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  periodButtonTextActive: {
-    color: '#64ffda',
-  },
+  // Section Title
   sectionTitle: {
     color: '#ffffff',
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 12,
   },
+  // Session Card Styles
   sessionCard: {
     backgroundColor: '#16213e',
     borderRadius: 12,
@@ -338,6 +445,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginTop: 2,
   },
+  // Empty State Styles
   emptyState: {
     backgroundColor: '#16213e',
     borderRadius: 16,
@@ -360,6 +468,44 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
   },
+  // Placeholder Styles for Upcoming Tabs
+  placeholderContainer: {
+    backgroundColor: '#16213e',
+    borderRadius: 16,
+    padding: 32,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  placeholderEmoji: {
+    fontSize: 64,
+    marginBottom: 20,
+  },
+  placeholderTitle: {
+    color: '#ffffff',
+    fontSize: 24,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  placeholderText: {
+    color: '#8892b0',
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  placeholderFeatures: {
+    alignSelf: 'stretch',
+    backgroundColor: '#0f3460',
+    borderRadius: 12,
+    padding: 16,
+  },
+  featureItem: {
+    color: '#b8c5d6',
+    fontSize: 14,
+    lineHeight: 28,
+  },
+  // Tips Card Styles
   tipsCard: {
     backgroundColor: '#0f3460',
     borderRadius: 12,
