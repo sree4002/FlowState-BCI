@@ -398,71 +398,106 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-## 2026-01-21
-
-### Task: Create ThetaTrendWidget with sparkline chart of recent theta values
+### Task: Create mock BLE service for development/testing without hardware
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created ThetaTrendWidget component in src/components/ThetaTrendWidget.tsx
-2. Implemented sparkline chart using victory-native (VictoryLine, VictoryArea, VictoryChart, VictoryAxis)
-3. Integrated with SessionContext to access recentSessions data
-4. Added configurable props: maxDataPoints, height, showStats, title
-5. Implemented theta z-score color coding using status colors (red < 0, yellow < 0.5, green < 1.5, blue >= 1.5)
-6. Added statistics display showing min, avg, max, and latest theta z-scores
-7. Implemented trend indicator (up/down/stable) based on comparing recent vs older sessions
-8. Applied dark theme styling using theme constants (Colors, Spacing, BorderRadius, Typography, Shadows)
-9. Added empty state with helpful message when no session data exists
-10. Used smooth interpolation (monotoneX) for sparkline curve
-11. Added semi-transparent area fill under the sparkline for visual depth
-12. Created comprehensive test suite with 15+ test cases (__tests__/ThetaTrendWidget.test.tsx)
-13. Mocked victory-native components and Dimensions for testing
-14. Updated src/components/index.ts to export ThetaTrendWidget and ThetaTrendWidgetProps
+1. Created comprehensive MockBleService class in src/services/MockBleService.ts
+2. Implemented full BLE device simulation with configurable scenarios:
+   - 'ideal' - Perfect signal, stable theta, no artifacts
+   - 'realistic' - Normal variation with occasional artifacts (default)
+   - 'noisy' - Frequent artifacts, unstable signal
+   - 'entrainment_success' - Gradual theta increase simulation
+   - 'entrainment_plateau' - Theta plateau at target
+   - 'poor_connection' - Weak signal with frequent drops
+   - 'custom' - Fully configurable parameters
+3. Implemented simulated EEG data generation with:
+   - Realistic theta, alpha, and beta power values
+   - Z-score calculation based on configurable baselines
+   - Raw sample arrays matching device sampling rates (500Hz headband, 250Hz earpiece)
+   - Artifact simulation (amplitude spikes, dropouts, drift)
+   - Signal quality metrics with artifact detection flags
+4. Implemented connection simulation:
+   - scanAndConnect() with configurable failure probability
+   - connectToDevice() with realistic delay simulation
+   - disconnect() with proper state cleanup
+   - Connection status tracking
+5. Implemented entrainment control:
+   - startEntrainment() / stopEntrainment()
+   - setFrequency() with validation (4-8 Hz theta range)
+   - setVolume() with validation (0-1 range)
+   - sendCommand() for arbitrary BLE commands
+6. Implemented event listener system:
+   - Connection change listeners
+   - EEG data listeners (continuous streaming)
+   - Status update listeners (entrainment state)
+   - Signal quality listeners (periodic updates)
+7. Created TypeScript interfaces for all mock service types:
+   - EEGDataWithMetrics (extends EEGDataPacket with power values)
+   - MockDeviceConfig (device type, signal quality, artifacts, etc.)
+   - SimulationScenario (preset scenarios)
+   - EntrainmentStatus (playback state)
+   - All listener callback types
+8. Added factory function createMockBleService() and default singleton mockBleService
+9. Updated src/services/index.ts to export MockBleService
+10. Created comprehensive test suite with 40 tests covering all functionality
+11. Verified all tests pass (40 tests for MockBleService)
+12. Verified linting passes with no errors or warnings
 
 **Files created/modified**:
-- src/components/ThetaTrendWidget.tsx (created - 270 lines)
-- src/components/index.ts (modified - added ThetaTrendWidget export)
-- __tests__/ThetaTrendWidget.test.tsx (created - 130+ lines with comprehensive tests)
+- src/services/MockBleService.ts (created - 565 lines with complete mock BLE implementation)
+- src/services/index.ts (modified - added MockBleService export)
+- __tests__/MockBleService.test.ts (created - 420 lines with 40 comprehensive tests)
 
-**Component API**:
+**MockBleService features**:
+- Device type simulation: headband (500Hz) or earpiece (250Hz)
+- Configurable signal quality (0-100)
+- Connection failure simulation with probability setting
+- Configurable data generation interval
+- Simulated battery level
+- Artifact simulation with configurable probability
+- Baseline theta values for z-score calculation
+- Entrainment effect on theta power
+- Scenario presets for common testing patterns
+
+**Test coverage**: 40 test cases covering:
+- Constructor and configuration (4 tests)
+- setConfig and setScenario (3 tests)
+- setBaseline (1 test)
+- requestPermissions (1 test)
+- scanAndConnect (4 tests)
+- connectToDevice (1 test)
+- disconnect (3 tests)
+- Connection status and device info (3 tests)
+- Entrainment control (8 tests)
+- Event listeners (8 tests)
+- Data generation by scenario (3 tests)
+- destroy cleanup (1 test)
+
+**Usage examples**:
 ```typescript
-interface ThetaTrendWidgetProps {
-  maxDataPoints?: number;  // Maximum sessions to display (default: 10)
-  height?: number;         // Widget height in pixels (default: 120)
-  showStats?: boolean;     // Show statistics row (default: true)
-  title?: string;          // Widget title (default: 'Theta Trend')
-}
+// Create with default realistic scenario
+import { mockBleService } from './services';
+
+// Or create custom instance
+import { createMockBleService } from './services';
+const service = createMockBleService('entrainment_success', {
+  deviceType: 'headband',
+  batteryLevel: 95,
+});
+
+// Connect and listen for data
+service.addDataListener((data) => {
+  console.log('Theta Z-Score:', data.thetaZScore);
+});
+await service.connectToDevice();
+
+// Control entrainment
+await service.startEntrainment();
+await service.setFrequency(6.5);
+await service.setVolume(0.7);
 ```
 
-**Key features**:
-- Sparkline chart with VictoryLine and VictoryArea components
-- Data sourced from useSession() hook's recentSessions array
-- Color-coded values based on theta z-score zones:
-  - Red (#E74C3C): z-score < 0 (below target)
-  - Yellow (#F39C12): z-score 0-0.5 (approaching target)
-  - Green (#2ECC71): z-score 0.5-1.5 (target range)
-  - Blue (#3498DB): z-score >= 1.5 (above target)
-- Trend indicator comparing 3 most recent vs 3 oldest sessions
-- Statistics row with min/avg/max/latest values
-- Responsive width based on screen dimensions
-- Empty state handling with user guidance
-- Dark theme styling with surface background, rounded corners, shadow
-
-**Styling approach**:
-- Container: Colors.surface.primary background, BorderRadius.lg corners
-- Title: Typography.fontSize.lg, Colors.text.primary
-- Chart: Hidden axes for clean sparkline look, monotoneX interpolation
-- Stats: Colors.text.tertiary labels, color-coded values
-- Trend badge: Colors.surface.secondary background with colored indicator
-
-**Test coverage**:
-- Rendering tests (default title, custom title, empty state)
-- Props tests (maxDataPoints, height, showStats)
-- Component structure validation
-- Helper function integration
-- Provider integration tests
-- Accessibility tests (readable text)
-
-**Next steps**: Continue with Phase 6 widgets (ThetaTimeSeriesChart, ThetaGaugeDisplay, etc.)
+**Next steps**: Continue with Phase 3 BLE tasks or other pending items
 
