@@ -460,3 +460,85 @@ Victory Native provides chart components for:
 
 **Next steps**: Continue with Phase 2 tasks
 
+
+### Task: Create ThetaGaugeDisplay with circular gauge and color-coded zones (red/yellow/green/blue)
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created ThetaGaugeDisplay component in src/components/ThetaGaugeDisplay.tsx (377 lines)
+2. Implemented circular gauge visualization with animated needle
+3. Added four color-coded theta zones:
+   - Red (zscore < 0): Below target - theta activity below baseline
+   - Yellow (0 ≤ zscore < 0.5): Approaching target - getting close to optimal
+   - Green (0.5 ≤ zscore < 1.5): Optimal - theta in target range
+   - Blue (zscore ≥ 1.5): High theta - elevated theta activity
+4. Used React Native Animated API for smooth needle transitions
+5. Added comprehensive props interface with 10 configurable options:
+   - value: Current theta z-score to display
+   - minValue/maxValue: Gauge scale range (default: -1 to 2)
+   - size: Gauge size in pixels (default: 200)
+   - showLabel/title: Title display configuration
+   - animated/animationDuration: Animation settings
+   - showZoneLabels: Toggle zone labels around gauge
+   - showValue: Toggle value display below gauge
+   - testID: Test ID for component testing
+6. Implemented zone labels (Low, Near, Good, High) positioned around gauge
+7. Added value display showing current z-score with zone name
+8. Used theme colors from constants/theme.ts (Colors.status.red/yellow/green/blue)
+9. Applied consistent styling with shadows, borders, and typography from theme
+10. Created comprehensive test suite with 54 tests covering all functionality
+11. Updated react-native mock to include Easing functions for animation testing
+12. Exported component from src/components/index.ts
+13. All 54 tests pass
+
+**Files created/modified**:
+- src/components/ThetaGaugeDisplay.tsx (created - 377 lines)
+- __tests__/ThetaGaugeDisplay.test.tsx (created - 408 lines, 54 tests)
+- src/components/index.ts (modified - added ThetaGaugeDisplay export)
+- __mocks__/react-native.ts (modified - added Easing mock, improved testID handling)
+
+**Component features**:
+- Circular gauge with 270-degree arc (-135° to +135°)
+- Four color-coded zone segments using View borders
+- Animated needle with configurable duration (default 500ms)
+- Center dot matching current zone color
+- Zone labels positioned around gauge perimeter
+- Value display with 2 decimal precision
+- Dynamic zone label text (Below Target, Approaching, Optimal, High Theta)
+- Full dark theme integration
+- Responsive sizing based on size prop
+
+**Props interface**:
+```typescript
+interface ThetaGaugeDisplayProps {
+  value?: number | null;       // Current theta z-score
+  minValue?: number;           // Gauge minimum (default: -1)
+  maxValue?: number;           // Gauge maximum (default: 2)
+  size?: number;               // Gauge size in pixels (default: 200)
+  showLabel?: boolean;         // Show title (default: true)
+  title?: string;              // Title text (default: "Theta Level")
+  animated?: boolean;          // Animate needle (default: true)
+  animationDuration?: number;  // Animation ms (default: 500)
+  showZoneLabels?: boolean;    // Show zone labels (default: true)
+  showValue?: boolean;         // Show value text (default: true)
+  testID?: string;             // Test ID (default: "theta-gauge-display")
+}
+```
+
+**Test coverage**:
+- Basic rendering (8 tests)
+- Color-coded zones (5 tests)
+- Value display (8 tests)
+- Zone color mapping (5 tests)
+- Boundary values (6 tests)
+- Size configuration (3 tests)
+- Min/max value configuration (4 tests)
+- Animation configuration (3 tests)
+- Component export (2 tests)
+- Edge cases (6 tests)
+- Accessibility (2 tests)
+- Props interface (3 tests)
+
+**Next steps**: Continue with Phase 7 Active Session Screen tasks (ThetaNumericDisplay, ThetaTimeSeriesChart, etc.)
+

@@ -8,14 +8,18 @@ import React from 'react';
 export const View = ({ children, style, testID, ...props }: any) => {
   return React.createElement(
     'View',
-    { style, 'data-testid': testID, ...props },
+    { style, 'data-testid': testID, testID, ...props },
     children
   );
 };
 
 // Mock Text component
-export const Text = ({ children, style, ...props }: any) => {
-  return React.createElement('Text', { style, ...props }, children);
+export const Text = ({ children, style, testID, ...props }: any) => {
+  return React.createElement(
+    'Text',
+    { style, 'data-testid': testID, testID, ...props },
+    children
+  );
 };
 
 // Mock StyleSheet
@@ -44,6 +48,25 @@ export const Pressable = View;
 export const Dimensions = {
   get: () => ({ width: 375, height: 812, scale: 2, fontScale: 1 }),
   addEventListener: () => ({ remove: () => {} }),
+};
+
+// Mock Easing
+export const Easing = {
+  linear: (t: number) => t,
+  ease: (t: number) => t,
+  quad: (t: number) => t * t,
+  cubic: (t: number) => t * t * t,
+  poly: (n: number) => (t: number) => Math.pow(t, n),
+  sin: (t: number) => 1 - Math.cos((t * Math.PI) / 2),
+  circle: (t: number) => 1 - Math.sqrt(1 - t * t),
+  exp: (t: number) => Math.pow(2, 10 * (t - 1)),
+  elastic: (a?: number, p?: number) => (t: number) => t,
+  back: (s?: number) => (t: number) => t,
+  bounce: (t: number) => t,
+  bezier: (x1: number, y1: number, x2: number, y2: number) => (t: number) => t,
+  in: (easing: (t: number) => number) => easing,
+  out: (easing: (t: number) => number) => (t: number) => 1 - easing(1 - t),
+  inOut: (easing: (t: number) => number) => (t: number) => t,
 };
 
 // Mock Animated
@@ -94,6 +117,7 @@ export default {
   Pressable,
   Dimensions,
   Animated,
+  Easing,
   PixelRatio,
   Keyboard,
 };
