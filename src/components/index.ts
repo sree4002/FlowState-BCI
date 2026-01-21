@@ -1,5 +1,3 @@
-// Components exports
-export {
-  NextSessionWidget,
-  type NextSessionWidgetProps,
-} from './NextSessionWidget';
+// Reusable components
+export { QuickBoostButton } from './QuickBoostButton';
+export type { QuickBoostButtonProps } from './QuickBoostButton';
