@@ -20,7 +20,8 @@ describe('Database - Baselines Table', () => {
 
   beforeEach(() => {
     // Initialize database and create tables
-    db = initializeDatabase();
+    const result = initializeDatabase();
+    db = result.db;
     // Clean up any existing data
     deleteAllBaselines(db);
   });
@@ -48,8 +49,9 @@ describe('Database - Baselines Table', () => {
     });
 
     it('should initialize database with all tables', () => {
-      const testDb = initializeDatabase();
+      const { db: testDb, migrationResult } = initializeDatabase();
       expect(testDb).toBeDefined();
+      expect(migrationResult.success).toBe(true);
 
       // Verify baselines table exists
       const result = testDb.getFirstSync<{ count: number }>(
