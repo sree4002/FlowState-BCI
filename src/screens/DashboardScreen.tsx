@@ -13,26 +13,25 @@
  */
 
 import React, { useCallback } from 'react';
-import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { useDevice, useSession } from '../contexts';
-import {
-  DeviceStatusWidget,
-  TodaySummaryWidget,
-  ThetaTrendWidget,
-  NextSessionWidget,
-  QuickBoostButton,
-  CalibrateButton,
-  CustomSessionButton,
-} from '../components';
-import { Colors, Spacing } from '../constants/theme';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
+import { useDevice } from '../contexts';
+import { useSession } from '../contexts';
+import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
 
 export default function DashboardScreen() {
-  const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
-  const { isConnected } = useDevice();
-  const { sessionState } = useSession();
+  const { deviceInfo, signalQuality, isConnected } = useDevice();
+  const {
+    currentSession,
+    sessionState,
+    currentThetaZScore: thetaZScore,
+    recentSessions,
+    isRefreshing,
+    refreshRecentSessions,
+  } = useSession();
+
+  const handleRefresh = useCallback(() => {
+    refreshRecentSessions();
+  }, [refreshRecentSessions]);
 
   const [refreshing, setRefreshing] = React.useState(false);
 
@@ -61,17 +60,27 @@ export default function DashboardScreen() {
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={[
-        styles.contentContainer,
-        { paddingBottom: insets.bottom + Spacing.xxl },
-      ]}
-      showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
           tintColor={Colors.primary.main}
           colors={[Colors.primary.main]}
+          progressBackgroundColor={Colors.surface.primary}
+        />
+      }
+    >
+      {/* Connection Status Bar */}
+      <View style={styles.connectionBar}>
+        <View
+          style={[
+            styles.connectionDot,
+            {
+              backgroundColor: isConnected
+                ? Colors.accent.success
+                : Colors.accent.error,
+            },
+          ]}
         />
       }
       testID="dashboard-scroll-view"
