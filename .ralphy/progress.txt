@@ -397,3 +397,61 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Implement DC offset removal function for EEG data epochs
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created src/services/signalProcessing.ts as a new service module for EEG signal processing
+2. Implemented calculateDCOffset() function to compute the mean (DC offset) of an EEG signal epoch
+3. Implemented removeDCOffset() function that creates a new zero-mean signal array without modifying the original
+4. Implemented removeDCOffsetInPlace() function for memory-efficient real-time processing that modifies the array directly
+5. Implemented removeDCOffsetWithBaseline() function for ERP-style baseline correction using a specified baseline segment
+6. Added comprehensive JSDoc documentation with examples for all functions
+7. Added proper error handling for empty arrays and invalid baseline indices
+8. Created comprehensive test suite with 36 test cases covering all functions (__tests__/signal-processing.test.ts)
+9. Updated src/services/index.ts to export signalProcessing module
+10. Verified all tests pass (36 new tests, 212 total tests passing across 10 test suites)
+11. Verified linting passes with no errors or warnings
+
+**Files created/modified**:
+- src/services/signalProcessing.ts (created - 107 lines with 4 DC offset removal functions)
+- src/services/index.ts (modified - added signalProcessing export)
+- __tests__/signal-processing.test.ts (created - 320 lines with 36 comprehensive test cases)
+
+**Functions implemented**:
+- calculateDCOffset(samples: number[]): number
+  - Calculates the mean value of a signal epoch
+  - Throws error for empty array input
+
+- removeDCOffset(samples: number[]): number[]
+  - Returns a new array with DC offset removed (zero-mean signal)
+  - Does not modify the original array
+  - Preserves signal variance
+
+- removeDCOffsetInPlace(samples: number[]): number
+  - Modifies the input array directly for performance
+  - Returns the DC offset value that was removed
+  - Useful for real-time processing to minimize memory allocation
+
+- removeDCOffsetWithBaseline(samples: number[], baselineStart: number, baselineEnd: number): number[]
+  - Uses a specified baseline segment to calculate DC offset
+  - Useful for ERP (Event-Related Potential) analysis
+  - Validates baseline indices and throws errors for invalid ranges
+
+**Test coverage** (36 tests):
+- calculateDCOffset tests (7 tests): simple arrays, decimals, single element, negative values, empty array error, precision
+- removeDCOffset tests (9 tests): offset removal, immutability, new array return, zero-mean handling, variance preservation
+- removeDCOffsetInPlace tests (6 tests): in-place modification, return value, equivalence with removeDCOffset
+- removeDCOffsetWithBaseline tests (9 tests): baseline segments, error handling for invalid indices, ERP-style correction
+- Real-world EEG scenarios (5 tests): 500Hz and 250Hz sampling rates, noise handling, varying DC offset levels
+
+**Technical details**:
+- DC offset removal is essential preprocessing before frequency domain analysis (FFT) to prevent spectral leakage
+- Functions support typical EEG sampling rates (250Hz and 500Hz)
+- Signal variance is preserved after DC offset removal
+- Baseline correction variant supports ERP analysis with arbitrary baseline periods
+
+**Next steps**: Create Butterworth bandpass filter (0.5-50 Hz) using typed arrays as per Phase 4 task 2
+
