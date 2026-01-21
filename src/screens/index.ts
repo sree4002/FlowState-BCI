@@ -1,3 +1,2 @@
-// Screens export placeholder
-// Export screen components here as they are created
-export {};
+// Screens exports
+export { default as SettingsScreen } from './SettingsScreen';

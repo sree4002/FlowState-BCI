@@ -1,6 +1,7 @@
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   roots: ['<rootDir>/__tests__', '<rootDir>/App/__tests__'],
   transform: {
     '^.+\\.tsx?$': [
@@ -12,7 +13,9 @@ module.exports = {
       },
     ],
   },
-  transformIgnorePatterns: ['node_modules/(?!(expo-sqlite)/)'],
+  transformIgnorePatterns: [
+    'node_modules/(?!(expo-sqlite|react-native|@react-native|@react-navigation|@testing-library/jest-native)/)',
+  ],
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverageFrom: [
@@ -27,6 +30,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.ts',
+    '^react-native$': '<rootDir>/__mocks__/react-native.ts',
   },
   testTimeout: 10000,
   maxWorkers: 1,
