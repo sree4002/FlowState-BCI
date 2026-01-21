@@ -27,7 +27,9 @@ module.exports = {
   ],
   moduleNameMapper: {
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.ts',
+    '^react-native$': '<rootDir>/__mocks__/react-native.ts',
   },
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testTimeout: 10000,
   maxWorkers: 1,
 };

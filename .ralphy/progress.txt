@@ -397,3 +397,58 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create DashboardScreen placeholder with basic layout
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created DashboardScreen.tsx in src/screens/ with a complete basic layout
+2. Implemented connection status bar showing device connection state
+3. Implemented signal quality card (conditionally shown when connected)
+4. Implemented current session card with session state and theta z-score display
+5. Implemented recent sessions card showing up to 3 recent sessions
+6. Implemented quick stats card showing session count, average duration, and average z-score
+7. Used the established theme system from src/constants/theme.ts for all styling
+8. Integrated with DeviceContext and SessionContext for state management
+9. Created comprehensive test suite with 20 tests covering component rendering, structure, default state, and context integration
+10. Created react-native mock (__mocks__/react-native.ts) for Jest testing
+11. Updated Jest configuration to support React Native component testing
+12. Exported DashboardScreen from src/screens/index.ts
+13. Installed @testing-library/react-native and @testing-library/dom for testing
+14. Verified all tests pass (196 tests across 10 test suites)
+15. Verified linting passes with no errors or warnings
+
+**Files created/modified**:
+- src/screens/DashboardScreen.tsx (created - 185 lines)
+- src/screens/index.ts (modified - exports DashboardScreen)
+- __tests__/DashboardScreen.test.tsx (created - 20 comprehensive tests)
+- __mocks__/react-native.ts (created - mock for React Native components)
+- jest.config.js (modified - added react-native mock mapping)
+- jest.setup.js (modified - cleaned up deprecated imports)
+- package.json (modified - added @testing-library/react-native, @testing-library/dom)
+
+**DashboardScreen features**:
+- Connection status bar with visual indicator (green/red dot)
+- Device name display when connected
+- Battery level display when available
+- Signal quality card with quality label and percentage
+- Artifact detection display
+- Current session status (In Progress/Paused/No active session)
+- Session duration display
+- Theta Z-Score display
+- Recent sessions list (up to 3 sessions)
+- Quick stats: total sessions, average duration, average z-score
+- Fully typed with TypeScript
+- Responsive ScrollView layout
+- Dark theme styling using Colors, Spacing, BorderRadius, Typography from theme
+
+**Test coverage**:
+- Rendering tests (4 tests)
+- Component structure tests (5 tests)
+- Default state tests (4 tests)
+- Context integration tests (4 tests)
+- Card labels tests (3 tests)
+
+**Next steps**: Continue with Phase 2 tasks
+
