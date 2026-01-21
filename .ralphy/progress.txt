@@ -397,3 +397,56 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Implement z-score normalization function using baseline mean and std
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created src/utils/signalProcessing.ts with comprehensive z-score normalization functions
+2. Implemented calculateZScore() - core z-score calculation with input validation
+3. Implemented normalizeThetaZScore() - normalize theta power using baseline profile
+4. Implemented normalizeAllBands() - normalize theta, alpha, and beta bands simultaneously
+5. Implemented normalizeThetaArray() - batch normalize array of theta values
+6. Implemented calculateWindowZScore() - calculate z-score for sliding window average
+7. Implemented checkZScoreThreshold() - threshold detection with hysteresis for closed-loop control
+8. Implemented categorizeZScoreZone() - categorize z-scores into visual zones (low/baseline/elevated/high)
+9. Created TypeScript interfaces ZScoreResult and BandPowerInput
+10. Updated src/utils/index.ts to export all functions and types
+11. Created comprehensive test suite with 41 tests (__tests__/zscore-normalization.test.ts)
+12. All tests passing (217 total across 10 test suites)
+13. Linting passes with no errors
+
+**Files created/modified**:
+- src/utils/signalProcessing.ts (created - 176 lines with 7 functions)
+- src/utils/index.ts (modified - added exports for signal processing functions)
+- __tests__/zscore-normalization.test.ts (created - 280 lines with 41 comprehensive tests)
+
+**Functions implemented**:
+- calculateZScore(value, mean, std): Core z-score formula with validation
+- normalizeThetaZScore(thetaPower, baseline): Single theta value normalization
+- normalizeAllBands(bandPowers, baseline): Multi-band normalization
+- normalizeThetaArray(thetaValues, baseline): Batch processing for arrays
+- calculateWindowZScore(thetaWindow, baseline): Sliding window z-score
+- checkZScoreThreshold(zscore, target, hysteresis): Threshold detection with hysteresis
+- categorizeZScoreZone(zscore): Zone categorization for visualization
+
+**Test coverage**: 41 test cases covering:
+- Core z-score calculation (8 tests)
+- Theta normalization (4 tests)
+- All-bands normalization (3 tests)
+- Array normalization (5 tests)
+- Window z-score calculation (5 tests)
+- Threshold checking with hysteresis (8 tests)
+- Zone categorization (5 tests)
+- Integration tests (3 tests)
+
+**Key features**:
+- Z-score formula: z = (value - mean) / std
+- Input validation (throws error for std ≤ 0)
+- Hysteresis support to prevent oscillation in closed-loop control
+- Zone categories aligned with theta gauge color zones
+- TypeScript strict typing throughout
+
+**Next steps**: Create sliding buffer manager for real-time EEG processing (last 2-4 seconds)
+
