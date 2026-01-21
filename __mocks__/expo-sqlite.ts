@@ -137,9 +137,38 @@ const filterRows = (
   if (!where) return rows;
 
   // Simple WHERE id = ? parsing
-  if (where.match(/id\s*=\s*\?/i)) {
+  if (where.match(/^id\s*=\s*\?$/i)) {
     const id = params[0] as number;
     return rows.filter((row) => row.id === id);
+  }
+
+  // WHERE session_type = ?
+  if (where.match(/session_type\s*=\s*\?/i)) {
+    const sessionType = params[0] as string;
+    return rows.filter((row) => row.session_type === sessionType);
+  }
+
+  // WHERE hour_of_day = ?
+  if (where.match(/hour_of_day\s*=\s*\?/i)) {
+    const hourOfDay = params[0] as number;
+    return rows.filter((row) => row.hour_of_day === hourOfDay);
+  }
+
+  // WHERE start_time >= ? AND start_time <= ?
+  if (where.match(/start_time\s*>=\s*\?\s*AND\s*start_time\s*<=\s*\?/i)) {
+    const startTime = params[0] as number;
+    const endTime = params[1] as number;
+    return rows.filter((row) => {
+      const rowStartTime = row.start_time as number;
+      return rowStartTime >= startTime && rowStartTime <= endTime;
+    });
+  }
+
+  // WHERE session_count >= ? (used with ORDER BY)
+  if (where.match(/session_count\s*>=\s*(\d+)/i)) {
+    const match = where.match(/session_count\s*>=\s*(\d+)/i);
+    const minCount = parseInt(match![1]);
+    return rows.filter((row) => (row.session_count as number) >= minCount);
   }
 
   return rows;
@@ -175,25 +204,58 @@ const sortRows = (
 const parseUpdate = (
   sql: string,
   params: unknown[]
-): { tableName: string; updates: Record<string, unknown>; id: number } => {
-  const match = sql.match(/UPDATE (\w+) SET (.*?) WHERE id = \?/i);
+): {
+  tableName: string;
+  updates: Record<string, unknown>;
+  whereField: string;
+  whereValue: number;
+} => {
+  // Support both id = ? and hour_of_day = ? WHERE clauses
+  const matchById = sql.match(/UPDATE (\w+)\s+SET (.*?) WHERE id = \?/is);
+  const matchByHour = sql.match(
+    /UPDATE (\w+)\s+SET (.*?) WHERE hour_of_day = \?/is
+  );
+
+  const match = matchById || matchByHour;
   if (!match) {
     throw new Error('Invalid UPDATE statement');
   }
 
   const tableName = match[1];
   const setClause = match[2];
+  const whereField = matchByHour ? 'hour_of_day' : 'id';
 
   const updates: Record<string, unknown> = {};
-  const setParts = setClause.split(',');
-  setParts.forEach((part, idx) => {
+  // Parse SET clause more carefully - split by comma but handle strftime expressions
+  const setParts: string[] = [];
+  let current = '';
+  let parenDepth = 0;
+  for (const char of setClause) {
+    if (char === '(') parenDepth++;
+    if (char === ')') parenDepth--;
+    if (char === ',' && parenDepth === 0) {
+      setParts.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  if (current.trim()) setParts.push(current.trim());
+
+  let paramIdx = 0;
+  setParts.forEach((part) => {
     const [field] = part.trim().split('=');
-    updates[field.trim()] = params[idx];
+    const fieldName = field.trim();
+    // Skip fields that use SQL functions like strftime
+    if (!part.includes('strftime')) {
+      updates[fieldName] = params[paramIdx];
+      paramIdx++;
+    }
   });
 
-  const id = params[params.length - 1] as number;
+  const whereValue = params[params.length - 1] as number;
 
-  return { tableName, updates, id };
+  return { tableName, updates, whereField, whereValue };
 };
 
 /**
@@ -202,16 +264,27 @@ const parseUpdate = (
 const parseDelete = (
   sql: string,
   params: unknown[]
-): { tableName: string; id?: number } => {
+): { tableName: string; whereField?: string; whereValue?: number } => {
   const match = sql.match(/DELETE FROM (\w+)/i);
   if (!match) {
     throw new Error('Invalid DELETE statement');
   }
 
   const tableName = match[1];
-  const id = params.length > 0 ? (params[0] as number) : undefined;
 
-  return { tableName, id };
+  // Check for WHERE clause
+  if (sql.match(/WHERE id = \?/i)) {
+    return { tableName, whereField: 'id', whereValue: params[0] as number };
+  }
+  if (sql.match(/WHERE hour_of_day = \?/i)) {
+    return {
+      tableName,
+      whereField: 'hour_of_day',
+      whereValue: params[0] as number,
+    };
+  }
+
+  return { tableName };
 };
 
 /**
@@ -246,29 +319,50 @@ class MockSQLiteDatabase implements SQLiteDatabase {
 
       return { lastInsertRowId: counter, changes: 1 };
     } else if (query.match(/UPDATE/i)) {
-      const { tableName, updates, id } = parseUpdate(query, params);
+      const { tableName, updates, whereField, whereValue } = parseUpdate(
+        query,
+        params
+      );
       const table = tables.get(tableName);
       if (!table) {
         throw new Error(`Table ${tableName} does not exist`);
       }
 
-      const row = table.get(id);
-      if (row) {
-        Object.assign(row, updates);
+      // Find the row to update based on whereField
+      let foundRow: Record<string, unknown> | undefined;
+      for (const row of table.values()) {
+        if (row[whereField] === whereValue) {
+          foundRow = row;
+          break;
+        }
+      }
+
+      if (foundRow) {
+        Object.assign(foundRow, updates);
         return { lastInsertRowId: 0, changes: 1 };
       }
       return { lastInsertRowId: 0, changes: 0 };
     } else if (query.match(/DELETE FROM/i)) {
-      const { tableName, id } = parseDelete(query, params);
+      const { tableName, whereField, whereValue } = parseDelete(query, params);
       const table = tables.get(tableName);
       if (!table) {
         throw new Error(`Table ${tableName} does not exist`);
       }
 
-      if (id !== undefined) {
-        const existed = table.has(id);
-        table.delete(id);
-        return { lastInsertRowId: 0, changes: existed ? 1 : 0 };
+      if (whereField !== undefined && whereValue !== undefined) {
+        // Find and delete row by whereField
+        let deletedId: number | null = null;
+        for (const [id, row] of table.entries()) {
+          if (row[whereField] === whereValue) {
+            deletedId = id;
+            break;
+          }
+        }
+        if (deletedId !== null) {
+          table.delete(deletedId);
+          return { lastInsertRowId: 0, changes: 1 };
+        }
+        return { lastInsertRowId: 0, changes: 0 };
       } else {
         const count = table.size;
         table.clear();
@@ -287,6 +381,76 @@ class MockSQLiteDatabase implements SQLiteDatabase {
         const tableName = tableMatch[1];
         return { count: tables.has(tableName) ? 1 : 0 } as T;
       }
+    }
+
+    // Handle aggregate queries (SUM, AVG, COUNT)
+    if (query.match(/SELECT\s+COUNT\(\*\)|SUM\(|AVG\(/i)) {
+      const tableMatch = query.match(/FROM (\w+)/i);
+      if (!tableMatch) return null;
+      const tableName = tableMatch[1];
+      const table = tables.get(tableName);
+      if (!table) {
+        return {
+          total_sessions: 0,
+          total_duration_seconds: 0,
+          avg_theta_zscore: 0,
+          avg_signal_quality: 0,
+          avg_subjective_rating: null,
+          count: 0,
+        } as T;
+      }
+
+      let rows = Array.from(table.values()) as Record<string, unknown>[];
+
+      // Apply WHERE clause if present
+      const { where } = parseSelect(query);
+      rows = filterRows(rows, where, params);
+
+      // Handle simple COUNT
+      if (query.match(/SELECT COUNT\(\*\) as count/i)) {
+        return { count: rows.length } as T;
+      }
+
+      // Handle aggregate session stats
+      if (query.match(/total_sessions|total_duration_seconds/i)) {
+        const totalSessions = rows.length;
+        const totalDuration = rows.reduce(
+          (sum, r) => sum + ((r.duration_seconds as number) || 0),
+          0
+        );
+        const avgTheta =
+          totalSessions > 0
+            ? rows.reduce(
+                (sum, r) => sum + ((r.avg_theta_zscore as number) || 0),
+                0
+              ) / totalSessions
+            : 0;
+        const avgSignal =
+          totalSessions > 0
+            ? rows.reduce(
+                (sum, r) => sum + ((r.signal_quality_avg as number) || 0),
+                0
+              ) / totalSessions
+            : 0;
+        const ratingsRows = rows.filter((r) => r.subjective_rating !== null);
+        const avgRating =
+          ratingsRows.length > 0
+            ? ratingsRows.reduce(
+                (sum, r) => sum + ((r.subjective_rating as number) || 0),
+                0
+              ) / ratingsRows.length
+            : null;
+
+        return {
+          total_sessions: totalSessions,
+          total_duration_seconds: totalDuration,
+          avg_theta_zscore: avgTheta,
+          avg_signal_quality: avgSignal,
+          avg_subjective_rating: avgRating,
+        } as T;
+      }
+
+      return { count: rows.length } as T;
     }
 
     const { tableName, isCount, orderBy, where } = parseSelect(query);
@@ -325,6 +489,35 @@ class MockSQLiteDatabase implements SQLiteDatabase {
             { name: 'calibration_timestamp', pk: 0 },
             { name: 'quality_score', pk: 0 },
             { name: 'created_at', pk: 0 },
+          ] as T[];
+        }
+        if (tableName === 'sessions') {
+          return [
+            { name: 'id', pk: 1 },
+            { name: 'session_type', pk: 0 },
+            { name: 'start_time', pk: 0 },
+            { name: 'end_time', pk: 0 },
+            { name: 'duration_seconds', pk: 0 },
+            { name: 'avg_theta_zscore', pk: 0 },
+            { name: 'max_theta_zscore', pk: 0 },
+            { name: 'entrainment_freq', pk: 0 },
+            { name: 'volume', pk: 0 },
+            { name: 'signal_quality_avg', pk: 0 },
+            { name: 'subjective_rating', pk: 0 },
+            { name: 'notes', pk: 0 },
+            { name: 'created_at', pk: 0 },
+          ] as T[];
+        }
+        if (tableName === 'circadian_patterns') {
+          return [
+            { name: 'id', pk: 1 },
+            { name: 'hour_of_day', pk: 0 },
+            { name: 'avg_theta_mean', pk: 0 },
+            { name: 'avg_theta_std', pk: 0 },
+            { name: 'session_count', pk: 0 },
+            { name: 'avg_subjective_rating', pk: 0 },
+            { name: 'created_at', pk: 0 },
+            { name: 'updated_at', pk: 0 },
           ] as T[];
         }
       }
