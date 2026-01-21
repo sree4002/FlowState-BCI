@@ -460,3 +460,50 @@ Victory Native provides chart components for:
 
 **Next steps**: Continue with Phase 2 tasks
 
+
+### Task: Add pull-to-refresh for updating dashboard data
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Added `refreshRecentSessions` function to SessionContext that fetches sessions from the SQLite database
+2. Added `isRefreshing` state to SessionContext to track refresh status
+3. Updated SessionContext state and actions interfaces with the new properties
+4. Created `sessionRecordToSession` helper function to convert database records to Session type
+5. Updated DashboardScreen to import and use `RefreshControl` from react-native
+6. Wrapped ScrollView with RefreshControl component for pull-to-refresh functionality
+7. Connected RefreshControl to `isRefreshing` state and `refreshRecentSessions` action from SessionContext
+8. Styled RefreshControl with theme colors (tintColor, colors, progressBackgroundColor)
+9. Fixed destructuring alias for `currentThetaZScore` to `thetaZScore` for backward compatibility
+10. Updated existing tests to handle RefreshControl wrapper around ScrollView content
+11. Added new test suite "Pull to Refresh" with tests for RefreshControl presence
+12. Fixed test assertions to accept both uppercase and lowercase React Native element types
+13. All 22 DashboardScreen tests pass
+14. All 33 contexts tests pass
+
+**Files created/modified**:
+- src/contexts/SessionContext.tsx (modified - added refreshRecentSessions, isRefreshing, sessionRecordToSession)
+- src/screens/DashboardScreen.tsx (modified - added RefreshControl with onRefresh and refreshing props)
+- __tests__/DashboardScreen.test.tsx (modified - updated tests for RefreshControl, added new test suite)
+
+**Implementation details**:
+- Pull-to-refresh triggers `refreshRecentSessions()` which:
+  - Sets `isRefreshing` to true
+  - Opens SQLite database
+  - Fetches all sessions via `getAllSessions()`
+  - Converts SessionRecord[] to Session[] (keeps last 10)
+  - Updates `recentSessions` in context state
+  - Sets `isRefreshing` to false
+- RefreshControl uses theme colors:
+  - tintColor: Colors.primary.main (#4A90E2)
+  - colors: [Colors.primary.main] (for Android)
+  - progressBackgroundColor: Colors.surface.primary (#1E2433)
+- Error handling: logs warning to console but doesn't throw, keeping dashboard functional
+
+**Test coverage**:
+- "includes RefreshControl in the ScrollView" - verifies RefreshControl is present in component tree
+- "renders without crashing when isRefreshing is false" - verifies default state works
+- All existing tests updated to handle component structure changes
+
+**Next steps**: Continue with remaining Phase 2/3 tasks
+

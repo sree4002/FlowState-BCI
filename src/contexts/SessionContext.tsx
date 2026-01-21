@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  ReactNode,
+} from 'react';
 import {
   Session,
   SessionConfig,
@@ -6,6 +12,7 @@ import {
   CalibrationState,
   VisualizationMode,
 } from '../types';
+import { openDatabase, getAllSessions, SessionRecord } from '../services/database';
 
 /**
  * Session context state interface
@@ -19,6 +26,7 @@ export interface SessionContextState {
   currentThetaZScore: number | null;
   elapsedSeconds: number;
   recentSessions: Session[];
+  isRefreshing: boolean;
 }
 
 /**
@@ -35,6 +43,7 @@ export interface SessionContextActions {
   setRecentSessions: (sessions: Session[]) => void;
   addSession: (session: Session) => void;
   resetSessionState: () => void;
+  refreshRecentSessions: () => Promise<void>;
 }
 
 /**
@@ -75,6 +84,44 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
   );
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [recentSessions, setRecentSessions] = useState<Session[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+
+  /**
+   * Converts a SessionRecord from the database to a Session type
+   */
+  const sessionRecordToSession = (record: SessionRecord): Session => ({
+    id: record.id ?? 0,
+    session_type: record.session_type,
+    start_time: record.start_time,
+    end_time: record.end_time,
+    duration_seconds: record.duration_seconds,
+    avg_theta_zscore: record.avg_theta_zscore,
+    max_theta_zscore: record.max_theta_zscore,
+    entrainment_freq: record.entrainment_freq,
+    volume: record.volume,
+    signal_quality_avg: record.signal_quality_avg,
+    subjective_rating: record.subjective_rating,
+    notes: record.notes,
+  });
+
+  /**
+   * Refreshes recent sessions from the database
+   */
+  const refreshRecentSessions = useCallback(async (): Promise<void> => {
+    setIsRefreshing(true);
+    try {
+      const db = openDatabase();
+      const sessions = getAllSessions(db);
+      // Convert SessionRecord[] to Session[] and keep last 10
+      const convertedSessions = sessions.slice(0, 10).map(sessionRecordToSession);
+      setRecentSessions(convertedSessions);
+    } catch (error) {
+      // Log error but don't throw - dashboard should remain functional
+      console.warn('Failed to refresh sessions:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, []);
 
   const addSession = (session: Session) => {
     setRecentSessions((prev) => [session, ...prev].slice(0, 10)); // Keep only last 10 sessions
@@ -99,6 +146,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
     currentThetaZScore,
     elapsedSeconds,
     recentSessions,
+    isRefreshing,
     setCurrentSession,
     setSessionConfig,
     setSessionState,
@@ -109,6 +157,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
     setRecentSessions,
     addSession,
     resetSessionState,
+    refreshRecentSessions,
   };
 
   return (

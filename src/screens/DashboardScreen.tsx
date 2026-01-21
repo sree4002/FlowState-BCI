@@ -9,16 +9,26 @@
  * - Quick action buttons
  */
 
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import { useDevice } from '../contexts';
 import { useSession } from '../contexts';
 import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
 
 export default function DashboardScreen() {
   const { deviceInfo, signalQuality, isConnected } = useDevice();
-  const { currentSession, sessionState, thetaZScore, recentSessions } =
-    useSession();
+  const {
+    currentSession,
+    sessionState,
+    currentThetaZScore: thetaZScore,
+    recentSessions,
+    isRefreshing,
+    refreshRecentSessions,
+  } = useSession();
+
+  const handleRefresh = useCallback(() => {
+    refreshRecentSessions();
+  }, [refreshRecentSessions]);
 
   const getSignalQualityLabel = (score: number): string => {
     if (score >= 90) return 'Excellent';
@@ -43,7 +53,18 @@ export default function DashboardScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={handleRefresh}
+          tintColor={Colors.primary.main}
+          colors={[Colors.primary.main]}
+          progressBackgroundColor={Colors.surface.primary}
+        />
+      }
+    >
       {/* Connection Status Bar */}
       <View style={styles.connectionBar}>
         <View
