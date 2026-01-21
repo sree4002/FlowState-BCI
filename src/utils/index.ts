@@ -1,3 +1,13 @@
-// Utils export placeholder
-// Export utility functions here as they are created
-export {};
+// Utils exports
+export {
+  calculateSignalQualityScore,
+  calculateSignalQuality,
+  calculateArtifactPercentage,
+  detectAmplitudeArtifact,
+  detectGradientArtifact,
+  getQualityCategory,
+  isQualitySufficientForCalibration,
+  shouldPromptRecalibration,
+  ARTIFACT_THRESHOLDS,
+  QUALITY_THRESHOLDS,
+} from './signalQuality';
