@@ -398,75 +398,70 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create sliding buffer manager for real-time EEG processing (last 2-4 seconds)
+### Task: Implement AsyncStorage wrapper for user settings and device pairing info
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created SlidingBufferManager class in src/services/slidingBufferManager.ts (380+ lines)
-2. Implemented circular buffer using Float64Array for efficient memory usage
-3. Supports configurable sampling rates (500Hz headband, 250Hz earpiece) and window durations (2-4 seconds)
-4. Core features implemented:
-   - addSample(): Add individual EEG samples with timestamps
-   - addPacket(): Add samples from EEGDataPacket (BLE device format)
-   - addPackets(): Batch add multiple packets
-   - getSamples(): Get all samples in chronological order
-   - getWindow(): Get samples for specific time window (for Welch's periodogram)
-   - getRecentSamples(): Get most recent N samples (for visualization)
-   - getLatestSample()/getLatestTimestamp(): Quick access to newest data
-   - getStats(): Buffer statistics including fill percentage, processed counts
-   - hasEnoughSamples()/isFull(): Check buffer readiness for processing
-   - clear(): Reset buffer while preserving configuration
-   - reconfigure(): Change sampling rate/window duration (clears samples)
-   - clone(): Create copy with same configuration
-   - getRawBuffer(): Direct Float64Array access for high-performance processing
-5. Created factory functions for common device configurations:
-   - createHeadbandBuffer(): 500Hz sampling rate
-   - createEarpieceBuffer(): 250Hz sampling rate
-6. Full TypeScript support with exported interfaces:
-   - SlidingBufferConfig: Configuration options
-   - BufferSamples: Return type for sample retrieval
-   - BufferStats: Buffer state statistics
-7. Created comprehensive test suite with 63 test cases covering:
-   - Construction and configuration (5 tests)
-   - Factory functions (4 tests)
-   - Adding single samples (4 tests)
-   - Adding packets (4 tests)
-   - Circular buffer behavior (3 tests)
-   - Getting samples (4 tests)
-   - Window retrieval (5 tests)
-   - Recent samples (3 tests)
-   - Latest sample (4 tests)
-   - Buffer statistics (4 tests)
-   - hasEnoughSamples (3 tests)
-   - Clear (3 tests)
-   - Reconfigure (4 tests)
-   - Clone (3 tests)
-   - Raw buffer access (1 test)
-   - Real-world scenarios (4 tests)
-   - Edge cases (5 tests)
-8. All 63 tests passing
-9. Linting passes with no errors or warnings
-10. Updated src/services/index.ts to export the new module
+1. Created src/services/storage.ts with comprehensive AsyncStorage wrapper implementation
+2. Defined STORAGE_KEYS constant object with namespaced keys (@flowstate/) for user_settings, paired_devices, last_paired_device, onboarding_completed
+3. Created StoredDeviceInfo interface for persisted device data (excludes runtime-only fields like battery_level, rssi, is_connected)
+4. Implemented UserSettingsStorage service with methods:
+   - get(): Retrieves stored settings or null
+   - getWithDefaults(): Retrieves settings merged with defaults
+   - save(): Saves complete settings object
+   - update(): Partial update with field merging
+   - reset(): Resets to default settings
+   - clear(): Removes settings from storage
+5. Implemented DevicePairingStorage service with methods:
+   - getAll(): Returns all paired devices
+   - getById(): Retrieves specific device by ID
+   - save(): Adds new device or updates existing (preserves paired_at timestamp)
+   - remove(): Removes device by ID (also clears last paired if applicable)
+   - clearAll(): Removes all paired devices
+   - getLastPaired(): Gets last paired device ID
+   - setLastPaired(): Sets last paired device ID
+   - clearLastPaired(): Clears last paired reference
+   - updateLastConnected(): Updates device's last_connected timestamp
+   - getCount(): Returns count of paired devices
+6. Implemented OnboardingStorage service with methods:
+   - isCompleted(): Checks if onboarding is completed
+   - markCompleted(): Marks onboarding as completed
+   - reset(): Resets onboarding status
+7. Implemented clearAllAppData() utility function to remove all app data
+8. All methods include proper error handling with try/catch and console.error logging
+9. Created comprehensive test suite with 45 tests covering all storage services (__tests__/storage.test.ts)
+10. Created inline Jest mock for AsyncStorage with Map-based in-memory storage
+11. Updated src/services/index.ts to export storage module
+12. Updated jest.config.js with moduleNameMapper for AsyncStorage mock
+13. Verified all 45 tests pass
+14. Verified ESLint passes with no errors or warnings
 
 **Files created/modified**:
-- src/services/slidingBufferManager.ts (created - 380+ lines)
-- __tests__/slidingBufferManager.test.ts (created - 500+ lines with 63 tests)
-- src/services/index.ts (modified - added export)
+- src/services/storage.ts (created - 295 lines)
+- __tests__/storage.test.ts (created - 633 lines with 45 test cases)
+- __mocks__/@react-native-async-storage/async-storage.ts (created - mock implementation)
+- src/services/index.ts (modified - added storage export)
+- jest.config.js (modified - added moduleNameMapper for async-storage)
+- .ralphy/progress.txt (updated)
 
-**Key design decisions**:
-- Used Float64Array for efficient memory storage and fast access
-- Circular buffer implementation avoids memory allocation during streaming
-- Separate timestamps array enables accurate duration calculations
-- Configurable window duration supports different analysis requirements (2-4 seconds)
-- Factory functions simplify common use cases for headband/earpiece devices
-- Statistics tracking enables monitoring of buffer health during sessions
+**Key features**:
+- Namespaced storage keys to avoid conflicts (@flowstate/ prefix)
+- Type-safe interfaces for all stored data
+- Separation of persistent device info from runtime-only data
+- Automatic merge with defaults when retrieving settings
+- Preservation of paired_at timestamp when updating devices
+- Cascading deletion of last paired device when device is removed
+- Comprehensive error handling with graceful fallbacks
 
-**Integration points**:
-- Works with existing EEGDataPacket type from src/types
-- Designed for integration with DeviceContext (receives latestEEGData)
-- Output compatible with Welch's periodogram implementation
-- Supports artifact detection pipelines with getWindow() method
+**Test coverage**: 45 tests covering:
+- Storage keys validation (3 tests)
+- UserSettingsStorage: get, getWithDefaults, save, update, reset, clear (10 tests)
+- DevicePairingStorage: getAll, getById, save, remove, clearAll, getLastPaired, setLastPaired, clearLastPaired, updateLastConnected, getCount (19 tests)
+- OnboardingStorage: isCompleted, markCompleted, reset (5 tests)
+- clearAllAppData utility (2 tests)
+- StoredDeviceInfo type validation (2 tests)
+- Error handling scenarios (4 tests)
 
-**Next steps**: Implement amplitude threshold artifact detection (±100 µV) as per Phase 4 task 7
+**Next steps**: Create data export utilities for CSV, JSON, and EDF formats as per Phase 2 task 6
 
