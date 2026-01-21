@@ -398,80 +398,88 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create BLEService class with device scanning, connection, and disconnection methods
+### Task: Implement frequency ratio artifact detection (30-50 Hz vs 4-30 Hz ratio >2.0)
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created comprehensive BLEService class in src/services/BLEService.ts (450+ lines)
-2. Implemented device scanning functionality with configurable options:
-   - Name pattern filtering (FlowState, BCI, EEG by default)
-   - Service UUID filtering
-   - Configurable timeout (default 10 seconds)
-   - Duplicate device handling
-3. Implemented device connection with features:
-   - MTU negotiation support
-   - Connection timeout handling
-   - Auto-discovery of services and characteristics
-   - DeviceInfo conversion (headband vs earpiece detection, sampling rates)
-4. Implemented device disconnection with cleanup:
-   - Graceful disconnection handling
-   - Automatic cleanup of subscriptions
-   - State transition management
-5. Implemented event-based architecture with listener management:
-   - Scan result listeners
-   - Connection state listeners (disconnected, connecting, connected, disconnecting)
-   - Bluetooth state change listeners
-   - Error listeners
-6. Added platform-specific permission handling for Android (API 23+ and 31+)
-7. Implemented singleton pattern with getBLEService() and resetBLEService() helpers
-8. Exported BLE service UUIDs and device name patterns as constants
-9. Created comprehensive TypeScript types and interfaces:
-   - DiscoveredDevice, ScanOptions, ConnectionOptions
-   - ConnectionState type alias
-   - ScanListener, ConnectionStateListener, StateChangeListener, ErrorListener
-10. Created comprehensive test suite with 41 tests covering all functionality
-11. Created mock implementations for react-native-ble-plx and react-native
-12. Updated jest.config.js with module name mappings for new mocks
-13. Updated src/services/index.ts to export BLEService module
-14. Verified all 217 tests pass across all test suites
-15. Verified linting passes with no errors or warnings
+1. Created src/utils/signalProcessing.ts with comprehensive signal processing utilities
+2. Implemented FFT-based frequency analysis using a radix-2 Cooley-Tukey algorithm
+3. Defined FrequencyBands constants for EEG frequency bands (delta, theta, alpha, beta, gamma)
+4. Implemented core signal processing functions:
+   - fft(): Fast Fourier Transform for real-valued signals
+   - computePowerSpectrum(): Calculate power from FFT results
+   - getFrequencyBins(): Map FFT bins to frequency values in Hz
+   - calculateBandPower(): Calculate mean power in a specific frequency band
+5. Implemented detectFrequencyRatioArtifact() main function:
+   - Calculates ratio of high frequency (30-50 Hz) to low frequency (4-30 Hz) power
+   - Default threshold of 2.0 for artifact detection
+   - Returns FrequencyRatioResult with power values, ratio, hasArtifact flag, and threshold
+   - Handles edge cases: short signals, low sampling rates, DC offset removal
+6. Added helper functions for testing:
+   - generateSineWave(): Generate single-frequency test signals
+   - generateSyntheticEEG(): Generate multi-band EEG-like signals with controllable amplitudes
+7. Updated src/utils/index.ts to export the new module
+8. Created comprehensive test suite with 48 tests (__tests__/signal-processing.test.ts)
+9. Verified all tests pass (48 tests in signal-processing.test.ts)
+10. Ran Prettier to format code
 
 **Files created/modified**:
-- src/services/BLEService.ts (created - 450+ lines with full BLE service implementation)
-- src/services/index.ts (modified - added BLEService export)
-- __tests__/BLEService.test.ts (created - 588 lines with 41 comprehensive tests)
-- __mocks__/react-native-ble-plx.ts (created - mock for BLE library)
-- __mocks__/react-native.ts (created - mock for React Native platform/permissions)
-- jest.config.js (modified - added module name mappings for new mocks)
+- src/utils/signalProcessing.ts (created - 297 lines with FFT and artifact detection)
+- src/utils/index.ts (modified - added export for signalProcessing)
+- __tests__/signal-processing.test.ts (created - 354 lines with 48 comprehensive tests)
 
-**BLEService features**:
-- Device scanning with configurable filters and timeout
-- Device connection with MTU negotiation and timeout
-- Device disconnection with proper cleanup
-- Event listeners for scan results, connection state, BLE state, and errors
-- Singleton pattern for global access
-- Platform-specific permission handling (Android)
-- TypeScript types for all interfaces and options
+**Key implementation details**:
+- Frequency ratio artifact detection identifies muscle (EMG) artifacts in EEG data
+- High frequency (30-50 Hz) power dominance indicates muscle contamination
+- Ratio > 2.0 threshold based on typical EEG characteristics
+- Supports sampling rates from 100 Hz to 500+ Hz (common EEG ranges)
+- Includes DC offset removal before FFT analysis
+- Returns structured result with all relevant metrics
 
-**Exported constants**:
-- BLE_SERVICE_UUIDS: EEG_SERVICE, DEVICE_INFO_SERVICE, BATTERY_SERVICE
-- BLE_DEVICE_NAME_PATTERNS: ['FlowState', 'BCI', 'EEG']
-- DEFAULT_SCAN_TIMEOUT_MS: 10000
+**Algorithm**:
+1. Remove DC offset (mean) from signal
+2. Compute FFT using radix-2 Cooley-Tukey algorithm
+3. Calculate power spectrum (|FFT|²)
+4. Calculate mean power in low frequency band (4-30 Hz)
+5. Calculate mean power in high frequency band (30-50 Hz)
+6. Compute ratio = highFrequencyPower / lowFrequencyPower
+7. Flag artifact if ratio > threshold (default 2.0)
 
-**Test coverage**: 41 tests covering:
-- Constants validation (3 tests)
-- Initialization (5 tests)
-- Singleton behavior (2 tests)
-- Permission handling (1 test)
-- Bluetooth state (4 tests)
-- Scanning (6 tests)
-- Connection (7 tests)
-- Disconnection (4 tests)
-- Error handling (1 test)
-- Cleanup (2 tests)
-- Type validation (4 tests)
-- Integration (2 tests)
+**Test coverage**:
+- FrequencyBands constants validation (7 tests)
+- FREQUENCY_RATIO_ARTIFACT_THRESHOLD validation (1 test)
+- generateSineWave function (3 tests)
+- generateSyntheticEEG function (3 tests)
+- FFT implementation (4 tests)
+- computePowerSpectrum function (2 tests)
+- getFrequencyBins function (4 tests)
+- calculateBandPower function (3 tests)
+- detectFrequencyRatioArtifact main function (14 tests)
+- Edge cases (5 tests)
+- FrequencyRatioResult interface (1 test)
+- Integration with SignalQuality type (1 test)
 
-**Next steps**: Implement auto-reconnect logic with exponential backoff as per Phase 3 task 2
+**Usage example**:
+```typescript
+import { detectFrequencyRatioArtifact } from './utils/signalProcessing';
+
+const eegData = [...]; // EEG samples at 200 Hz
+const result = detectFrequencyRatioArtifact(eegData, 200);
+
+if (result.hasArtifact) {
+  console.log(`Muscle artifact detected! Ratio: ${result.ratio.toFixed(2)}`);
+}
+
+// Use with SignalQuality interface
+const signalQuality: SignalQuality = {
+  score: 85,
+  artifact_percentage: 5,
+  has_amplitude_artifact: false,
+  has_gradient_artifact: false,
+  has_frequency_artifact: result.hasArtifact,
+};
+```
+
+**Next steps**: Continue with remaining signal processing and artifact detection tasks
 
