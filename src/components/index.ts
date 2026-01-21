@@ -1,3 +1,5 @@
-// Components export placeholder
-// Export reusable components here as they are created
-export {};
+// Components exports
+export {
+  NextSessionWidget,
+  type NextSessionWidgetProps,
+} from './NextSessionWidget';
