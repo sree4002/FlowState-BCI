@@ -14,7 +14,7 @@ import { StatusBar, Text } from 'react-native';
 import { AppContext } from './src/context/AppContext';
 
 // Screens
-import HomeScreen from './src/screens/HomeScreen';
+import DashboardScreen from './src/screens/DashboardScreen';
 import SessionScreen from './src/screens/SessionScreen';
 import HistoryScreen from './src/screens/HistoryScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
@@ -22,18 +22,21 @@ import SettingsScreen from './src/screens/SettingsScreen';
 // Services
 import BleService from './src/services/BleService';
 
+// Navigation types
+import type { RootTabParamList } from './src/navigation/types';
+
 // Tab navigator
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<RootTabParamList>();
 
 // Simple icon component (replace with react-native-vector-icons in production)
 interface TabIconProps {
-  name: string;
+  name: keyof RootTabParamList;
   focused: boolean;
 }
 
 const TabIcon: React.FC<TabIconProps> = ({ name, focused }) => {
-  const icons: Record<string, string> = {
-    Home: focused ? '🏠' : '🏚️',
+  const icons: Record<keyof RootTabParamList, string> = {
+    Dashboard: focused ? '🏠' : '🏚️',
     Session: focused ? '🧠' : '💭',
     History: focused ? '📊' : '📈',
     Settings: focused ? '⚙️' : '🔧',
@@ -116,12 +119,12 @@ export default function App(): React.JSX.Element {
           }}
         >
           <Tab.Screen
-            name="Home"
-            component={HomeScreen}
+            name="Dashboard"
+            component={DashboardScreen}
             options={{
-              headerShown: false,
+              tabBarLabel: 'Dashboard',
               tabBarIcon: ({ focused }) => (
-                <TabIcon name="Home" focused={focused} />
+                <TabIcon name="Dashboard" focused={focused} />
               ),
             }}
           />
@@ -129,7 +132,7 @@ export default function App(): React.JSX.Element {
             name="Session"
             component={SessionScreen}
             options={{
-              headerShown: false,
+              tabBarLabel: 'Session',
               tabBarIcon: ({ focused }) => (
                 <TabIcon name="Session" focused={focused} />
               ),
@@ -139,7 +142,7 @@ export default function App(): React.JSX.Element {
             name="History"
             component={HistoryScreen}
             options={{
-              headerShown: false,
+              tabBarLabel: 'History',
               tabBarIcon: ({ focused }) => (
                 <TabIcon name="History" focused={focused} />
               ),
@@ -149,7 +152,7 @@ export default function App(): React.JSX.Element {
             name="Settings"
             component={SettingsScreen}
             options={{
-              headerShown: false,
+              tabBarLabel: 'Settings',
               tabBarIcon: ({ focused }) => (
                 <TabIcon name="Settings" focused={focused} />
               ),
