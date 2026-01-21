@@ -1,166 +1,66 @@
 /**
- * Jest mock for react-native module
- * Provides minimal implementations needed for component testing
+ * Mock implementation of react-native for testing
  */
-import * as React from 'react';
 
 // Platform mock
 export const Platform = {
-  OS: 'ios' as const,
-  Version: '14.0',
-  select: jest.fn((obj: Record<string, unknown>) => obj.ios ?? obj.default),
+  OS: 'ios' as 'ios' | 'android',
+  Version: 31,
+  select: <T>(specifics: { ios?: T; android?: T; default?: T }): T | undefined =>
+    specifics[Platform.OS] || specifics.default,
   isPad: false,
   isTVOS: false,
   isTV: false,
+  isTesting: true,
 };
 
-// StyleSheet mock
-export const StyleSheet = {
-  create: <T extends Record<string, unknown>>(styles: T): T => styles,
-  flatten: (style: unknown) => style,
-  hairlineWidth: 1,
-  absoluteFill: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+// PermissionsAndroid mock
+export const PermissionsAndroid = {
+  PERMISSIONS: {
+    ACCESS_FINE_LOCATION: 'android.permission.ACCESS_FINE_LOCATION',
+    ACCESS_COARSE_LOCATION: 'android.permission.ACCESS_COARSE_LOCATION',
+    BLUETOOTH_SCAN: 'android.permission.BLUETOOTH_SCAN',
+    BLUETOOTH_CONNECT: 'android.permission.BLUETOOTH_CONNECT',
+    BLUETOOTH_ADVERTISE: 'android.permission.BLUETOOTH_ADVERTISE',
   },
-  absoluteFillObject: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+  RESULTS: {
+    GRANTED: 'granted',
+    DENIED: 'denied',
+    NEVER_ASK_AGAIN: 'never_ask_again',
   },
+  check: jest.fn().mockResolvedValue(true),
+  request: jest.fn().mockResolvedValue('granted'),
+  requestMultiple: jest.fn().mockResolvedValue({
+    'android.permission.ACCESS_FINE_LOCATION': 'granted',
+    'android.permission.BLUETOOTH_SCAN': 'granted',
+    'android.permission.BLUETOOTH_CONNECT': 'granted',
+  }),
 };
 
-// View component mock
-export const View = ({
-  children,
-  style,
-  testID,
-  ...props
-}: React.PropsWithChildren<{ style?: unknown; testID?: string }>) =>
-  React.createElement('View', { style, testID, ...props }, children);
+// Allow tests to set platform
+export function setPlatform(os: 'ios' | 'android', version?: number): void {
+  Platform.OS = os;
+  if (version !== undefined) {
+    Platform.Version = version;
+  }
+}
 
-// Text component mock
-export const Text = ({
-  children,
-  style,
-  testID,
-  ...props
-}: React.PropsWithChildren<{ style?: unknown; testID?: string }>) =>
-  React.createElement('Text', { style, testID, ...props }, children);
+// Allow tests to configure permission results
+export function setPermissionResult(
+  results: Record<string, string>
+): void {
+  PermissionsAndroid.requestMultiple.mockResolvedValue(results);
+}
 
-// ScrollView component mock
-export const ScrollView = ({
-  children,
-  style,
-  contentContainerStyle,
-  testID,
-  ...props
-}: React.PropsWithChildren<{
-  style?: unknown;
-  contentContainerStyle?: unknown;
-  testID?: string;
-}>) =>
-  React.createElement(
-    'ScrollView',
-    { style, contentContainerStyle, testID, ...props },
-    children
-  );
-
-// TouchableOpacity component mock
-export const TouchableOpacity = ({
-  children,
-  onPress,
-  style,
-  activeOpacity,
-  testID,
-  ...props
-}: React.PropsWithChildren<{
-  onPress?: () => void;
-  style?: unknown;
-  activeOpacity?: number;
-  testID?: string;
-}>) =>
-  React.createElement(
-    'TouchableOpacity',
-    { onPress, style, activeOpacity, testID, ...props },
-    children
-  );
-
-// Switch component mock
-export const Switch = ({
-  value,
-  onValueChange,
-  trackColor,
-  thumbColor,
-  testID,
-  ...props
-}: {
-  value?: boolean;
-  onValueChange?: (value: boolean) => void;
-  trackColor?: { false?: string; true?: string };
-  thumbColor?: string;
-  testID?: string;
-}) =>
-  React.createElement('Switch', {
-    value,
-    onValueChange,
-    trackColor,
-    thumbColor,
-    testID,
-    ...props,
+// Reset mock state
+export function resetMocks(): void {
+  Platform.OS = 'ios';
+  Platform.Version = 31;
+  PermissionsAndroid.check.mockReset().mockResolvedValue(true);
+  PermissionsAndroid.request.mockReset().mockResolvedValue('granted');
+  PermissionsAndroid.requestMultiple.mockReset().mockResolvedValue({
+    'android.permission.ACCESS_FINE_LOCATION': 'granted',
+    'android.permission.BLUETOOTH_SCAN': 'granted',
+    'android.permission.BLUETOOTH_CONNECT': 'granted',
   });
-
-// Alert mock
-export const Alert = {
-  alert: jest.fn(),
-};
-
-// Dimensions mock
-export const Dimensions = {
-  get: jest.fn().mockReturnValue({ width: 375, height: 812, scale: 2, fontScale: 1 }),
-  addEventListener: jest.fn(),
-  removeEventListener: jest.fn(),
-};
-
-// Other commonly used components and utilities
-export const SafeAreaView = View;
-export const TouchableHighlight = TouchableOpacity;
-export const TouchableWithoutFeedback = TouchableOpacity;
-export const Pressable = TouchableOpacity;
-export const FlatList = ScrollView;
-export const SectionList = ScrollView;
-export const Image = View;
-export const TextInput = View;
-export const ActivityIndicator = View;
-export const Modal = View;
-export const StatusBar = View;
-export const KeyboardAvoidingView = View;
-
-export default {
-  Platform,
-  StyleSheet,
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
-  TouchableHighlight,
-  TouchableWithoutFeedback,
-  Pressable,
-  Switch,
-  Alert,
-  Dimensions,
-  SafeAreaView,
-  FlatList,
-  SectionList,
-  Image,
-  TextInput,
-  ActivityIndicator,
-  Modal,
-  StatusBar,
-  KeyboardAvoidingView,
-};
+}
