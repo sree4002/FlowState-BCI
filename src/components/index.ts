@@ -1,5 +1,7 @@
-// Export reusable components
+// Components export
+// Export reusable components here as they are created
+
 export {
-  TodaySummaryWidget,
-  type TodaySummaryWidgetProps,
-} from './TodaySummaryWidget';
+  ThetaTrendWidget,
+  type ThetaTrendWidgetProps,
+} from './ThetaTrendWidget';
