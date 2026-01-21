@@ -1,3 +1,2 @@
-// Screens export placeholder
-// Export screen components here as they are created
-export {};
+// Screen components exports
+export { default as DashboardScreen } from './DashboardScreen';

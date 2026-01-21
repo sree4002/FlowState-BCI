@@ -398,57 +398,57 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Create CustomSessionButton component for configurable sessions
+### Task: Create DashboardScreen placeholder with basic layout
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created CustomSessionButton component in src/components/CustomSessionButton.tsx
-2. Implemented button that opens a configuration modal when pressed
-3. Added three configurable sliders for session parameters:
-   - Duration slider (5-60 minutes, step 5, default 15 min)
-   - Frequency slider (4-12 Hz, step 0.5, for theta to alpha range)
-   - Volume slider (0-100%, step 5)
-4. Integrated with SessionContext to set session config and state
-5. Integrated with SettingsContext to use user's default settings for initial values
-6. Created SessionConfig object with type 'custom' when starting session
-7. Added callback prop (onSessionStart) for parent component notifications
-8. Added disabled state support with visual styling
-9. Added comprehensive accessibility attributes (labels, hints, roles, states)
-10. Implemented duration formatting (shows "X min" or "Xh Ym" for 60+ min)
-11. Styled according to theme with dark surface background, primary/secondary accent colors
-12. Added testID prop support for test automation
-13. Exported component and props interface from src/components/index.ts
-14. Added @react-native-community/slider dependency to package.json
-15. Added mock for Slider component in jest.setup.js
-16. Updated tsconfig.json to include src/ folder and use bundler moduleResolution
-17. Created comprehensive test suite with 17 test cases (__tests__/CustomSessionButton.test.tsx)
-18. Verified all tests pass (193 tests passing across 10 test suites)
+1. Created DashboardScreen.tsx in src/screens/ with a complete basic layout
+2. Implemented connection status bar showing device connection state
+3. Implemented signal quality card (conditionally shown when connected)
+4. Implemented current session card with session state and theta z-score display
+5. Implemented recent sessions card showing up to 3 recent sessions
+6. Implemented quick stats card showing session count, average duration, and average z-score
+7. Used the established theme system from src/constants/theme.ts for all styling
+8. Integrated with DeviceContext and SessionContext for state management
+9. Created comprehensive test suite with 20 tests covering component rendering, structure, default state, and context integration
+10. Created react-native mock (__mocks__/react-native.ts) for Jest testing
+11. Updated Jest configuration to support React Native component testing
+12. Exported DashboardScreen from src/screens/index.ts
+13. Installed @testing-library/react-native and @testing-library/dom for testing
+14. Verified all tests pass (196 tests across 10 test suites)
+15. Verified linting passes with no errors or warnings
 
 **Files created/modified**:
-- src/components/CustomSessionButton.tsx (created - 310 lines)
-- src/components/index.ts (modified - added CustomSessionButton export)
-- __tests__/CustomSessionButton.test.tsx (created - 17 comprehensive test cases)
-- package.json (modified - added @react-native-community/slider dependency)
-- jest.setup.js (modified - added Slider mock and setupFilesAfterEnv)
-- jest.config.js (modified - added setupFilesAfterEnv)
-- tsconfig.json (modified - added src/ to include, changed moduleResolution to bundler)
+- src/screens/DashboardScreen.tsx (created - 185 lines)
+- src/screens/index.ts (modified - exports DashboardScreen)
+- __tests__/DashboardScreen.test.tsx (created - 20 comprehensive tests)
+- __mocks__/react-native.ts (created - mock for React Native components)
+- jest.config.js (modified - added react-native mock mapping)
+- jest.setup.js (modified - cleaned up deprecated imports)
+- package.json (modified - added @testing-library/react-native, @testing-library/dom)
 
-**Component features**:
-- CustomSessionButtonProps interface with optional props: onSessionStart, disabled, testID
-- Default values: duration 15 min, frequency from settings.boost_frequency, volume from settings.default_volume
-- Session config includes: type, duration_minutes, entrainment_freq, volume, target_zscore, closed_loop_behavior
-- Button disabled when session is running (not idle)
-- Modal with Cancel and Start Session buttons
-- Styled using Theme colors: surface.primary for button, surface.elevated for modal
-- Slider colors: primary blue for duration, secondary purple for frequency, green for volume
+**DashboardScreen features**:
+- Connection status bar with visual indicator (green/red dot)
+- Device name display when connected
+- Battery level display when available
+- Signal quality card with quality label and percentage
+- Artifact detection display
+- Current session status (In Progress/Paused/No active session)
+- Session duration display
+- Theta Z-Score display
+- Recent sessions list (up to 3 sessions)
+- Quick stats: total sessions, average duration, average z-score
+- Fully typed with TypeScript
+- Responsive ScrollView layout
+- Dark theme styling using Colors, Spacing, BorderRadius, Typography from theme
 
 **Test coverage**:
-- Session Configuration Logic (4 tests)
-- Duration Formatting Logic (3 tests)
-- Theme Integration (3 tests)
-- Props Interface (3 tests)
-- Slider Configuration Constants (4 tests)
+- Rendering tests (4 tests)
+- Component structure tests (5 tests)
+- Default state tests (4 tests)
+- Context integration tests (4 tests)
+- Card labels tests (3 tests)
 
-**Next steps**: Continue with remaining Phase 6 dashboard components (QuickBoostButton, CalibrateButton)
+**Next steps**: Continue with Phase 2 tasks
 

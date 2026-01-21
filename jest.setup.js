@@ -1,6 +1,5 @@
 // Jest setup file
-// Note: @testing-library/jest-native matchers are not loaded due to ESM issues
-// Use standard Jest matchers instead
+// Note: @testing-library/jest-native is deprecated in favor of @testing-library/react-native v12.4+
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
