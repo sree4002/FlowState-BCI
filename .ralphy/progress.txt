@@ -397,3 +397,73 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create SQLite database schema for sessions table
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Added SessionType type alias for valid session types ('calibration', 'quick_boost', 'custom', 'scheduled', 'sham')
+2. Implemented createSessionsTable function with 13 columns matching the spec
+3. Created SessionRecord TypeScript interface matching database schema
+4. Implemented complete CRUD operations for sessions table:
+   - insertSession: Insert new session record
+   - getLatestSession: Retrieve most recent session by start_time
+   - getAllSessions: Get all sessions ordered by start_time (newest first)
+   - getSessionById: Retrieve session by ID
+   - getSessionsByType: Retrieve sessions filtered by session_type
+   - updateSession: Update existing session (supports partial updates)
+   - deleteSession: Delete session by ID
+   - deleteAllSessions: Clear all sessions
+   - getSessionsCount: Get count of sessions
+5. Updated initializeDatabase to create sessions table
+6. Updated dropAllTables to drop sessions table
+7. Created comprehensive test suite with 29 test cases (__tests__/database-sessions.test.ts)
+8. Updated expo-sqlite mock to support sessions table PRAGMA and WHERE session_type queries
+9. Verified all tests pass (205 tests passing across 10 test suites)
+
+**Files created/modified**:
+- src/services/database.ts (modified - added 188 lines for sessions table implementation)
+- __tests__/database-sessions.test.ts (created - 29 comprehensive test cases)
+- __mocks__/expo-sqlite.ts (modified - added sessions table PRAGMA support and session_type filter)
+
+**Database schema details**:
+- Table: sessions
+- Columns:
+  - id: INTEGER PRIMARY KEY AUTOINCREMENT
+  - session_type: TEXT NOT NULL CHECK constraint (calibration, quick_boost, custom, scheduled, sham)
+  - start_time: INTEGER NOT NULL (Unix timestamp when session started)
+  - end_time: INTEGER NOT NULL (Unix timestamp when session ended)
+  - duration_seconds: INTEGER NOT NULL (session duration in seconds)
+  - avg_theta_zscore: REAL NOT NULL (average theta z-score during session)
+  - max_theta_zscore: REAL NOT NULL (maximum theta z-score achieved)
+  - entrainment_freq: REAL NOT NULL (entrainment frequency used in Hz)
+  - volume: REAL NOT NULL (audio volume level 0-1)
+  - signal_quality_avg: REAL NOT NULL (average signal quality score)
+  - subjective_rating: INTEGER (optional user rating 1-5)
+  - notes: TEXT (optional user notes)
+  - created_at: INTEGER DEFAULT (strftime('%s', 'now')) (record creation timestamp)
+
+**CRUD operations implemented**:
+- Create: insertSession() - returns auto-increment ID
+- Read: getLatestSession(), getAllSessions(), getSessionById(), getSessionsByType()
+- Update: updateSession() - supports partial updates of any field
+- Delete: deleteSession(), deleteAllSessions()
+- Utility: getSessionsCount()
+
+**Test coverage**: 29 test cases covering:
+- Database initialization (2 tests)
+- Table schema validation (2 tests)
+- Insert operations (4 tests)
+- Get latest session (2 tests)
+- Get all sessions (2 tests)
+- Get session by ID (2 tests)
+- Get sessions by type (2 tests)
+- Update operations (4 tests)
+- Delete operations (2 tests)
+- Delete all sessions (1 test)
+- Count operations (3 tests)
+- Data integrity (3 tests)
+
+**Next steps**: Create SQLite database schema for circadian_patterns table as per Phase 2 task 3
+

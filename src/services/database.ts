@@ -36,12 +36,47 @@ export const createBaselinesTable = (db: SQLite.SQLiteDatabase): void => {
 };
 
 /**
+ * Session type enum for database storage
+ */
+export type SessionType =
+  | 'calibration'
+  | 'quick_boost'
+  | 'custom'
+  | 'scheduled'
+  | 'sham';
+
+/**
+ * Creates the sessions table if it doesn't exist
+ * Stores BCI entrainment session records with metrics
+ */
+export const createSessionsTable = (db: SQLite.SQLiteDatabase): void => {
+  db.execSync(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      session_type TEXT NOT NULL CHECK(session_type IN ('calibration', 'quick_boost', 'custom', 'scheduled', 'sham')),
+      start_time INTEGER NOT NULL,
+      end_time INTEGER NOT NULL,
+      duration_seconds INTEGER NOT NULL,
+      avg_theta_zscore REAL NOT NULL,
+      max_theta_zscore REAL NOT NULL,
+      entrainment_freq REAL NOT NULL,
+      volume REAL NOT NULL,
+      signal_quality_avg REAL NOT NULL,
+      subjective_rating INTEGER,
+      notes TEXT,
+      created_at INTEGER DEFAULT (strftime('%s', 'now'))
+    );
+  `);
+};
+
+/**
  * Initializes all database tables
  * Should be called on app startup
  */
 export const initializeDatabase = (): SQLite.SQLiteDatabase => {
   const db = openDatabase();
   createBaselinesTable(db);
+  createSessionsTable(db);
   return db;
 };
 
@@ -50,6 +85,7 @@ export const initializeDatabase = (): SQLite.SQLiteDatabase => {
  */
 export const dropAllTables = (db: SQLite.SQLiteDatabase): void => {
   db.execSync('DROP TABLE IF EXISTS baselines;');
+  db.execSync('DROP TABLE IF EXISTS sessions;');
 };
 
 /**
@@ -204,6 +240,195 @@ export const deleteAllBaselines = (db: SQLite.SQLiteDatabase): void => {
 export const getBaselinesCount = (db: SQLite.SQLiteDatabase): number => {
   const result = db.getFirstSync<{ count: number }>(
     'SELECT COUNT(*) as count FROM baselines'
+  );
+  return result?.count || 0;
+};
+
+// ============================================================================
+// Sessions Table Operations
+// ============================================================================
+
+/**
+ * Session record interface matching database schema
+ */
+export interface SessionRecord {
+  id?: number;
+  session_type: SessionType;
+  start_time: number;
+  end_time: number;
+  duration_seconds: number;
+  avg_theta_zscore: number;
+  max_theta_zscore: number;
+  entrainment_freq: number;
+  volume: number;
+  signal_quality_avg: number;
+  subjective_rating: number | null;
+  notes: string | null;
+  created_at?: number;
+}
+
+/**
+ * Inserts a new session record into the database
+ * @returns The ID of the inserted record
+ */
+export const insertSession = (
+  db: SQLite.SQLiteDatabase,
+  session: Omit<SessionRecord, 'id' | 'created_at'>
+): number => {
+  const result = db.runSync(
+    `INSERT INTO sessions
+     (session_type, start_time, end_time, duration_seconds, avg_theta_zscore, max_theta_zscore, entrainment_freq, volume, signal_quality_avg, subjective_rating, notes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      session.session_type,
+      session.start_time,
+      session.end_time,
+      session.duration_seconds,
+      session.avg_theta_zscore,
+      session.max_theta_zscore,
+      session.entrainment_freq,
+      session.volume,
+      session.signal_quality_avg,
+      session.subjective_rating,
+      session.notes,
+    ]
+  );
+  return result.lastInsertRowId;
+};
+
+/**
+ * Retrieves the most recent session
+ * @returns The latest session record or null if none exists
+ */
+export const getLatestSession = (
+  db: SQLite.SQLiteDatabase
+): SessionRecord | null => {
+  const result = db.getFirstSync<SessionRecord>(
+    'SELECT * FROM sessions ORDER BY start_time DESC LIMIT 1'
+  );
+  return result || null;
+};
+
+/**
+ * Retrieves all sessions ordered by start_time (newest first)
+ */
+export const getAllSessions = (db: SQLite.SQLiteDatabase): SessionRecord[] => {
+  return db.getAllSync<SessionRecord>(
+    'SELECT * FROM sessions ORDER BY start_time DESC'
+  );
+};
+
+/**
+ * Retrieves a session by ID
+ */
+export const getSessionById = (
+  db: SQLite.SQLiteDatabase,
+  id: number
+): SessionRecord | null => {
+  const result = db.getFirstSync<SessionRecord>(
+    'SELECT * FROM sessions WHERE id = ?',
+    [id]
+  );
+  return result || null;
+};
+
+/**
+ * Retrieves sessions by type
+ */
+export const getSessionsByType = (
+  db: SQLite.SQLiteDatabase,
+  sessionType: SessionType
+): SessionRecord[] => {
+  return db.getAllSync<SessionRecord>(
+    'SELECT * FROM sessions WHERE session_type = ? ORDER BY start_time DESC',
+    [sessionType]
+  );
+};
+
+/**
+ * Updates an existing session record
+ */
+export const updateSession = (
+  db: SQLite.SQLiteDatabase,
+  id: number,
+  session: Partial<Omit<SessionRecord, 'id' | 'created_at'>>
+): void => {
+  const fields: string[] = [];
+  const values: (number | string | null)[] = [];
+
+  if (session.session_type !== undefined) {
+    fields.push('session_type = ?');
+    values.push(session.session_type);
+  }
+  if (session.start_time !== undefined) {
+    fields.push('start_time = ?');
+    values.push(session.start_time);
+  }
+  if (session.end_time !== undefined) {
+    fields.push('end_time = ?');
+    values.push(session.end_time);
+  }
+  if (session.duration_seconds !== undefined) {
+    fields.push('duration_seconds = ?');
+    values.push(session.duration_seconds);
+  }
+  if (session.avg_theta_zscore !== undefined) {
+    fields.push('avg_theta_zscore = ?');
+    values.push(session.avg_theta_zscore);
+  }
+  if (session.max_theta_zscore !== undefined) {
+    fields.push('max_theta_zscore = ?');
+    values.push(session.max_theta_zscore);
+  }
+  if (session.entrainment_freq !== undefined) {
+    fields.push('entrainment_freq = ?');
+    values.push(session.entrainment_freq);
+  }
+  if (session.volume !== undefined) {
+    fields.push('volume = ?');
+    values.push(session.volume);
+  }
+  if (session.signal_quality_avg !== undefined) {
+    fields.push('signal_quality_avg = ?');
+    values.push(session.signal_quality_avg);
+  }
+  if (session.subjective_rating !== undefined) {
+    fields.push('subjective_rating = ?');
+    values.push(session.subjective_rating);
+  }
+  if (session.notes !== undefined) {
+    fields.push('notes = ?');
+    values.push(session.notes);
+  }
+
+  if (fields.length === 0) {
+    return;
+  }
+
+  values.push(id);
+  db.runSync(`UPDATE sessions SET ${fields.join(', ')} WHERE id = ?`, values);
+};
+
+/**
+ * Deletes a session by ID
+ */
+export const deleteSession = (db: SQLite.SQLiteDatabase, id: number): void => {
+  db.runSync('DELETE FROM sessions WHERE id = ?', [id]);
+};
+
+/**
+ * Deletes all sessions (use with caution)
+ */
+export const deleteAllSessions = (db: SQLite.SQLiteDatabase): void => {
+  db.runSync('DELETE FROM sessions');
+};
+
+/**
+ * Gets the count of sessions in the database
+ */
+export const getSessionsCount = (db: SQLite.SQLiteDatabase): number => {
+  const result = db.getFirstSync<{ count: number }>(
+    'SELECT COUNT(*) as count FROM sessions'
   );
   return result?.count || 0;
 };

@@ -142,6 +142,12 @@ const filterRows = (
     return rows.filter((row) => row.id === id);
   }
 
+  // Simple WHERE session_type = ? parsing
+  if (where.match(/session_type\s*=\s*\?/i)) {
+    const sessionType = params[0] as string;
+    return rows.filter((row) => row.session_type === sessionType);
+  }
+
   return rows;
 };
 
@@ -324,6 +330,23 @@ class MockSQLiteDatabase implements SQLiteDatabase {
             { name: 'optimal_freq', pk: 0 },
             { name: 'calibration_timestamp', pk: 0 },
             { name: 'quality_score', pk: 0 },
+            { name: 'created_at', pk: 0 },
+          ] as T[];
+        }
+        if (tableName === 'sessions') {
+          return [
+            { name: 'id', pk: 1 },
+            { name: 'session_type', pk: 0 },
+            { name: 'start_time', pk: 0 },
+            { name: 'end_time', pk: 0 },
+            { name: 'duration_seconds', pk: 0 },
+            { name: 'avg_theta_zscore', pk: 0 },
+            { name: 'max_theta_zscore', pk: 0 },
+            { name: 'entrainment_freq', pk: 0 },
+            { name: 'volume', pk: 0 },
+            { name: 'signal_quality_avg', pk: 0 },
+            { name: 'subjective_rating', pk: 0 },
+            { name: 'notes', pk: 0 },
             { name: 'created_at', pk: 0 },
           ] as T[];
         }
