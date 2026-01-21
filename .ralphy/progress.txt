@@ -397,3 +397,89 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Implement frequency ratio artifact detection (30-50 Hz vs 4-30 Hz ratio >2.0)
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created src/utils/signalProcessing.ts with comprehensive signal processing utilities
+2. Implemented FFT-based frequency analysis using a radix-2 Cooley-Tukey algorithm
+3. Defined FrequencyBands constants for EEG frequency bands (delta, theta, alpha, beta, gamma)
+4. Implemented core signal processing functions:
+   - fft(): Fast Fourier Transform for real-valued signals
+   - computePowerSpectrum(): Calculate power from FFT results
+   - getFrequencyBins(): Map FFT bins to frequency values in Hz
+   - calculateBandPower(): Calculate mean power in a specific frequency band
+5. Implemented detectFrequencyRatioArtifact() main function:
+   - Calculates ratio of high frequency (30-50 Hz) to low frequency (4-30 Hz) power
+   - Default threshold of 2.0 for artifact detection
+   - Returns FrequencyRatioResult with power values, ratio, hasArtifact flag, and threshold
+   - Handles edge cases: short signals, low sampling rates, DC offset removal
+6. Added helper functions for testing:
+   - generateSineWave(): Generate single-frequency test signals
+   - generateSyntheticEEG(): Generate multi-band EEG-like signals with controllable amplitudes
+7. Updated src/utils/index.ts to export the new module
+8. Created comprehensive test suite with 48 tests (__tests__/signal-processing.test.ts)
+9. Verified all tests pass (48 tests in signal-processing.test.ts)
+10. Ran Prettier to format code
+
+**Files created/modified**:
+- src/utils/signalProcessing.ts (created - 297 lines with FFT and artifact detection)
+- src/utils/index.ts (modified - added export for signalProcessing)
+- __tests__/signal-processing.test.ts (created - 354 lines with 48 comprehensive tests)
+
+**Key implementation details**:
+- Frequency ratio artifact detection identifies muscle (EMG) artifacts in EEG data
+- High frequency (30-50 Hz) power dominance indicates muscle contamination
+- Ratio > 2.0 threshold based on typical EEG characteristics
+- Supports sampling rates from 100 Hz to 500+ Hz (common EEG ranges)
+- Includes DC offset removal before FFT analysis
+- Returns structured result with all relevant metrics
+
+**Algorithm**:
+1. Remove DC offset (mean) from signal
+2. Compute FFT using radix-2 Cooley-Tukey algorithm
+3. Calculate power spectrum (|FFT|²)
+4. Calculate mean power in low frequency band (4-30 Hz)
+5. Calculate mean power in high frequency band (30-50 Hz)
+6. Compute ratio = highFrequencyPower / lowFrequencyPower
+7. Flag artifact if ratio > threshold (default 2.0)
+
+**Test coverage**:
+- FrequencyBands constants validation (7 tests)
+- FREQUENCY_RATIO_ARTIFACT_THRESHOLD validation (1 test)
+- generateSineWave function (3 tests)
+- generateSyntheticEEG function (3 tests)
+- FFT implementation (4 tests)
+- computePowerSpectrum function (2 tests)
+- getFrequencyBins function (4 tests)
+- calculateBandPower function (3 tests)
+- detectFrequencyRatioArtifact main function (14 tests)
+- Edge cases (5 tests)
+- FrequencyRatioResult interface (1 test)
+- Integration with SignalQuality type (1 test)
+
+**Usage example**:
+```typescript
+import { detectFrequencyRatioArtifact } from './utils/signalProcessing';
+
+const eegData = [...]; // EEG samples at 200 Hz
+const result = detectFrequencyRatioArtifact(eegData, 200);
+
+if (result.hasArtifact) {
+  console.log(`Muscle artifact detected! Ratio: ${result.ratio.toFixed(2)}`);
+}
+
+// Use with SignalQuality interface
+const signalQuality: SignalQuality = {
+  score: 85,
+  artifact_percentage: 5,
+  has_amplitude_artifact: false,
+  has_gradient_artifact: false,
+  has_frequency_artifact: result.hasArtifact,
+};
+```
+
+**Next steps**: Continue with remaining signal processing and artifact detection tasks
+
