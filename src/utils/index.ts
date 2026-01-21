@@ -1,3 +1,9 @@
-// Utils export placeholder
-// Export utility functions here as they are created
-export {};
+// Utils exports
+export {
+  calculateBackoffDelay,
+  getBackoffSequence,
+  canRetry,
+  getTotalBackoffTime,
+  DEFAULT_RECONNECT_CONFIG,
+} from './reconnect';
+export type { ReconnectConfig } from './reconnect';

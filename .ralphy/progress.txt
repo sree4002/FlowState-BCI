@@ -397,3 +397,76 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Implement auto-reconnect logic with exponential backoff (2s, 4s, 8s intervals)
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Enhanced BleService with auto-reconnect functionality in App/src/services/BleService.js
+2. Added auto-reconnect state properties: autoReconnectEnabled, lastConnectedDeviceId, reconnectAttempts, maxReconnectAttempts (5), baseReconnectDelay (2000ms), reconnectTimer, isReconnecting, intentionalDisconnect
+3. Implemented calculateBackoffDelay() method using exponential backoff formula: 2^attempt * baseDelay (2s, 4s, 8s, 16s, 32s with 32s cap)
+4. Implemented attemptReconnect() method with retry logic, attempt tracking, and listener notifications
+5. Added reconnectToDeviceById() method to reconnect to previously connected device by ID
+6. Added setAutoReconnect(enabled, deviceId) to configure auto-reconnect
+7. Added cancelReconnect() to stop pending reconnect attempts
+8. Added resetReconnectState() for state cleanup on successful connections
+9. Added handleUnexpectedDisconnect() to trigger auto-reconnect on unexpected disconnections
+10. Updated connectToDevice() to store device ID and reset reconnect state on success
+11. Updated disconnect() to mark intentional disconnect and cancel pending reconnects
+12. Updated destroy() to clean up reconnect timers
+13. Added reconnect listener system: addReconnectListener(), removeReconnectListener(), notifyReconnectAttempt()
+14. Added getReconnectStatus() for current reconnect state inspection
+15. Created TypeScript types in src/types/index.ts: ReconnectStatusType, ReconnectAttemptEvent, ReconnectState
+16. Created reusable utility module src/utils/reconnect.ts with functions: calculateBackoffDelay, getBackoffSequence, canRetry, getTotalBackoffTime
+17. Exported utility functions from src/utils/index.ts
+18. Created comprehensive test suite with 31 tests (__tests__/reconnect.test.ts)
+19. Verified all tests pass (31 reconnect tests, 207 total tests passing)
+
+**Files created/modified**:
+- App/src/services/BleService.js (modified - added ~200 lines of auto-reconnect logic)
+- src/types/index.ts (modified - added 3 new types: ReconnectStatusType, ReconnectAttemptEvent, ReconnectState)
+- src/utils/reconnect.ts (created - 82 lines with reusable backoff utilities)
+- src/utils/index.ts (modified - added reconnect exports)
+- __tests__/reconnect.test.ts (created - 235 lines with 31 comprehensive tests)
+
+**Exponential backoff implementation**:
+- Base delay: 2 seconds (2000ms)
+- Formula: delay = baseDelay * 2^attempt
+- Intervals: 2s → 4s → 8s → 16s → 32s (capped at 32s)
+- Max attempts: 5 (configurable)
+- Total max wait time: 62 seconds across all retries
+
+**BleService auto-reconnect features**:
+- Automatic reconnection on unexpected disconnections
+- Intentional disconnects (via disconnect() method) do not trigger auto-reconnect
+- Device ID stored on successful connection for targeted reconnection
+- Reconnect attempt events notified to listeners with status: waiting, connecting, connected, failed, max_attempts_reached
+- State includes: attempt number, max attempts, next delay, optional error message
+- Can be enabled/disabled via setAutoReconnect(enabled, deviceId)
+
+**TypeScript types added**:
+- ReconnectStatusType: 'waiting' | 'connecting' | 'connected' | 'failed' | 'max_attempts_reached'
+- ReconnectAttemptEvent: { attempt, maxAttempts, status, nextDelayMs, error? }
+- ReconnectState: { isReconnecting, currentAttempt, maxAttempts, autoReconnectEnabled, lastConnectedDeviceId }
+
+**Utility functions created**:
+- calculateBackoffDelay(attempt, config): Calculate delay for given attempt
+- getBackoffSequence(config): Get array of all delays for max attempts
+- canRetry(currentAttempt, config): Check if more retries allowed
+- getTotalBackoffTime(config): Calculate total wait time across all retries
+
+**Test coverage** (31 tests):
+- DEFAULT_RECONNECT_CONFIG validation (1 test)
+- calculateBackoffDelay tests (7 tests)
+- getBackoffSequence tests (4 tests)
+- canRetry tests (3 tests)
+- getTotalBackoffTime tests (3 tests)
+- Exponential backoff pattern validation (2 tests)
+- BleService backoff calculation equivalence (3 tests)
+- Reconnect state management (2 tests)
+- Reconnect attempt limits (2 tests)
+- ReconnectAttemptEvent structure (5 tests)
+
+**Next steps**: Continue with remaining Phase 3 tasks
+

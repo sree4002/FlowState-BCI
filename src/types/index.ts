@@ -61,6 +61,38 @@ export interface DeviceInfo {
 }
 
 /**
+ * Auto-reconnect status for tracking reconnection attempts
+ */
+export type ReconnectStatusType =
+  | 'waiting'
+  | 'connecting'
+  | 'connected'
+  | 'failed'
+  | 'max_attempts_reached';
+
+/**
+ * Reconnect attempt event data
+ */
+export interface ReconnectAttemptEvent {
+  attempt: number;
+  maxAttempts: number;
+  status: ReconnectStatusType;
+  nextDelayMs: number | null;
+  error?: string;
+}
+
+/**
+ * Current reconnect state
+ */
+export interface ReconnectState {
+  isReconnecting: boolean;
+  currentAttempt: number;
+  maxAttempts: number;
+  autoReconnectEnabled: boolean;
+  lastConnectedDeviceId: string | null;
+}
+
+/**
  * Application settings and user preferences
  */
 export interface AppSettings {
