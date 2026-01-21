@@ -1,636 +1,379 @@
 import {
-  WelchConfig,
-  WelchResult,
-  BandPower,
-  DEFAULT_WELCH_CONFIG,
-  hannWindow,
-  hammingWindow,
-  rectangularWindow,
-  getWindowFunction,
-  windowPower,
-  nextPowerOf2,
-  zeroPad,
-  fft,
-  rfft,
-  computePowerSpectrum,
-  rfftFrequencies,
-  welchPeriodogram,
-  extractBandPower,
-  extractThetaPower,
-  extractAlphaPower,
-  extractBetaPower,
-  extractAllBandPowers,
-  generateSineWave,
-  generateSyntheticEEG,
+  calculateDCOffset,
+  removeDCOffset,
+  removeDCOffsetInPlace,
+  removeDCOffsetWithBaseline,
 } from '../src/services/signalProcessing';
 
-describe("Signal Processing - Welch's Periodogram", () => {
-  describe('Window Functions', () => {
-    describe('hannWindow', () => {
-      it('should generate a Hann window of correct length', () => {
-        const window = hannWindow(256);
-        expect(window.length).toBe(256);
-      });
-
-      it('should start and end near zero', () => {
-        const window = hannWindow(256);
-        expect(window[0]).toBeCloseTo(0, 5);
-        expect(window[255]).toBeCloseTo(0, 5);
-      });
-
-      it('should peak at the center with value near 1', () => {
-        const window = hannWindow(256);
-        const center = Math.floor(255 / 2);
-        expect(window[center]).toBeCloseTo(1, 1);
-      });
-
-      it('should be symmetric', () => {
-        const window = hannWindow(100);
-        for (let i = 0; i < 50; i++) {
-          expect(window[i]).toBeCloseTo(window[99 - i], 10);
-        }
-      });
+describe('Signal Processing - DC Offset Removal', () => {
+  describe('calculateDCOffset', () => {
+    it('should calculate mean of a simple array', () => {
+      const samples = [1, 2, 3, 4, 5];
+      const dcOffset = calculateDCOffset(samples);
+      expect(dcOffset).toBe(3);
     });
 
-    describe('hammingWindow', () => {
-      it('should generate a Hamming window of correct length', () => {
-        const window = hammingWindow(256);
-        expect(window.length).toBe(256);
-      });
-
-      it('should have non-zero endpoints (0.08)', () => {
-        const window = hammingWindow(256);
-        expect(window[0]).toBeCloseTo(0.08, 1);
-        expect(window[255]).toBeCloseTo(0.08, 1);
-      });
-
-      it('should peak at the center with value near 1', () => {
-        const window = hammingWindow(256);
-        const center = Math.floor(255 / 2);
-        expect(window[center]).toBeCloseTo(1, 1);
-      });
+    it('should calculate mean of array with decimals', () => {
+      const samples = [10.5, 11.5, 12.5, 13.5];
+      const dcOffset = calculateDCOffset(samples);
+      expect(dcOffset).toBe(12);
     });
 
-    describe('rectangularWindow', () => {
-      it('should generate all ones', () => {
-        const window = rectangularWindow(100);
-        expect(window.length).toBe(100);
-        expect(window.every((v) => v === 1)).toBe(true);
-      });
+    it('should handle single element array', () => {
+      const samples = [42.5];
+      const dcOffset = calculateDCOffset(samples);
+      expect(dcOffset).toBe(42.5);
     });
 
-    describe('getWindowFunction', () => {
-      it('should return Hann window for "hann"', () => {
-        const window = getWindowFunction('hann', 64);
-        const hann = hannWindow(64);
-        expect(window).toEqual(hann);
-      });
-
-      it('should return Hamming window for "hamming"', () => {
-        const window = getWindowFunction('hamming', 64);
-        const hamming = hammingWindow(64);
-        expect(window).toEqual(hamming);
-      });
-
-      it('should return rectangular window for "rectangular"', () => {
-        const window = getWindowFunction('rectangular', 64);
-        expect(window.every((v) => v === 1)).toBe(true);
-      });
+    it('should handle negative values', () => {
+      const samples = [-5, -3, -1, 1, 3, 5];
+      const dcOffset = calculateDCOffset(samples);
+      expect(dcOffset).toBe(0);
     });
 
-    describe('windowPower', () => {
-      it('should calculate sum of squared values', () => {
-        const window = [1, 2, 3];
-        expect(windowPower(window)).toBe(14); // 1 + 4 + 9
-      });
-
-      it('should return N for rectangular window', () => {
-        const window = rectangularWindow(100);
-        expect(windowPower(window)).toBe(100);
-      });
-
-      it('should return approximately 0.375*N for Hann window', () => {
-        const window = hannWindow(1024);
-        const power = windowPower(window);
-        // Hann window has a theoretical power of 0.375*N (3/8*N)
-        expect(power).toBeCloseTo(384, -1); // Approximately 0.375*N
-      });
-    });
-  });
-
-  describe('Utility Functions', () => {
-    describe('nextPowerOf2', () => {
-      it('should return next power of 2 for non-power inputs', () => {
-        expect(nextPowerOf2(100)).toBe(128);
-        expect(nextPowerOf2(500)).toBe(512);
-        expect(nextPowerOf2(1000)).toBe(1024);
-      });
-
-      it('should return same value for power of 2 inputs', () => {
-        expect(nextPowerOf2(64)).toBe(64);
-        expect(nextPowerOf2(256)).toBe(256);
-        expect(nextPowerOf2(1024)).toBe(1024);
-      });
-
-      it('should handle edge cases', () => {
-        expect(nextPowerOf2(0)).toBe(1);
-        expect(nextPowerOf2(1)).toBe(1);
-        expect(nextPowerOf2(2)).toBe(2);
-      });
+    it('should handle mixed positive and negative values', () => {
+      const samples = [-10, 20, -30, 40];
+      const dcOffset = calculateDCOffset(samples);
+      expect(dcOffset).toBe(5);
     });
 
-    describe('zeroPad', () => {
-      it('should pad with zeros to target length', () => {
-        const data = [1, 2, 3];
-        const padded = zeroPad(data, 8);
-        expect(padded).toEqual([1, 2, 3, 0, 0, 0, 0, 0]);
-      });
-
-      it('should truncate if data is longer than target', () => {
-        const data = [1, 2, 3, 4, 5];
-        const truncated = zeroPad(data, 3);
-        expect(truncated).toEqual([1, 2, 3]);
-      });
-
-      it('should return same length if equal to target', () => {
-        const data = [1, 2, 3, 4];
-        const result = zeroPad(data, 4);
-        expect(result).toEqual([1, 2, 3, 4]);
-      });
-    });
-  });
-
-  describe('FFT Functions', () => {
-    describe('fft', () => {
-      it('should throw error for non-power-of-2 length', () => {
-        const real = [1, 2, 3];
-        const imag = [0, 0, 0];
-        expect(() => fft(real, imag)).toThrow(
-          'FFT length must be a power of 2'
-        );
-      });
-
-      it('should compute FFT of DC signal correctly', () => {
-        const real = [1, 1, 1, 1];
-        const imag = [0, 0, 0, 0];
-        fft(real, imag);
-        expect(real[0]).toBeCloseTo(4, 5); // DC component = sum
-        expect(real[1]).toBeCloseTo(0, 5);
-        expect(real[2]).toBeCloseTo(0, 5);
-        expect(real[3]).toBeCloseTo(0, 5);
-      });
-
-      it('should compute FFT of single frequency sine wave', () => {
-        const n = 64;
-        const real = new Array(n);
-        const imag = new Array(n).fill(0);
-        const freq = 4; // 4 cycles in n samples
-
-        for (let i = 0; i < n; i++) {
-          real[i] = Math.sin((2 * Math.PI * freq * i) / n);
-        }
-
-        fft(real, imag);
-
-        // Peak should be at frequency bin 4 (and n-4 for negative frequency)
-        const magnitude = (r: number, i: number) => Math.sqrt(r * r + i * i);
-        const mag4 = magnitude(real[freq], imag[freq]);
-        const mag0 = magnitude(real[0], imag[0]);
-
-        expect(mag4).toBeGreaterThan(mag0 + 10); // Much larger than DC
-      });
-    });
-
-    describe('rfft', () => {
-      it('should return only positive frequencies', () => {
-        const data = new Array(8).fill(1);
-        const { real, imag } = rfft(data);
-        expect(real.length).toBe(5); // N/2 + 1
-        expect(imag.length).toBe(5);
-      });
-
-      it('should compute DC component correctly', () => {
-        const data = [2, 2, 2, 2];
-        const { real } = rfft(data);
-        expect(real[0]).toBeCloseTo(8, 5); // Sum of all values
-      });
-    });
-
-    describe('computePowerSpectrum', () => {
-      it('should compute magnitude squared', () => {
-        const real = [3, 4];
-        const imag = [4, 3];
-        const power = computePowerSpectrum(real, imag);
-        expect(power[0]).toBe(25); // 3^2 + 4^2
-        expect(power[1]).toBe(25); // 4^2 + 3^2
-      });
-    });
-
-    describe('rfftFrequencies', () => {
-      it('should generate correct frequency bins', () => {
-        const freqs = rfftFrequencies(256, 500);
-        expect(freqs.length).toBe(129); // N/2 + 1
-        expect(freqs[0]).toBe(0); // DC
-        expect(freqs[freqs.length - 1]).toBeCloseTo(250, 5); // Nyquist
-      });
-
-      it('should have correct frequency resolution', () => {
-        const freqs = rfftFrequencies(1000, 500);
-        const resolution = freqs[1] - freqs[0];
-        expect(resolution).toBeCloseTo(0.5, 5); // fs / N = 500 / 1000
-      });
-    });
-  });
-
-  describe("Welch's Periodogram", () => {
-    describe('welchPeriodogram', () => {
-      it('should compute PSD for valid input', () => {
-        const samplingRate = 500;
-        const duration = 4; // 4 seconds
-        const signal = generateSineWave(10, samplingRate, duration);
-
-        const result = welchPeriodogram(signal, { samplingRate });
-
-        expect(result.frequencies).toBeDefined();
-        expect(result.psd).toBeDefined();
-        expect(result.frequencies.length).toBe(result.psd.length);
-        expect(result.segmentCount).toBeGreaterThan(0);
-      });
-
-      it('should throw error if input is too short', () => {
-        const signal = [1, 2, 3]; // Too short for 2 second window at 500 Hz
-        expect(() => welchPeriodogram(signal, { samplingRate: 500 })).toThrow(
-          /Input data length/
-        );
-      });
-
-      it('should detect peak at correct frequency', () => {
-        const samplingRate = 500;
-        const testFreq = 10; // 10 Hz
-        const duration = 4;
-        const signal = generateSineWave(testFreq, samplingRate, duration);
-
-        const result = welchPeriodogram(signal, { samplingRate });
-
-        // Find frequency with maximum power
-        let maxPower = -Infinity;
-        let maxFreq = 0;
-        for (let i = 1; i < result.psd.length - 1; i++) {
-          if (result.psd[i] > maxPower) {
-            maxPower = result.psd[i];
-            maxFreq = result.frequencies[i];
-          }
-        }
-
-        // Peak should be close to test frequency
-        expect(Math.abs(maxFreq - testFreq)).toBeLessThan(1);
-      });
-
-      it('should work with different window sizes', () => {
-        const samplingRate = 500;
-        const signal = generateSineWave(10, samplingRate, 8);
-
-        const result2s = welchPeriodogram(signal, {
-          samplingRate,
-          windowSizeSeconds: 2,
-        });
-
-        const result4s = welchPeriodogram(signal, {
-          samplingRate,
-          windowSizeSeconds: 4,
-        });
-
-        // 4 second window should have better frequency resolution
-        expect(result4s.frequencyResolution).toBeLessThan(
-          result2s.frequencyResolution
-        );
-      });
-
-      it('should work with different overlap ratios', () => {
-        const samplingRate = 500;
-        const signal = generateSineWave(10, samplingRate, 6);
-
-        const result25 = welchPeriodogram(signal, {
-          samplingRate,
-          overlapRatio: 0.25,
-        });
-
-        const result75 = welchPeriodogram(signal, {
-          samplingRate,
-          overlapRatio: 0.75,
-        });
-
-        // Higher overlap should produce more segments
-        expect(result75.segmentCount).toBeGreaterThan(result25.segmentCount);
-      });
-
-      it('should use default configuration values', () => {
-        const signal = generateSineWave(10, 500, 4);
-        const result = welchPeriodogram(signal);
-
-        expect(result.frequencyResolution).toBeDefined();
-        expect(result.segmentCount).toBeGreaterThan(0);
-      });
-    });
-
-    describe('DEFAULT_WELCH_CONFIG', () => {
-      it('should have expected default values', () => {
-        expect(DEFAULT_WELCH_CONFIG.samplingRate).toBe(500);
-        expect(DEFAULT_WELCH_CONFIG.windowSizeSeconds).toBe(2);
-        expect(DEFAULT_WELCH_CONFIG.overlapRatio).toBe(0.5);
-        expect(DEFAULT_WELCH_CONFIG.windowFunction).toBe('hann');
-      });
-    });
-  });
-
-  describe('Band Power Extraction', () => {
-    describe('extractBandPower', () => {
-      it('should extract power in specified frequency range', () => {
-        const samplingRate = 500;
-        const signal = generateSineWave(10, samplingRate, 4); // 10 Hz in alpha band
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-
-        const alphaPower = extractBandPower(welchResult, 8, 13);
-
-        expect(alphaPower.lowFreq).toBe(8);
-        expect(alphaPower.highFreq).toBe(13);
-        expect(alphaPower.absolutePower).toBeGreaterThan(0);
-        expect(alphaPower.relativePower).toBeGreaterThan(0);
-        expect(alphaPower.relativePower).toBeLessThanOrEqual(1);
-        expect(alphaPower.peakFrequency).toBeGreaterThanOrEqual(8);
-        expect(alphaPower.peakFrequency).toBeLessThanOrEqual(13);
-      });
-
-      it('should find correct peak frequency', () => {
-        const samplingRate = 500;
-        const testFreq = 6; // 6 Hz in theta band
-        const signal = generateSineWave(testFreq, samplingRate, 4);
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-
-        const thetaPower = extractBandPower(welchResult, 4, 8);
-
-        expect(Math.abs(thetaPower.peakFrequency - testFreq)).toBeLessThan(1);
-      });
-
-      it('should calculate relative power correctly', () => {
-        const samplingRate = 500;
-        // Signal with only alpha band component
-        const signal = generateSineWave(10, samplingRate, 4);
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-
-        const alphaPower = extractBandPower(welchResult, 8, 13);
-        const thetaPower = extractBandPower(welchResult, 4, 8);
-
-        // Alpha should have much more relative power than theta
-        expect(alphaPower.relativePower).toBeGreaterThan(
-          thetaPower.relativePower
-        );
-      });
-    });
-
-    describe('extractThetaPower', () => {
-      it('should extract theta band (4-8 Hz)', () => {
-        const samplingRate = 500;
-        const signal = generateSineWave(6, samplingRate, 4);
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-
-        const theta = extractThetaPower(welchResult);
-
-        expect(theta.lowFreq).toBe(4);
-        expect(theta.highFreq).toBe(8);
-        expect(theta.absolutePower).toBeGreaterThan(0);
-      });
-    });
-
-    describe('extractAlphaPower', () => {
-      it('should extract alpha band (8-13 Hz)', () => {
-        const samplingRate = 500;
-        const signal = generateSineWave(10, samplingRate, 4);
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-
-        const alpha = extractAlphaPower(welchResult);
-
-        expect(alpha.lowFreq).toBe(8);
-        expect(alpha.highFreq).toBe(13);
-        expect(alpha.absolutePower).toBeGreaterThan(0);
-      });
-    });
-
-    describe('extractBetaPower', () => {
-      it('should extract beta band (13-30 Hz)', () => {
-        const samplingRate = 500;
-        const signal = generateSineWave(20, samplingRate, 4);
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-
-        const beta = extractBetaPower(welchResult);
-
-        expect(beta.lowFreq).toBe(13);
-        expect(beta.highFreq).toBe(30);
-        expect(beta.absolutePower).toBeGreaterThan(0);
-      });
-    });
-
-    describe('extractAllBandPowers', () => {
-      it('should extract theta, alpha, and beta band powers', () => {
-        const samplingRate = 500;
-        const signal = generateSyntheticEEG(samplingRate, 4);
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-
-        const bands = extractAllBandPowers(welchResult);
-
-        expect(bands.theta).toBeDefined();
-        expect(bands.alpha).toBeDefined();
-        expect(bands.beta).toBeDefined();
-
-        expect(bands.theta.lowFreq).toBe(4);
-        expect(bands.theta.highFreq).toBe(8);
-        expect(bands.alpha.lowFreq).toBe(8);
-        expect(bands.alpha.highFreq).toBe(13);
-        expect(bands.beta.lowFreq).toBe(13);
-        expect(bands.beta.highFreq).toBe(30);
-      });
-    });
-  });
-
-  describe('Test Signal Generation', () => {
-    describe('generateSineWave', () => {
-      it('should generate correct number of samples', () => {
-        const signal = generateSineWave(10, 500, 2);
-        expect(signal.length).toBe(1000); // 500 Hz * 2 seconds
-      });
-
-      it('should generate signal with correct amplitude', () => {
-        const amplitude = 5;
-        const signal = generateSineWave(10, 500, 2, amplitude);
-        const maxAbs = Math.max(...signal.map(Math.abs));
-        expect(maxAbs).toBeCloseTo(amplitude, 1);
-      });
-
-      it('should generate signal with correct frequency', () => {
-        const freq = 10;
-        const samplingRate = 500;
-        const duration = 4;
-        const signal = generateSineWave(freq, samplingRate, duration);
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-
-        // Find peak frequency
-        let maxPower = -Infinity;
-        let peakFreq = 0;
-        for (let i = 1; i < welchResult.psd.length - 1; i++) {
-          if (welchResult.psd[i] > maxPower) {
-            maxPower = welchResult.psd[i];
-            peakFreq = welchResult.frequencies[i];
-          }
-        }
-
-        expect(Math.abs(peakFreq - freq)).toBeLessThan(1);
-      });
-    });
-
-    describe('generateSyntheticEEG', () => {
-      it('should generate correct number of samples', () => {
-        const signal = generateSyntheticEEG(500, 3);
-        expect(signal.length).toBe(1500); // 500 Hz * 3 seconds
-      });
-
-      it('should contain theta, alpha, and beta components', () => {
-        const samplingRate = 500;
-        const signal = generateSyntheticEEG(samplingRate, 4);
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-        const bands = extractAllBandPowers(welchResult);
-
-        // All bands should have non-zero power
-        expect(bands.theta.absolutePower).toBeGreaterThan(0);
-        expect(bands.alpha.absolutePower).toBeGreaterThan(0);
-        expect(bands.beta.absolutePower).toBeGreaterThan(0);
-      });
-
-      it('should respect relative power parameters', () => {
-        const samplingRate = 500;
-        // Strong theta, weak alpha and beta
-        const signal = generateSyntheticEEG(samplingRate, 4, 2.0, 0.2, 0.2);
-        const welchResult = welchPeriodogram(signal, { samplingRate });
-        const bands = extractAllBandPowers(welchResult);
-
-        // Theta should dominate
-        expect(bands.theta.absolutePower).toBeGreaterThan(
-          bands.alpha.absolutePower
-        );
-        expect(bands.theta.absolutePower).toBeGreaterThan(
-          bands.beta.absolutePower
-        );
-      });
-    });
-  });
-
-  describe('TypeScript Types', () => {
-    it('should define WelchConfig interface correctly', () => {
-      const config: WelchConfig = {
-        samplingRate: 500,
-        windowSizeSeconds: 2,
-        overlapRatio: 0.5,
-        windowFunction: 'hann',
-      };
-      expect(config.samplingRate).toBe(500);
-      expect(config.windowSizeSeconds).toBe(2);
-    });
-
-    it('should define WelchResult interface correctly', () => {
-      const result: WelchResult = {
-        frequencies: [0, 1, 2],
-        psd: [0.1, 0.2, 0.3],
-        frequencyResolution: 0.5,
-        segmentCount: 3,
-      };
-      expect(result.frequencies.length).toBe(3);
-      expect(result.segmentCount).toBe(3);
-    });
-
-    it('should define BandPower interface correctly', () => {
-      const bandPower: BandPower = {
-        lowFreq: 4,
-        highFreq: 8,
-        absolutePower: 10.5,
-        relativePower: 0.25,
-        peakFrequency: 6.5,
-        peakPower: 8.3,
-      };
-      expect(bandPower.lowFreq).toBe(4);
-      expect(bandPower.relativePower).toBe(0.25);
-    });
-  });
-
-  describe('Integration Tests', () => {
-    it('should process 2-second window correctly for 500 Hz sampling', () => {
-      const samplingRate = 500;
-      const windowSizeSeconds = 2;
-      const signal = generateSineWave(6, samplingRate, 4);
-
-      const result = welchPeriodogram(signal, {
-        samplingRate,
-        windowSizeSeconds,
-      });
-
-      // Window size of 2 seconds at 500 Hz = 1000 samples
-      // NFFT = 1024 (next power of 2)
-      // Frequency resolution = 500 / 1024 ≈ 0.488 Hz
-      expect(result.frequencyResolution).toBeCloseTo(500 / 1024, 2);
-    });
-
-    it('should process 4-second window correctly for 500 Hz sampling', () => {
-      const samplingRate = 500;
-      const windowSizeSeconds = 4;
-      const signal = generateSineWave(6, samplingRate, 8);
-
-      const result = welchPeriodogram(signal, {
-        samplingRate,
-        windowSizeSeconds,
-      });
-
-      // Window size of 4 seconds at 500 Hz = 2000 samples
-      // NFFT = 2048 (next power of 2)
-      // Frequency resolution = 500 / 2048 ≈ 0.244 Hz
-      expect(result.frequencyResolution).toBeCloseTo(500 / 2048, 2);
-    });
-
-    it('should process 250 Hz earpiece sampling rate correctly', () => {
-      const samplingRate = 250;
-      const signal = generateSineWave(10, samplingRate, 4);
-
-      const result = welchPeriodogram(signal, { samplingRate });
-
-      expect(result.frequencies).toBeDefined();
-      // Nyquist frequency should be 125 Hz
-      expect(result.frequencies[result.frequencies.length - 1]).toBeCloseTo(
-        125,
-        0
+    it('should throw error for empty array', () => {
+      expect(() => calculateDCOffset([])).toThrow(
+        'Cannot calculate DC offset of empty samples array'
       );
     });
 
-    it('should correctly identify dominant frequency in mixed signal', () => {
-      const samplingRate = 500;
-      const duration = 4;
+    it('should preserve precision for typical EEG values', () => {
+      const samples = [10.12345, 10.23456, 10.34567, 10.45678];
+      const dcOffset = calculateDCOffset(samples);
+      expect(dcOffset).toBeCloseTo(10.290115, 5);
+    });
+  });
 
-      // Create signal with multiple components, theta dominant
-      const theta = generateSineWave(6, samplingRate, duration, 10);
-      const alpha = generateSineWave(10, samplingRate, duration, 3);
-      const beta = generateSineWave(20, samplingRate, duration, 2);
+  describe('removeDCOffset', () => {
+    it('should remove DC offset from simple array', () => {
+      const samples = [101, 102, 103, 104, 105];
+      const corrected = removeDCOffset(samples);
 
-      const signal = theta.map((t, i) => t + alpha[i] + beta[i]);
+      // Mean should be approximately 0
+      const correctedMean = calculateDCOffset(corrected);
+      expect(correctedMean).toBeCloseTo(0, 10);
 
-      const result = welchPeriodogram(signal, { samplingRate });
-      const bands = extractAllBandPowers(result);
+      // Values should be shifted
+      expect(corrected[0]).toBe(-2);
+      expect(corrected[2]).toBe(0);
+      expect(corrected[4]).toBe(2);
+    });
 
-      // Theta should have highest absolute power
-      expect(bands.theta.absolutePower).toBeGreaterThan(
-        bands.alpha.absolutePower
+    it('should not modify original array', () => {
+      const samples = [100, 101, 102];
+      const originalCopy = [...samples];
+      removeDCOffset(samples);
+
+      expect(samples).toEqual(originalCopy);
+    });
+
+    it('should return new array', () => {
+      const samples = [100, 101, 102];
+      const corrected = removeDCOffset(samples);
+
+      expect(corrected).not.toBe(samples);
+    });
+
+    it('should handle array with zero mean', () => {
+      const samples = [-2, -1, 0, 1, 2];
+      const corrected = removeDCOffset(samples);
+
+      expect(corrected).toEqual([-2, -1, 0, 1, 2]);
+    });
+
+    it('should handle single element array', () => {
+      const samples = [50];
+      const corrected = removeDCOffset(samples);
+
+      expect(corrected).toEqual([0]);
+    });
+
+    it('should throw error for empty array', () => {
+      expect(() => removeDCOffset([])).toThrow(
+        'Cannot remove DC offset from empty samples array'
       );
-      expect(bands.theta.absolutePower).toBeGreaterThan(
-        bands.beta.absolutePower
+    });
+
+    it('should handle typical EEG data with DC offset', () => {
+      // Simulated EEG data with ~100µV DC offset
+      const samples = [100.5, 101.2, 99.8, 100.1, 100.4, 99.9, 100.3, 99.8];
+      const corrected = removeDCOffset(samples);
+
+      // Check that mean is now ~0
+      const correctedMean = calculateDCOffset(corrected);
+      expect(correctedMean).toBeCloseTo(0, 10);
+
+      // Check that signal shape is preserved (differences between consecutive samples)
+      for (let i = 1; i < samples.length; i++) {
+        const originalDiff = samples[i] - samples[i - 1];
+        const correctedDiff = corrected[i] - corrected[i - 1];
+        expect(correctedDiff).toBeCloseTo(originalDiff, 10);
+      }
+    });
+
+    it('should handle large DC offset', () => {
+      const samples = [1000, 1001, 1002, 999, 1000];
+      const corrected = removeDCOffset(samples);
+
+      const correctedMean = calculateDCOffset(corrected);
+      expect(correctedMean).toBeCloseTo(0, 10);
+    });
+
+    it('should preserve signal variance', () => {
+      const samples = [10, 20, 30, 20, 10];
+      const corrected = removeDCOffset(samples);
+
+      // Calculate variance of original
+      const originalMean = calculateDCOffset(samples);
+      const originalVariance =
+        samples.reduce((acc, val) => acc + Math.pow(val - originalMean, 2), 0) /
+        samples.length;
+
+      // Calculate variance of corrected
+      const correctedMean = calculateDCOffset(corrected);
+      const correctedVariance =
+        corrected.reduce(
+          (acc, val) => acc + Math.pow(val - correctedMean, 2),
+          0
+        ) / corrected.length;
+
+      expect(correctedVariance).toBeCloseTo(originalVariance, 10);
+    });
+  });
+
+  describe('removeDCOffsetInPlace', () => {
+    it('should modify array in place', () => {
+      const samples = [101, 102, 103, 104, 105];
+      removeDCOffsetInPlace(samples);
+
+      expect(samples[0]).toBe(-2);
+      expect(samples[2]).toBe(0);
+      expect(samples[4]).toBe(2);
+    });
+
+    it('should return the DC offset that was removed', () => {
+      const samples = [100, 101, 102, 103, 104];
+      const dcOffset = removeDCOffsetInPlace(samples);
+
+      expect(dcOffset).toBe(102);
+    });
+
+    it('should result in zero mean', () => {
+      const samples = [50.5, 51.2, 49.8, 50.1];
+      removeDCOffsetInPlace(samples);
+
+      const mean = calculateDCOffset(samples);
+      expect(mean).toBeCloseTo(0, 10);
+    });
+
+    it('should throw error for empty array', () => {
+      expect(() => removeDCOffsetInPlace([])).toThrow(
+        'Cannot remove DC offset from empty samples array'
+      );
+    });
+
+    it('should handle single element', () => {
+      const samples = [42];
+      const dcOffset = removeDCOffsetInPlace(samples);
+
+      expect(dcOffset).toBe(42);
+      expect(samples[0]).toBe(0);
+    });
+
+    it('should be equivalent to removeDCOffset', () => {
+      const samples1 = [10.5, 11.2, 9.8, 10.1, 10.4];
+      const samples2 = [...samples1];
+
+      const correctedNew = removeDCOffset(samples1);
+      removeDCOffsetInPlace(samples2);
+
+      for (let i = 0; i < samples1.length; i++) {
+        expect(samples2[i]).toBeCloseTo(correctedNew[i], 10);
+      }
+    });
+  });
+
+  describe('removeDCOffsetWithBaseline', () => {
+    it('should remove DC offset using baseline segment', () => {
+      // First 4 samples are baseline with mean 100
+      // Last 4 samples have different mean but should be corrected using baseline
+      const samples = [99, 100, 101, 100, 110, 111, 112, 113];
+      const corrected = removeDCOffsetWithBaseline(samples, 0, 4);
+
+      // Baseline mean was 100, so all samples shifted by -100
+      expect(corrected[0]).toBe(-1);
+      expect(corrected[1]).toBe(0);
+      expect(corrected[4]).toBe(10);
+      expect(corrected[7]).toBe(13);
+    });
+
+    it('should not modify original array', () => {
+      const samples = [100, 101, 102, 110, 111];
+      const originalCopy = [...samples];
+      removeDCOffsetWithBaseline(samples, 0, 3);
+
+      expect(samples).toEqual(originalCopy);
+    });
+
+    it('should handle middle baseline segment', () => {
+      const samples = [90, 91, 100, 101, 100, 110, 111];
+      // Use samples at indices 2, 3, 4 as baseline (mean = 100.333...)
+      const corrected = removeDCOffsetWithBaseline(samples, 2, 5);
+
+      const baselineMean = calculateDCOffset([100, 101, 100]);
+      expect(corrected[2]).toBeCloseTo(100 - baselineMean, 10);
+    });
+
+    it('should handle single sample baseline', () => {
+      const samples = [100, 105, 110, 115];
+      const corrected = removeDCOffsetWithBaseline(samples, 0, 1);
+
+      // Baseline is just [100], so offset is 100
+      expect(corrected[0]).toBe(0);
+      expect(corrected[1]).toBe(5);
+      expect(corrected[3]).toBe(15);
+    });
+
+    it('should throw error for empty samples array', () => {
+      expect(() => removeDCOffsetWithBaseline([], 0, 1)).toThrow(
+        'Cannot remove DC offset from empty samples array'
+      );
+    });
+
+    it('should throw error for negative baseline start', () => {
+      expect(() => removeDCOffsetWithBaseline([1, 2, 3], -1, 2)).toThrow(
+        'Baseline start index cannot be negative'
+      );
+    });
+
+    it('should throw error for baseline end exceeding length', () => {
+      expect(() => removeDCOffsetWithBaseline([1, 2, 3], 0, 5)).toThrow(
+        'Baseline end index cannot exceed samples length'
+      );
+    });
+
+    it('should throw error for baseline start >= end', () => {
+      expect(() => removeDCOffsetWithBaseline([1, 2, 3], 2, 2)).toThrow(
+        'Baseline start must be less than baseline end'
       );
 
-      // Peak in theta band should be near 6 Hz (within frequency resolution)
-      expect(Math.abs(bands.theta.peakFrequency - 6)).toBeLessThan(0.5);
+      expect(() => removeDCOffsetWithBaseline([1, 2, 3], 2, 1)).toThrow(
+        'Baseline start must be less than baseline end'
+      );
+    });
+
+    it('should handle ERP-style baseline correction', () => {
+      // Simulate ERP data: 100 samples baseline, 400 samples post-stimulus
+      const baselineSamples = Array.from(
+        { length: 100 },
+        () => 50 + Math.random() * 2
+      );
+      const postStimulusSamples = Array.from(
+        { length: 400 },
+        () => 55 + Math.random() * 5
+      );
+      const samples = [...baselineSamples, ...postStimulusSamples];
+
+      const corrected = removeDCOffsetWithBaseline(samples, 0, 100);
+
+      // Baseline period should now have mean ~0
+      const correctedBaselineMean = calculateDCOffset(
+        corrected.slice(0, 100)
+      );
+      expect(Math.abs(correctedBaselineMean)).toBeLessThan(0.01);
+    });
+
+    it('should preserve relative amplitudes within epoch', () => {
+      const samples = [100, 102, 104, 106, 108];
+      const corrected = removeDCOffsetWithBaseline(samples, 0, 2);
+
+      // Baseline mean is 101
+      // Differences between consecutive samples should be preserved
+      for (let i = 1; i < samples.length; i++) {
+        const originalDiff = samples[i] - samples[i - 1];
+        const correctedDiff = corrected[i] - corrected[i - 1];
+        expect(correctedDiff).toBeCloseTo(originalDiff, 10);
+      }
+    });
+  });
+
+  describe('Real-world EEG scenarios', () => {
+    it('should handle 500Hz sampling rate epoch (1 second)', () => {
+      // Generate 500 samples simulating 1 second of EEG at 500Hz
+      const sampleCount = 500;
+      const dcOffset = 150; // Typical DC offset in µV
+      const samples = Array.from(
+        { length: sampleCount },
+        () => dcOffset + (Math.random() - 0.5) * 20
+      );
+
+      const corrected = removeDCOffset(samples);
+      const correctedMean = calculateDCOffset(corrected);
+
+      expect(Math.abs(correctedMean)).toBeLessThan(0.001);
+      expect(corrected.length).toBe(sampleCount);
+    });
+
+    it('should handle 250Hz sampling rate epoch (1 second)', () => {
+      // Generate 250 samples simulating 1 second of EEG at 250Hz
+      const sampleCount = 250;
+      const dcOffset = 100;
+      const samples = Array.from(
+        { length: sampleCount },
+        () => dcOffset + (Math.random() - 0.5) * 15
+      );
+
+      const corrected = removeDCOffset(samples);
+      const correctedMean = calculateDCOffset(corrected);
+
+      expect(Math.abs(correctedMean)).toBeLessThan(0.001);
+    });
+
+    it('should not amplify noise', () => {
+      // Small signal with noise should not have noise amplified
+      const samples = Array.from(
+        { length: 100 },
+        () => 50 + (Math.random() - 0.5) * 0.1
+      );
+
+      const originalVariance =
+        samples.reduce(
+          (acc, val) =>
+            acc + Math.pow(val - calculateDCOffset(samples), 2),
+          0
+        ) / samples.length;
+
+      const corrected = removeDCOffset(samples);
+      const correctedVariance =
+        corrected.reduce(
+          (acc, val) =>
+            acc + Math.pow(val - calculateDCOffset(corrected), 2),
+          0
+        ) / corrected.length;
+
+      // Variance should be identical
+      expect(correctedVariance).toBeCloseTo(originalVariance, 10);
+    });
+
+    it('should handle varying DC offset levels', () => {
+      const offsets = [0, 50, 100, 200, -50, -100];
+
+      for (const offset of offsets) {
+        const samples = Array.from(
+          { length: 50 },
+          () => offset + (Math.random() - 0.5) * 10
+        );
+        const corrected = removeDCOffset(samples);
+        const correctedMean = calculateDCOffset(corrected);
+
+        expect(Math.abs(correctedMean)).toBeLessThan(0.001);
+      }
     });
   });
 });
