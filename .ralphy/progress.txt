@@ -398,71 +398,83 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-## 2026-01-21
-
-### Task: Create TodaySummaryWidget showing session count, total time, and avg theta
+### Task: Implement connection quality monitoring using RSSI values
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created TodaySummaryWidget React Native component in src/components/TodaySummaryWidget.tsx
-2. Component displays three metrics for today's sessions:
-   - Session count: Number of sessions completed today
-   - Total time: Cumulative duration formatted as minutes or hours+minutes
-   - Average theta: Mean theta z-score with +/- sign and color-coded display
-3. Implemented session filtering to include only sessions from today (based on start_time timestamp)
-4. Used SessionContext via useSession() hook to access recentSessions data
-5. Added optional sessions prop for testing/flexibility when sessions are passed from parent
-6. Applied proper styling using theme constants (Colors, Spacing, BorderRadius, Typography, Shadows)
-7. Color-coded average theta display:
-   - Green (>= 0.5): Target range achieved
-   - Yellow (>= 0): Approaching target
-   - Red (< 0): Below target
-8. Implemented helper functions: formatDuration, formatTheta, filterTodaySessions, calculateTodayStats, getThetaColor
-9. Used useMemo for performance optimization of stats calculation
-10. Updated src/components/index.ts to export TodaySummaryWidget and TodaySummaryWidgetProps
-11. Created comprehensive test suite with 31 tests (__tests__/TodaySummaryWidget.test.tsx)
-12. Tests cover: filtering logic, session count calculation, total time summation, average theta computation, formatting functions, and edge cases
-13. Verified all tests pass (31 new tests, 207 total across test suites)
-14. Verified TypeScript compilation passes without errors
+1. Added comprehensive connection quality TypeScript types to src/types/index.ts:
+   - ConnectionQualityLevel type ('excellent' | 'good' | 'fair' | 'poor')
+   - RSSIReading interface for individual RSSI readings with timestamps
+   - ConnectionQuality interface with 11 fields (currentRSSI, averageRSSI, minRSSI, maxRSSI, rssiStdDev, qualityLevel, qualityScore, isStable, lastUpdated, sampleCount)
+   - ConnectionQualityConfig interface for configurable thresholds and polling intervals
+   - DEFAULT_CONNECTION_QUALITY_CONFIG constant with sensible defaults
+   - ConnectionQualityCallback and QualityLevelChangeCallback types for event handling
+
+2. Created ConnectionQualityMonitor class (src/services/ConnectionQualityMonitor.ts):
+   - RSSI polling at configurable intervals (default 2 seconds)
+   - Sliding window averaging for smoothed metrics (default window size 10)
+   - Quality level classification based on RSSI thresholds:
+     - Excellent: >= -50 dBm
+     - Good: >= -70 dBm
+     - Fair: >= -85 dBm
+     - Poor: < -85 dBm
+   - Connection stability detection based on RSSI standard deviation
+   - Quality score calculation (0-100) combining RSSI strength and stability
+   - Event callbacks for quality updates and level changes
+   - Utility functions: getQualityLevelDescription(), getQualityLevelColor()
+
+3. Created TypeScript BLEService (src/services/BLEService.ts):
+   - Full TypeScript rewrite with proper type safety
+   - Integrated ConnectionQualityMonitor for automatic RSSI monitoring
+   - Auto-reconnect logic with exponential backoff (2s, 4s, 8s)
+   - Device info tracking with real-time RSSI updates
+   - Connection state management ('disconnected' | 'connecting' | 'connected' | 'reconnecting')
+   - EEG data stream monitoring
+   - Event listener pattern for connection state, EEG data, and device info updates
+   - Console warnings when connection quality degrades to 'poor'
+
+4. Updated exports in src/services/index.ts
+
+5. Created comprehensive test suite (__tests__/connection-quality-monitor.test.ts):
+   - 23 tests covering quality level classification, score calculation, RSSI collection, stability detection
+   - Tests for sliding window behavior, standard deviation calculation, and type validation
+   - All tests passing
 
 **Files created/modified**:
-- src/components/TodaySummaryWidget.tsx (created - 160 lines with React Native component)
-- src/components/index.ts (modified - added TodaySummaryWidget export)
-- __tests__/TodaySummaryWidget.test.tsx (created - 512 lines with 31 comprehensive test cases)
+- src/types/index.ts (modified - added 86 lines of connection quality types)
+- src/services/ConnectionQualityMonitor.ts (created - 305 lines)
+- src/services/BLEService.ts (created - 453 lines)
+- src/services/index.ts (modified - added exports)
+- __tests__/connection-quality-monitor.test.ts (created - 270 lines with 23 tests)
 
-**Component API**:
-```typescript
-interface TodaySummaryWidgetProps {
-  sessions?: Session[];  // Optional: use instead of context data
-}
+**Quality level thresholds** (configurable):
+- Excellent: RSSI >= -50 dBm (very close range, optimal)
+- Good: -50 > RSSI >= -70 dBm (normal operating range)
+- Fair: -70 > RSSI >= -85 dBm (usable but may have issues)
+- Poor: RSSI < -85 dBm (connection may be unstable)
 
-<TodaySummaryWidget />              // Uses SessionContext
-<TodaySummaryWidget sessions={[]}  /> // Uses provided sessions
-```
+**Quality score algorithm**:
+- Base score (0-80): Maps RSSI from -100 dBm (0) to -30 dBm (80)
+- Stability bonus (0-20): Full bonus if stdDev <= 5, decreases to 0 at stdDev >= 20
+- Final score: 0-100 range
 
-**Widget display format**:
-```
-┌─────────────────────────────────┐
-│ Today                           │
-├────────────────┬────────────────┤
-│       3        │     1h 30m     │
-│   Sessions     │   Total Time   │
-├────────────────┴────────────────┤
-│            +0.75                │
-│          Avg Theta              │
-└─────────────────────────────────┘
-```
+**Key features**:
+- Automatic RSSI polling when device is connected
+- Statistical analysis: average, min, max, standard deviation
+- Configurable thresholds for different use cases
+- Event-driven architecture for UI updates
+- Clean integration with BLEService for seamless monitoring
 
-**Test coverage**: 31 test cases covering:
-- filterTodaySessions (4 tests): empty array, yesterday filtering, all today, any time today
-- calculateTodayStats - Empty State (3 tests): zero count, zero time, null theta
-- calculateTodayStats - Session Count (3 tests): today only, single session, all types
-- calculateTodayStats - Total Time (3 tests): single session, multiple sessions, exclude yesterday
-- calculateTodayStats - Average Theta (5 tests): single session, multiple sessions, negative, exclude yesterday, zero
-- formatDuration (4 tests): zero, minutes, hours+minutes, just hours
-- formatTheta (5 tests): null, positive, negative, zero, rounding
-- Edge Cases (4 tests): midnight, long sessions, many sessions, mixed theta values
+**Test coverage**: 23 tests covering:
+- Quality level classification (4 tests)
+- Quality score calculation (6 tests)
+- RSSI reading collection (4 tests)
+- Stability detection (2 tests)
+- Current RSSI tracking (1 test)
+- Standard deviation calculation (3 tests)
+- Default config validation (1 test)
+- Type validation (2 tests)
 
-**Next steps**: Continue with Phase 3 tasks as per PRD
+**Next steps**: Add paired device storage and retrieval from AsyncStorage as per Phase 3 task 5
 

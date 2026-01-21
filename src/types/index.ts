@@ -180,3 +180,89 @@ export interface ThemeColors {
   textSecondary: string;
   border: string;
 }
+
+/**
+ * Connection quality level based on RSSI values
+ * - excellent: RSSI >= -50 dBm (very close range, optimal)
+ * - good: -50 > RSSI >= -70 dBm (normal operating range)
+ * - fair: -70 > RSSI >= -85 dBm (usable but may have issues)
+ * - poor: RSSI < -85 dBm (connection may be unstable)
+ */
+export type ConnectionQualityLevel = 'excellent' | 'good' | 'fair' | 'poor';
+
+/**
+ * Individual RSSI reading with timestamp
+ */
+export interface RSSIReading {
+  rssi: number;
+  timestamp: number;
+}
+
+/**
+ * Connection quality metrics aggregated from RSSI readings
+ */
+export interface ConnectionQuality {
+  /** Current RSSI value in dBm */
+  currentRSSI: number;
+  /** Average RSSI over the monitoring window */
+  averageRSSI: number;
+  /** Minimum RSSI in the monitoring window */
+  minRSSI: number;
+  /** Maximum RSSI in the monitoring window */
+  maxRSSI: number;
+  /** Standard deviation of RSSI (indicates stability) */
+  rssiStdDev: number;
+  /** Computed quality level based on RSSI */
+  qualityLevel: ConnectionQualityLevel;
+  /** Quality score 0-100 based on RSSI and stability */
+  qualityScore: number;
+  /** Whether the connection is considered stable */
+  isStable: boolean;
+  /** Timestamp of last RSSI update */
+  lastUpdated: number;
+  /** Number of samples in the current window */
+  sampleCount: number;
+}
+
+/**
+ * Configuration for connection quality monitoring
+ */
+export interface ConnectionQualityConfig {
+  /** Interval between RSSI reads in milliseconds */
+  pollingIntervalMs: number;
+  /** Size of the sliding window for averaging */
+  windowSize: number;
+  /** RSSI threshold for excellent connection (dBm) */
+  excellentThreshold: number;
+  /** RSSI threshold for good connection (dBm) */
+  goodThreshold: number;
+  /** RSSI threshold for fair connection (dBm) */
+  fairThreshold: number;
+  /** Standard deviation threshold for stability */
+  stabilityThreshold: number;
+}
+
+/**
+ * Default connection quality configuration
+ */
+export const DEFAULT_CONNECTION_QUALITY_CONFIG: ConnectionQualityConfig = {
+  pollingIntervalMs: 2000,
+  windowSize: 10,
+  excellentThreshold: -50,
+  goodThreshold: -70,
+  fairThreshold: -85,
+  stabilityThreshold: 10,
+};
+
+/**
+ * Callback type for connection quality updates
+ */
+export type ConnectionQualityCallback = (quality: ConnectionQuality) => void;
+
+/**
+ * Callback type for quality level change events
+ */
+export type QualityLevelChangeCallback = (
+  newLevel: ConnectionQualityLevel,
+  previousLevel: ConnectionQualityLevel
+) => void;
