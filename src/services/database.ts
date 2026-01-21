@@ -1,4 +1,16 @@
 import * as SQLite from 'expo-sqlite';
+import {
+  allMigrations,
+  runMigrations,
+  getCurrentVersion,
+  getAppliedMigrations,
+  getPendingMigrations,
+  rollbackLastMigration,
+  dropMigrationsTable,
+  MigrationResult,
+  MigrationRecord,
+  Migration,
+} from './migrations';
 
 /**
  * Database schema and initialization for FlowState BCI
@@ -16,6 +28,7 @@ export const openDatabase = (): SQLite.SQLiteDatabase => {
 
 /**
  * Creates the baselines table if it doesn't exist
+ * @deprecated Use initializeDatabase() with migrations instead
  * Stores calibration baseline profiles for EEG signal normalization
  */
 export const createBaselinesTable = (db: SQLite.SQLiteDatabase): void => {
@@ -36,37 +49,60 @@ export const createBaselinesTable = (db: SQLite.SQLiteDatabase): void => {
 };
 
 /**
- * Creates the circadian_patterns table if it doesn't exist
- * Stores aggregated theta statistics by hour of day for circadian rhythm analysis
+ * Initializes the database with all migrations
+ * Should be called on app startup
+ * @returns Object containing db instance and migration result
  */
-export const createCircadianPatternsTable = (
-  db: SQLite.SQLiteDatabase
-): void => {
-  db.execSync(`
-    CREATE TABLE IF NOT EXISTS circadian_patterns (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      hour_of_day INTEGER NOT NULL CHECK (hour_of_day >= 0 AND hour_of_day <= 23),
-      avg_theta_mean REAL NOT NULL,
-      avg_theta_std REAL NOT NULL,
-      session_count INTEGER NOT NULL DEFAULT 0,
-      avg_subjective_rating REAL,
-      created_at INTEGER DEFAULT (strftime('%s', 'now')),
-      updated_at INTEGER DEFAULT (strftime('%s', 'now')),
-      UNIQUE(hour_of_day)
-    );
-  `);
+export const initializeDatabase = (): {
+  db: SQLite.SQLiteDatabase;
+  migrationResult: MigrationResult;
+} => {
+  const db = openDatabase();
+  const migrationResult = runMigrations(db, allMigrations);
+  return { db, migrationResult };
 };
 
 /**
- * Initializes all database tables
- * Should be called on app startup
+ * Initializes the database and returns just the db instance
+ * For backwards compatibility with existing code
  */
-export const initializeDatabase = (): SQLite.SQLiteDatabase => {
-  const db = openDatabase();
-  createBaselinesTable(db);
-  createSessionsTable(db);
-  createCircadianPatternsTable(db);
+export const initializeDatabaseSimple = (): SQLite.SQLiteDatabase => {
+  const { db } = initializeDatabase();
   return db;
+};
+
+/**
+ * Gets the current schema version
+ */
+export const getSchemaVersion = (db: SQLite.SQLiteDatabase): number => {
+  return getCurrentVersion(db);
+};
+
+/**
+ * Gets list of applied migrations
+ */
+export const getAppliedMigrationsList = (
+  db: SQLite.SQLiteDatabase
+): MigrationRecord[] => {
+  return getAppliedMigrations(db);
+};
+
+/**
+ * Gets list of pending migrations
+ */
+export const getPendingMigrationsList = (
+  db: SQLite.SQLiteDatabase
+): Migration[] => {
+  return getPendingMigrations(db, allMigrations);
+};
+
+/**
+ * Rolls back the last migration
+ */
+export const rollbackMigration = (
+  db: SQLite.SQLiteDatabase
+): MigrationResult => {
+  return rollbackLastMigration(db, allMigrations);
 };
 
 /**
@@ -76,6 +112,7 @@ export const dropAllTables = (db: SQLite.SQLiteDatabase): void => {
   db.execSync('DROP TABLE IF EXISTS baselines;');
   db.execSync('DROP TABLE IF EXISTS sessions;');
   db.execSync('DROP TABLE IF EXISTS circadian_patterns;');
+  dropMigrationsTable(db);
 };
 
 /**

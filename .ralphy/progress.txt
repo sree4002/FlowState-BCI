@@ -398,64 +398,106 @@ Victory Native provides chart components for:
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
 
-### Task: Implement amplitude threshold artifact detection (±100 µV)
+### Task: Add database migration support for future schema updates
 
 **Status**: ✅ Completed
 
 **What was done**:
-1. Created src/services/signalProcessing.ts with comprehensive amplitude threshold artifact detection
-2. Implemented detectAmplitudeArtifacts() function for analyzing arrays of voltage samples
-3. Implemented detectAmplitudeArtifactsInPacket() for processing EEGDataPacket objects
-4. Implemented detectAmplitudeArtifactsInWindow() for analyzing sliding windows of multiple packets
-5. Created AmplitudeArtifactResult interface with detailed detection statistics:
-   - hasArtifact: boolean flag for artifact presence
-   - artifactSampleCount: count of samples exceeding threshold
-   - totalSampleCount: total samples analyzed
-   - artifactPercentage: percentage of artifacts (0-100)
-   - maxAmplitude/minAmplitude: amplitude range tracking
-   - artifactIndices: array of indices where artifacts occurred
-6. Implemented utility functions:
-   - isAmplitudeArtifact(): single sample artifact check
-   - isValidThreshold(): threshold validation
-   - clampSamplesToThreshold(): artifact clamping for data cleaning
-   - createAmplitudeSignalQuality(): creates partial SignalQuality object
-7. Defined DEFAULT_AMPLITUDE_THRESHOLD_UV constant (100 µV) as per EEG standards
-8. Created comprehensive test suite with 51 test cases covering:
-   - Basic artifact detection (empty arrays, boundary conditions, positive/negative artifacts)
-   - Statistics calculation (percentages, min/max tracking)
-   - Custom threshold support
-   - Edge cases (zero values, large values, floating point precision)
-   - Realistic EEG scenarios (eye blinks, muscle artifacts, electrode pops)
-   - Multi-packet window analysis
-   - Integration with SignalQuality type
-9. Updated src/services/index.ts to export signalProcessing module
-10. Verified all 227 tests pass across 10 test suites
-11. Verified linting passes with no errors or warnings
+1. Created comprehensive database migration system in src/services/migrations/
+2. Implemented migration types and interfaces:
+   - Migration interface with version, name, up(), and optional down() methods
+   - MigrationRecord for tracking applied migrations
+   - MigrationResult for reporting migration outcomes
+3. Implemented migration runner with full functionality:
+   - createMigrationsTable(): Creates schema_migrations tracking table
+   - runMigrations(): Runs pending migrations in version order
+   - rollbackLastMigration(): Reverts last applied migration
+   - getCurrentVersion(): Gets current schema version
+   - getAppliedMigrations(): Lists all applied migrations
+   - getPendingMigrations(): Lists pending migrations
+   - isMigrationApplied(): Checks if specific migration was applied
+4. Created initial migration (001) for baselines table
+5. Created migration (002) for sessions table with:
+   - Full schema matching PRD requirements
+   - session_type CHECK constraint (calibration, quick_boost, custom, scheduled, sham)
+   - Index on start_time for efficient date queries
+6. Created migration (003) for circadian_patterns table with:
+   - hour_of_day as primary key with CHECK constraint (0-23)
+   - updated_at timestamp for tracking pattern updates
+7. Updated database.ts to integrate migration system:
+   - initializeDatabase() now runs migrations and returns MigrationResult
+   - initializeDatabaseSimple() for backwards compatibility
+   - Added getSchemaVersion(), getAppliedMigrationsList(), getPendingMigrationsList()
+   - Added rollbackMigration() wrapper
+   - Updated dropAllTables() to clean all tables including schema_migrations
+8. Updated src/services/index.ts to export migrations module
+9. Created comprehensive test suite with 35 test cases for migration system
+10. Updated expo-sqlite mock to support:
+    - CREATE/DROP INDEX statements
+    - MAX() aggregate function
+    - WHERE version = ? clause
+    - Literal VALUES parsing (for constraint testing)
+    - Schema introspection for multiple tables (schema_migrations, sessions, circadian_patterns)
+    - CHECK constraint validation for session_type and hour_of_day
+11. Updated existing database-baselines.test.ts to work with new initializeDatabase() return value
+12. Verified all tests pass (61 tests passing across 2 database test files)
+13. Verified linting passes with no errors or warnings
 
 **Files created/modified**:
-- src/services/signalProcessing.ts (created - 203 lines)
-- __tests__/signal-processing.test.ts (created - 51 comprehensive test cases)
-- src/services/index.ts (modified - added signalProcessing export)
+- src/services/migrations/types.ts (created - Migration, MigrationRecord, MigrationResult interfaces)
+- src/services/migrations/runner.ts (created - Migration runner with all operations)
+- src/services/migrations/001_create_baselines_table.ts (created - Baselines table migration)
+- src/services/migrations/002_create_sessions_table.ts (created - Sessions table migration)
+- src/services/migrations/003_create_circadian_patterns_table.ts (created - Circadian patterns migration)
+- src/services/migrations/index.ts (created - Exports allMigrations array and all types/functions)
+- src/services/database.ts (modified - Integrated migration system)
+- src/services/index.ts (modified - Added migrations export)
+- __tests__/database-migrations.test.ts (created - 35 comprehensive migration tests)
+- __tests__/database-baselines.test.ts (modified - Updated for new initializeDatabase() API)
+- __mocks__/expo-sqlite.ts (modified - Extended to support migration system operations)
 
-**Key implementation details**:
-- Threshold: ±100 µV (samples with absolute value > 100 are artifacts)
-- Boundary condition: exactly ±100 µV is NOT flagged as artifact (uses > not >=)
-- Works with EEGDataPacket type from src/types/index.ts
-- Compatible with SignalQuality interface (has_amplitude_artifact, artifact_percentage fields)
-- Supports custom thresholds for specialized use cases
-- Efficient O(n) algorithm scanning all samples in single pass
+**Migration system architecture**:
+- Version-based migrations (integer version numbers)
+- Sequential execution in version order
+- Idempotent: safe to run multiple times
+- Rollback support via optional down() methods
+- schema_migrations table tracks applied migrations
+- MigrationResult provides success/failure status and applied migrations list
 
-**Functions exported**:
-- detectAmplitudeArtifacts(samples, threshold): Main detection function
-- detectAmplitudeArtifactsInPacket(packet, threshold): Packet wrapper
-- detectAmplitudeArtifactsInWindow(packets, threshold): Window analysis
-- createAmplitudeSignalQuality(result): SignalQuality integration
-- isAmplitudeArtifact(sample, threshold): Single sample check
-- isValidThreshold(threshold): Threshold validation
-- clampSamplesToThreshold(samples, threshold): Artifact clamping
-- DEFAULT_AMPLITUDE_THRESHOLD_UV: 100 µV constant
+**Sessions table schema** (migration 002):
+- id: INTEGER PRIMARY KEY AUTOINCREMENT
+- session_type: TEXT NOT NULL with CHECK constraint
+- start_time: INTEGER NOT NULL (indexed)
+- end_time: INTEGER NOT NULL
+- duration_seconds: INTEGER NOT NULL
+- avg_theta_zscore: REAL NOT NULL
+- max_theta_zscore: REAL NOT NULL
+- entrainment_freq: REAL NOT NULL
+- volume: REAL NOT NULL
+- signal_quality_avg: REAL NOT NULL
+- subjective_rating: INTEGER (nullable)
+- notes: TEXT (nullable)
+- created_at: INTEGER DEFAULT timestamp
 
-**Test coverage**: 51 tests covering all functions and edge cases
+**Circadian patterns table schema** (migration 003):
+- hour_of_day: INTEGER PRIMARY KEY (0-23 CHECK constraint)
+- avg_theta_mean: REAL NOT NULL
+- avg_theta_std: REAL NOT NULL
+- session_count: INTEGER NOT NULL DEFAULT 0
+- avg_subjective_rating: REAL (nullable)
+- updated_at: INTEGER DEFAULT timestamp
 
-**Next steps**: Implement gradient threshold artifact detection (>50 µV/sample) as per Phase 4 task 2
+**Test coverage**: 35 test cases covering:
+- Migration table management (4 tests)
+- Running migrations (7 tests)
+- Migration version tracking (3 tests)
+- Incremental migrations (1 test)
+- Migration rollback (4 tests)
+- Database wrapper functions (4 tests)
+- Sessions table schema (4 tests)
+- Circadian patterns table schema (3 tests)
+- Custom migration handling (2 tests)
+- initializeDatabase integration (3 tests)
+
+**Next steps**: Implement AsyncStorage wrapper for user settings and device pairing info as per Phase 2 task 5
 

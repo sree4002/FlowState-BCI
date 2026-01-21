@@ -16,8 +16,11 @@ export interface SQLiteDatabase {
 }
 
 // In-memory storage for test database
-let tables: Map<string, Map<number, Record<string, unknown>>> = new Map();
+let tables: Map<string, Map<number | string, Record<string, unknown>>> =
+  new Map();
 let autoIncrementCounters: Map<string, number> = new Map();
+let indexes: Set<string> = new Set();
+let tableSchemas: Map<string, string> = new Map(); // Store original CREATE TABLE SQL
 
 /**
  * Resets the mock database state
@@ -25,6 +28,8 @@ let autoIncrementCounters: Map<string, number> = new Map();
 export const resetMockDatabase = (): void => {
   tables = new Map();
   autoIncrementCounters = new Map();
+  indexes = new Set();
+  tableSchemas = new Map();
 };
 
 /**
@@ -37,7 +42,28 @@ const parseCreateTable = (sql: string): void => {
     if (!tables.has(tableName)) {
       tables.set(tableName, new Map());
       autoIncrementCounters.set(tableName, 0);
+      tableSchemas.set(tableName, sql);
     }
+  }
+};
+
+/**
+ * Parse SQL CREATE INDEX statement
+ */
+const parseCreateIndex = (sql: string): void => {
+  const match = sql.match(/CREATE INDEX IF NOT EXISTS (\w+)/i);
+  if (match) {
+    indexes.add(match[1]);
+  }
+};
+
+/**
+ * Parse SQL DROP INDEX statement
+ */
+const parseDropIndex = (sql: string): void => {
+  const match = sql.match(/DROP INDEX IF EXISTS (\w+)/i);
+  if (match) {
+    indexes.delete(match[1]);
   }
 };
 
@@ -50,6 +76,7 @@ const parseDropTable = (sql: string): void => {
     const tableName = match[1];
     tables.delete(tableName);
     autoIncrementCounters.delete(tableName);
+    tableSchemas.delete(tableName);
   }
 };
 
@@ -59,22 +86,19 @@ const parseDropTable = (sql: string): void => {
 const parseInsert = (
   sql: string,
   params: unknown[]
-): {
-  tableName: string;
-  row: Record<string, unknown>;
-  onConflictField?: string;
-  updateFields?: string[];
-} => {
-  // Normalize whitespace in SQL for easier parsing
+): { tableName: string; row: Record<string, unknown> } => {
+  // Normalize whitespace for multiline SQL
   const normalizedSql = sql.replace(/\s+/g, ' ').trim();
-
-  const match = normalizedSql.match(/INSERT INTO (\w+)\s*\((.*?)\)\s*VALUES/i);
+  const match = normalizedSql.match(
+    /INSERT INTO (\w+)\s*\((.*?)\)\s*VALUES\s*\((.*?)\)/i
+  );
   if (!match) {
     throw new Error('Invalid INSERT statement');
   }
 
   const tableName = match[1];
   const columns = match[2].split(',').map((col) => col.trim());
+  const valuesStr = match[3];
 
   // Extract VALUES clause to check which columns use placeholders vs expressions
   const valuesMatch = normalizedSql.match(
@@ -86,16 +110,35 @@ const parseInsert = (
   }
 
   const row: Record<string, unknown> = {};
-  let paramIdx = 0;
-  columns.forEach((col, colIdx) => {
-    // Only use params for columns that use '?' placeholders
-    const valuePart = valuePlaceholders[colIdx] || '';
-    if (valuePart === '?') {
-      row[col] = params[paramIdx];
-      paramIdx++;
-    }
-    // Skip columns that use expressions like strftime(...)
-  });
+
+  // If we have params, use them. Otherwise, parse literal values from SQL
+  if (params.length > 0) {
+    columns.forEach((col, idx) => {
+      row[col] = params[idx];
+    });
+  } else {
+    // Parse literal values from VALUES clause
+    const literalValues = valuesStr.split(',').map((v) => {
+      const trimmed = v.trim();
+      // Handle string literals
+      if (trimmed.startsWith("'") && trimmed.endsWith("'")) {
+        return trimmed.slice(1, -1);
+      }
+      // Handle numbers
+      const num = parseFloat(trimmed);
+      if (!isNaN(num)) {
+        return num;
+      }
+      // Handle NULL
+      if (trimmed.toUpperCase() === 'NULL') {
+        return null;
+      }
+      return trimmed;
+    });
+    columns.forEach((col, idx) => {
+      row[col] = literalValues[idx];
+    });
+  }
 
   // Check for ON CONFLICT clause
   const conflictMatch = normalizedSql.match(/ON CONFLICT\((\w+)\)/i);
@@ -212,33 +255,10 @@ const filterRows = (
     return rows.filter((row) => row.id === id);
   }
 
-  // WHERE session_type = ?
-  if (where.match(/session_type\s*=\s*\?/i)) {
-    const sessionType = params[0] as string;
-    return rows.filter((row) => row.session_type === sessionType);
-  }
-
-  // WHERE hour_of_day = ?
-  if (where.match(/hour_of_day\s*=\s*\?/i)) {
-    const hourOfDay = params[0] as number;
-    return rows.filter((row) => row.hour_of_day === hourOfDay);
-  }
-
-  // WHERE start_time >= ? AND start_time <= ?
-  if (where.match(/start_time\s*>=\s*\?\s*AND\s*start_time\s*<=\s*\?/i)) {
-    const startTime = params[0] as number;
-    const endTime = params[1] as number;
-    return rows.filter((row) => {
-      const rowStartTime = row.start_time as number;
-      return rowStartTime >= startTime && rowStartTime <= endTime;
-    });
-  }
-
-  // WHERE session_count >= ? (used with ORDER BY)
-  if (where.match(/session_count\s*>=\s*(\d+)/i)) {
-    const match = where.match(/session_count\s*>=\s*(\d+)/i);
-    const minCount = parseInt(match![1]);
-    return rows.filter((row) => (row.session_count as number) >= minCount);
+  // WHERE version = ? parsing
+  if (where.match(/version\s*=\s*\?/i)) {
+    const version = params[0] as number;
+    return rows.filter((row) => row.version === version);
   }
 
   return rows;
@@ -334,7 +354,7 @@ const parseUpdate = (
 const parseDelete = (
   sql: string,
   params: unknown[]
-): { tableName: string; whereField?: string; whereValue?: number } => {
+): { tableName: string; key?: number | string; keyField?: string } => {
   const match = sql.match(/DELETE FROM (\w+)/i);
   if (!match) {
     throw new Error('Invalid DELETE statement');
@@ -343,15 +363,10 @@ const parseDelete = (
   const tableName = match[1];
 
   // Check for WHERE clause
-  if (sql.match(/WHERE id = \?/i)) {
-    return { tableName, whereField: 'id', whereValue: params[0] as number };
-  }
-  if (sql.match(/WHERE hour_of_day = \?/i)) {
-    return {
-      tableName,
-      whereField: 'hour_of_day',
-      whereValue: params[0] as number,
-    };
+  if (sql.match(/WHERE\s+id\s*=\s*\?/i)) {
+    return { tableName, key: params[0] as number, keyField: 'id' };
+  } else if (sql.match(/WHERE\s+version\s*=\s*\?/i)) {
+    return { tableName, key: params[0] as number, keyField: 'version' };
   }
 
   return { tableName };
@@ -366,6 +381,10 @@ class MockSQLiteDatabase implements SQLiteDatabase {
       parseCreateTable(query);
     } else if (query.match(/DROP TABLE/i)) {
       parseDropTable(query);
+    } else if (query.match(/CREATE INDEX/i)) {
+      parseCreateIndex(query);
+    } else if (query.match(/DROP INDEX/i)) {
+      parseDropIndex(query);
     }
   }
 
@@ -380,45 +399,79 @@ class MockSQLiteDatabase implements SQLiteDatabase {
         throw new Error(`Table ${tableName} does not exist`);
       }
 
-      // Handle ON CONFLICT (upsert)
-      if (onConflictField) {
-        const conflictValue = row[onConflictField];
-        // Find existing row with same conflict field value
-        let existingRowId: number | null = null;
-        let existingRow: Record<string, unknown> | null = null;
-        table.forEach((r, id) => {
-          if (r[onConflictField] === conflictValue) {
-            existingRowId = id;
-            existingRow = r;
-          }
-        });
+      // Check table schema for primary key
+      const schema = tableSchemas.get(tableName) || '';
+      const hasPrimaryKeyVersion = schema.match(/version\s+INTEGER\s+PRIMARY/i);
+      const hasPrimaryKeyHour = schema.match(
+        /hour_of_day\s+INTEGER\s+PRIMARY/i
+      );
 
-        if (existingRow && existingRowId !== null) {
-          // Update existing row
-          if (updateFields) {
-            for (const field of updateFields) {
-              if (field in row) {
-                existingRow[field] = row[field];
-              }
-            }
+      let key: number | string;
+      let fullRow: Record<string, unknown>;
+
+      if (hasPrimaryKeyVersion && row.version !== undefined) {
+        // Use version as primary key
+        key = row.version as number;
+
+        // Check constraint for hour_of_day if applicable
+        if (row.hour_of_day !== undefined) {
+          const hour = row.hour_of_day as number;
+          if (hour < 0 || hour > 23) {
+            throw new Error('CHECK constraint failed: hour_of_day');
           }
-          existingRow['updated_at'] = Math.floor(Date.now() / 1000);
-          return { lastInsertRowId: existingRowId, changes: 1 };
         }
+
+        fullRow = {
+          ...row,
+          applied_at: Math.floor(Date.now() / 1000),
+        };
+      } else if (
+        (hasPrimaryKeyHour || tableName === 'circadian_patterns') &&
+        row.hour_of_day !== undefined
+      ) {
+        // Use hour_of_day as primary key
+        const hour = row.hour_of_day as number;
+        if (hour < 0 || hour > 23) {
+          throw new Error('CHECK constraint failed: hour_of_day');
+        }
+        key = hour;
+        fullRow = {
+          ...row,
+          updated_at: Math.floor(Date.now() / 1000),
+        };
+      } else {
+        // Auto-increment id
+        const counter = (autoIncrementCounters.get(tableName) || 0) + 1;
+        autoIncrementCounters.set(tableName, counter);
+        key = counter;
+
+        // Check session_type constraint for sessions table
+        if (tableName === 'sessions' && row.session_type) {
+          const validTypes = [
+            'calibration',
+            'quick_boost',
+            'custom',
+            'scheduled',
+            'sham',
+          ];
+          if (!validTypes.includes(row.session_type as string)) {
+            throw new Error('CHECK constraint failed: session_type');
+          }
+        }
+
+        fullRow = {
+          id: counter,
+          ...row,
+          created_at: Math.floor(Date.now() / 1000),
+        };
       }
 
-      const counter = (autoIncrementCounters.get(tableName) || 0) + 1;
-      autoIncrementCounters.set(tableName, counter);
+      table.set(key, fullRow);
 
-      const fullRow = {
-        id: counter,
-        ...row,
-        created_at: Math.floor(Date.now() / 1000),
-        updated_at: Math.floor(Date.now() / 1000),
+      return {
+        lastInsertRowId: typeof key === 'number' ? key : 0,
+        changes: 1,
       };
-      table.set(counter, fullRow);
-
-      return { lastInsertRowId: counter, changes: 1 };
     } else if (query.match(/UPDATE/i)) {
       const { tableName, updates, whereField, whereValue } = parseUpdate(
         query,
@@ -444,26 +497,24 @@ class MockSQLiteDatabase implements SQLiteDatabase {
       }
       return { lastInsertRowId: 0, changes: 0 };
     } else if (query.match(/DELETE FROM/i)) {
-      const { tableName, whereField, whereValue } = parseDelete(query, params);
+      const { tableName, key, keyField } = parseDelete(query, params);
       const table = tables.get(tableName);
       if (!table) {
         throw new Error(`Table ${tableName} does not exist`);
       }
 
-      if (whereField !== undefined && whereValue !== undefined) {
-        // Find and delete row by whereField
-        let deletedId: number | null = null;
-        for (const [id, row] of table.entries()) {
-          if (row[whereField] === whereValue) {
-            deletedId = id;
-            break;
-          }
+      if (key !== undefined && keyField) {
+        // Delete by specific key field
+        let existed = false;
+        if (keyField === 'version') {
+          existed = table.has(key);
+          table.delete(key);
+        } else {
+          // For id-based deletes
+          existed = table.has(key);
+          table.delete(key);
         }
-        if (deletedId !== null) {
-          table.delete(deletedId);
-          return { lastInsertRowId: 0, changes: 1 };
-        }
-        return { lastInsertRowId: 0, changes: 0 };
+        return { lastInsertRowId: 0, changes: existed ? 1 : 0 };
       } else {
         const count = table.size;
         table.clear();
@@ -484,74 +535,19 @@ class MockSQLiteDatabase implements SQLiteDatabase {
       }
     }
 
-    // Handle aggregate queries (SUM, AVG, COUNT)
-    if (query.match(/SELECT\s+COUNT\(\*\)|SUM\(|AVG\(/i)) {
-      const tableMatch = query.match(/FROM (\w+)/i);
-      if (!tableMatch) return null;
-      const tableName = tableMatch[1];
+    // Handle MAX() queries
+    const maxMatch = query.match(/SELECT MAX\((\w+)\) as (\w+) FROM (\w+)/i);
+    if (maxMatch) {
+      const [, field, alias, tableName] = maxMatch;
       const table = tables.get(tableName);
-      if (!table) {
-        return {
-          total_sessions: 0,
-          total_duration_seconds: 0,
-          avg_theta_zscore: 0,
-          avg_signal_quality: 0,
-          avg_subjective_rating: null,
-          count: 0,
-        } as T;
+      if (!table || table.size === 0) {
+        return { [alias]: null } as T;
       }
-
-      let rows = Array.from(table.values()) as Record<string, unknown>[];
-
-      // Apply WHERE clause if present
-      const { where } = parseSelect(query);
-      rows = filterRows(rows, where, params);
-
-      // Handle simple COUNT
-      if (query.match(/SELECT COUNT\(\*\) as count/i)) {
-        return { count: rows.length } as T;
-      }
-
-      // Handle aggregate session stats
-      if (query.match(/total_sessions|total_duration_seconds/i)) {
-        const totalSessions = rows.length;
-        const totalDuration = rows.reduce(
-          (sum, r) => sum + ((r.duration_seconds as number) || 0),
-          0
-        );
-        const avgTheta =
-          totalSessions > 0
-            ? rows.reduce(
-                (sum, r) => sum + ((r.avg_theta_zscore as number) || 0),
-                0
-              ) / totalSessions
-            : 0;
-        const avgSignal =
-          totalSessions > 0
-            ? rows.reduce(
-                (sum, r) => sum + ((r.signal_quality_avg as number) || 0),
-                0
-              ) / totalSessions
-            : 0;
-        const ratingsRows = rows.filter((r) => r.subjective_rating !== null);
-        const avgRating =
-          ratingsRows.length > 0
-            ? ratingsRows.reduce(
-                (sum, r) => sum + ((r.subjective_rating as number) || 0),
-                0
-              ) / ratingsRows.length
-            : null;
-
-        return {
-          total_sessions: totalSessions,
-          total_duration_seconds: totalDuration,
-          avg_theta_zscore: avgTheta,
-          avg_signal_quality: avgSignal,
-          avg_subjective_rating: avgRating,
-        } as T;
-      }
-
-      return { count: rows.length } as T;
+      const rows = Array.from(table.values()) as Record<string, unknown>[];
+      const maxVal = Math.max(
+        ...rows.map((r) => (r[field] as number) ?? -Infinity)
+      );
+      return { [alias]: maxVal === -Infinity ? null : maxVal } as T;
     }
 
     const { tableName, isCount, orderBy, where } = parseSelect(query);
@@ -559,6 +555,14 @@ class MockSQLiteDatabase implements SQLiteDatabase {
     if (isCount) {
       const table = tables.get(tableName);
       if (!table) return { count: 0 } as T;
+
+      // Handle filtered count
+      if (where) {
+        let rows = Array.from(table.values()) as Record<string, unknown>[];
+        rows = filterRows(rows, where, params);
+        return { count: rows.length } as T;
+      }
+
       return { count: table.size } as T;
     }
 
@@ -592,6 +596,13 @@ class MockSQLiteDatabase implements SQLiteDatabase {
             { name: 'created_at', pk: 0 },
           ] as T[];
         }
+        if (tableName === 'schema_migrations') {
+          return [
+            { name: 'version', pk: 1 },
+            { name: 'name', pk: 0 },
+            { name: 'applied_at', pk: 0 },
+          ] as T[];
+        }
         if (tableName === 'sessions') {
           return [
             { name: 'id', pk: 1 },
@@ -611,18 +622,42 @@ class MockSQLiteDatabase implements SQLiteDatabase {
         }
         if (tableName === 'circadian_patterns') {
           return [
-            { name: 'id', pk: 1 },
-            { name: 'hour_of_day', pk: 0 },
+            { name: 'hour_of_day', pk: 1 },
             { name: 'avg_theta_mean', pk: 0 },
             { name: 'avg_theta_std', pk: 0 },
             { name: 'session_count', pk: 0 },
             { name: 'avg_subjective_rating', pk: 0 },
-            { name: 'created_at', pk: 0 },
             { name: 'updated_at', pk: 0 },
           ] as T[];
         }
       }
       return [];
+    }
+
+    // Handle sqlite_master queries for indexes
+    if (query.match(/sqlite_master/i) && query.match(/type='index'/i)) {
+      const tblMatch = query.match(/tbl_name='(\w+)'/i);
+      if (tblMatch) {
+        const tblName = tblMatch[1];
+        const result: { name: string }[] = [];
+        indexes.forEach((indexName) => {
+          if (indexName.includes(tblName)) {
+            result.push({ name: indexName });
+          }
+        });
+        return result as T[];
+      }
+    }
+
+    // Handle sqlite_master queries for tables (without type filter)
+    if (query.match(/sqlite_master/i) && query.match(/type='table'/i)) {
+      const result: { name: string }[] = [];
+      tables.forEach((_, tableName) => {
+        if (!tableName.startsWith('sqlite_')) {
+          result.push({ name: tableName });
+        }
+      });
+      return result as T[];
     }
 
     const { tableName, orderBy, limit, where } = parseSelect(query);
