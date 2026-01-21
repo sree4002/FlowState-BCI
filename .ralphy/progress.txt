@@ -397,3 +397,58 @@ Victory Native provides chart components for:
 
 **Next steps**: Create SQLite database schema for sessions table as per Phase 2 task 2
 
+
+### Task: Create CustomSessionButton component for configurable sessions
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created CustomSessionButton component in src/components/CustomSessionButton.tsx
+2. Implemented button that opens a configuration modal when pressed
+3. Added three configurable sliders for session parameters:
+   - Duration slider (5-60 minutes, step 5, default 15 min)
+   - Frequency slider (4-12 Hz, step 0.5, for theta to alpha range)
+   - Volume slider (0-100%, step 5)
+4. Integrated with SessionContext to set session config and state
+5. Integrated with SettingsContext to use user's default settings for initial values
+6. Created SessionConfig object with type 'custom' when starting session
+7. Added callback prop (onSessionStart) for parent component notifications
+8. Added disabled state support with visual styling
+9. Added comprehensive accessibility attributes (labels, hints, roles, states)
+10. Implemented duration formatting (shows "X min" or "Xh Ym" for 60+ min)
+11. Styled according to theme with dark surface background, primary/secondary accent colors
+12. Added testID prop support for test automation
+13. Exported component and props interface from src/components/index.ts
+14. Added @react-native-community/slider dependency to package.json
+15. Added mock for Slider component in jest.setup.js
+16. Updated tsconfig.json to include src/ folder and use bundler moduleResolution
+17. Created comprehensive test suite with 17 test cases (__tests__/CustomSessionButton.test.tsx)
+18. Verified all tests pass (193 tests passing across 10 test suites)
+
+**Files created/modified**:
+- src/components/CustomSessionButton.tsx (created - 310 lines)
+- src/components/index.ts (modified - added CustomSessionButton export)
+- __tests__/CustomSessionButton.test.tsx (created - 17 comprehensive test cases)
+- package.json (modified - added @react-native-community/slider dependency)
+- jest.setup.js (modified - added Slider mock and setupFilesAfterEnv)
+- jest.config.js (modified - added setupFilesAfterEnv)
+- tsconfig.json (modified - added src/ to include, changed moduleResolution to bundler)
+
+**Component features**:
+- CustomSessionButtonProps interface with optional props: onSessionStart, disabled, testID
+- Default values: duration 15 min, frequency from settings.boost_frequency, volume from settings.default_volume
+- Session config includes: type, duration_minutes, entrainment_freq, volume, target_zscore, closed_loop_behavior
+- Button disabled when session is running (not idle)
+- Modal with Cancel and Start Session buttons
+- Styled using Theme colors: surface.primary for button, surface.elevated for modal
+- Slider colors: primary blue for duration, secondary purple for frequency, green for volume
+
+**Test coverage**:
+- Session Configuration Logic (4 tests)
+- Duration Formatting Logic (3 tests)
+- Theme Integration (3 tests)
+- Props Interface (3 tests)
+- Slider Configuration Constants (4 tests)
+
+**Next steps**: Continue with remaining Phase 6 dashboard components (QuickBoostButton, CalibrateButton)
+

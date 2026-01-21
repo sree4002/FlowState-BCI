@@ -1,5 +1,6 @@
 // Jest setup file
-import '@testing-library/jest-native/extend-expect';
+// Note: @testing-library/jest-native matchers are not loaded due to ESM issues
+// Use standard Jest matchers instead
 
 // Mock AsyncStorage
 jest.mock('@react-native-async-storage/async-storage', () => ({
@@ -13,3 +14,20 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 jest.mock('react-native-ble-plx', () => ({
   BleManager: jest.fn(),
 }));
+
+// Mock Slider component
+jest.mock('@react-native-community/slider', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    __esModule: true,
+    default: (props) => {
+      return React.createElement(View, {
+        testID: props.testID,
+        accessibilityLabel: props.accessibilityLabel,
+        accessibilityValue: props.accessibilityValue,
+        onValueChange: props.onValueChange,
+      });
+    },
+  };
+});

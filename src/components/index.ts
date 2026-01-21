@@ -1,3 +1,7 @@
-// Components export placeholder
+// Components export
 // Export reusable components here as they are created
-export {};
+
+export {
+  CustomSessionButton,
+  type CustomSessionButtonProps,
+} from './CustomSessionButton';
