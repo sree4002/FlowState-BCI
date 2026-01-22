@@ -98,7 +98,7 @@
 
 ## Phase 9: History & Analytics
 
-- [ ] Create SessionListView with scrollable list, newest first
+- [x] Create SessionListView with scrollable list, newest first
 - [ ] Create SessionListItem showing date, duration, avg theta, frequency, rating
 - [ ] Add filter controls for date range and session type
 - [ ] Add sort controls (date, duration, theta score)

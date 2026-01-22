@@ -1720,3 +1720,109 @@ The recalibration prompt for poor quality scores was already implemented in Cali
 
 **Next steps**: Phase 8 is now complete. Move to Phase 9: Create SessionListView with scrollable list, newest first
 
+
+### Task: Create SessionListView with scrollable list, newest first
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created SessionListView component in src/components/SessionListView.tsx (500+ lines)
+2. Implemented scrollable FlatList displaying sessions ordered by start_time (newest first)
+3. Built SessionListItem component with:
+   - Session type badges with color coding (Calibration, Quick Boost, Custom, Scheduled, A/B Test)
+   - Duration display with human-readable format (Xh Xm Xs)
+   - Theta z-score display with color coding (blue ≥1.0, green ≥0.5, yellow ≥0, red <0)
+   - Entrainment frequency display (X.X Hz)
+   - Subjective rating stars (1-5 stars)
+   - Date headers (Today, Yesterday, or formatted date)
+4. Implemented 12 exported helper functions:
+   - getSessionTypeLabel: Returns human-readable session type label
+   - getSessionTypeBadgeColor: Returns color for session type badge
+   - formatSessionDuration: Formats seconds to human-readable duration
+   - formatSessionDate: Formats timestamp to "Jan 15, 2026" format
+   - formatSessionTime: Formats timestamp to "2:30 PM" format
+   - formatThetaZScore: Formats z-score with sign prefix (+/-) and 2 decimals
+   - getThetaColor: Returns color based on z-score range
+   - getSessionAccessibilityLabel: Returns accessibility label for session item
+   - isSameDay: Checks if two timestamps are on same day
+   - getRelativeDateLabel: Returns Today/Yesterday or formatted date
+   - getStarRating: Returns star rating string (★☆☆☆☆)
+5. Created SESSION_TYPE_LABELS and SESSION_TYPE_COLORS constants
+6. Implemented EmptyState component for when no sessions exist
+7. Added pull-to-refresh functionality using RefreshControl
+8. Integrated with SessionContext for session data and refresh
+9. Added maxItems prop for limiting displayed sessions
+10. Added comprehensive accessibility features (roles, labels, hints)
+11. Added test IDs for all interactive elements
+12. Used theme constants (Colors, Spacing, BorderRadius, Typography, Shadows) throughout
+13. Updated src/components/index.ts to export component and all helpers
+14. Created comprehensive test suite with 238 tests covering:
+    - File structure and exports (5 tests)
+    - Index file exports (10 tests)
+    - Required imports (10 tests)
+    - SessionListViewProps interface (6 tests)
+    - SESSION_TYPE_LABELS constant (6 tests)
+    - SESSION_TYPE_COLORS constant (3 tests)
+    - All 12 helper functions (60+ tests)
+    - EmptyState component (5 tests)
+    - SessionListItem component (8 tests)
+    - Date header (4 tests)
+    - Type badge (3 tests)
+    - Stats display (5 tests)
+    - Rating display (3 tests)
+    - Context integration (4 tests)
+    - List rendering (9 tests)
+    - RefreshControl (5 tests)
+    - maxItems handling (3 tests)
+    - Date header logic (2 tests)
+    - List header component (3 tests)
+    - Test IDs (8 tests)
+    - Styling (19 tests)
+    - Theme integration (15 tests)
+    - Key extractor (3 tests)
+    - Render item (4 tests)
+    - Documentation (4 tests)
+    - Functional tests for all helper functions (40+ tests)
+15. Verified all 238 tests pass
+16. Verified linting passes with 0 errors (only pre-existing warnings in other files)
+17. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/components/SessionListView.tsx (created - 500+ lines with complete implementation)
+- src/components/index.ts (modified - added SessionListView exports)
+- __tests__/SessionListView.test.ts (created - 1000+ lines with 238 test cases)
+- docs/prd.md (updated - marked task as complete)
+
+**Component features**:
+- **FlatList**: Efficient scrollable list for session history
+- **Session Items**: Cards showing type badge, duration, theta z-score, frequency, rating
+- **Date Headers**: Grouped by Today/Yesterday/formatted date
+- **Type Badges**: Color-coded badges for session types
+- **Theta Coloring**: Blue/green/yellow/red based on z-score ranges
+- **Star Ratings**: Visual 5-star display for subjective ratings
+- **Pull-to-Refresh**: RefreshControl for updating session list
+- **Empty State**: Helpful message when no sessions exist
+- **MaxItems**: Optional limit on displayed sessions
+- **Full Accessibility**: Roles, labels, hints on all interactive elements
+- **Theme Integration**: Full use of Colors, Spacing, BorderRadius, Typography, Shadows
+
+**TypeScript types defined**:
+- SessionListViewProps: Interface for component props (sessions, onSessionPress, showRefreshControl, testID, maxItems, isLoading)
+
+**Exported helper functions**:
+- getSessionTypeLabel(sessionType): Returns human-readable label
+- getSessionTypeBadgeColor(sessionType): Returns badge color
+- formatSessionDuration(seconds): Returns "Xh Xm Xs" format
+- formatSessionDate(timestamp): Returns "Jan 15, 2026" format
+- formatSessionTime(timestamp): Returns "2:30 PM" format
+- formatThetaZScore(zscore): Returns "+X.XX" format
+- getThetaColor(zscore): Returns color for z-score range
+- getSessionAccessibilityLabel(session): Returns accessibility label
+- isSameDay(timestamp1, timestamp2): Returns boolean
+- getRelativeDateLabel(timestamp): Returns Today/Yesterday/date
+- getStarRating(rating): Returns "★★★☆☆" format
+
+**Test coverage**: 238 test cases covering file structure, exports, imports, props interface, constants, all 12 helper functions, empty state, session list item, date header, type badge, stats display, rating display, context integration, list rendering, refresh control, maxItems handling, date header logic, list header, test IDs, styling, theme integration, key extractor, render item, documentation, and functional tests.
+
+**Next steps**: Create SessionListItem showing date, duration, avg theta, frequency, rating as per Phase 9 task 2
+
