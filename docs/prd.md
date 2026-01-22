@@ -92,9 +92,9 @@
 - [x] Create CalibrationSummaryScreen showing baseline results
 - [x] Implement calibration session state machine
 - [x] Add auto-pause when signal quality critically degraded (<20%)
-- [ ] Display percentage of clean data during calibration
-- [ ] Implement calibration data collection (5-10 minute duration options)
-- [ ] Add recalibration prompt if quality score is poor (<50)
+- [x] Display percentage of clean data during calibration
+- [x] Implement calibration data collection (5-10 minute duration options)
+- [x] Add recalibration prompt if quality score is poor (<50)
 
 ## Phase 9: History & Analytics
 

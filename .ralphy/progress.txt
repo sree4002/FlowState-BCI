@@ -1631,3 +1631,92 @@ The auto-pause functionality was already fully implemented as part of the Calibr
 
 **Next steps**: Display percentage of clean data during calibration as per Phase 8 task 7
 
+
+### Task: Display percentage of clean data during calibration
+
+**Status**: ✅ Completed (Already Implemented)
+
+**What was found**:
+The clean data percentage display was already implemented in CalibrationProgressScreen.tsx:
+
+1. **CalibrationProgressScreen.tsx** (lines 714-738):
+   - `renderDataQuality()` function displays data quality stats
+   - Shows "Clean Data" percentage from `cleanDataPercentage` state
+   - Shows "Avg Quality" percentage
+   - Shows "Samples" count
+   - Shows auto-pause count when applicable
+
+2. **Implementation details**:
+   - `cleanDataPercentage` calculated using `calculateCleanDataPercentage(signalSamples)`
+   - Real-time updates during calibration recording
+   - Displayed in stat cards with labels
+
+**Test verification**:
+- Tests verify cleanDataPercentage is displayed with % suffix
+- Tests verify data quality container exists with testID
+- Tests verify result data includes cleanDataPercentage
+
+**Files modified**:
+- docs/prd.md (updated - marked task as complete)
+
+
+### Task: Implement calibration data collection (5-10 minute duration options)
+
+**Status**: ✅ Completed (Already Implemented)
+
+**What was found**:
+The 5-10 minute duration options were already implemented in CalibrationInstructionsScreen.tsx:
+
+1. **CalibrationInstructionsScreen.tsx** (lines 536-576):
+   - `renderDurationSelector()` renders duration selection UI
+   - Options for 5 and 10 minutes with visual selection state
+   - `getDurationDescription()` provides descriptions for each option
+   - Duration selection stored in `selectedDuration` state
+
+2. **Implementation details**:
+   - Props interface includes `duration?: 5 | 10`
+   - Default duration is 5 minutes
+   - RadioButton-style selection with accessibility
+   - Duration description updates based on selection
+
+**Test verification**:
+- Tests verify duration prop type as `5 | 10`
+- Tests verify default duration of 5
+- Tests verify getDurationDescription returns correct messages
+- Tests verify duration selector UI elements
+
+**Files modified**:
+- docs/prd.md (updated - marked task as complete)
+
+
+### Task: Add recalibration prompt if quality score is poor (<50)
+
+**Status**: ✅ Completed (Already Implemented)
+
+**What was found**:
+The recalibration prompt for poor quality scores was already implemented in CalibrationSummaryScreen.tsx:
+
+1. **CalibrationSummaryScreen.tsx**:
+   - `ACCEPTABLE_QUALITY_THRESHOLD = 50` (line 33)
+   - Quality level check in `getCalibrationQualityLevel()` uses threshold (line 91)
+   - Warning container shows when `canSave` is false (lines 633-639)
+   - Warning text: "Calibration quality is too low. Please recalibrate for better results."
+   - Recalibrate button always available (lines 642-651)
+   - `getQualityRecommendation()` returns recalibration recommendation for poor quality
+
+2. **Implementation details**:
+   - `canSave` is false when quality score < 50 or clean data % < 50
+   - Save button hidden, warning shown instead
+   - Recalibrate button prominently displayed
+
+**Test verification**:
+- Tests verify ACCEPTABLE_QUALITY_THRESHOLD = 50
+- Tests verify poor quality returns appropriate messages
+- Tests verify recalibrate button accessibility
+- Tests verify warning display logic
+
+**Files modified**:
+- docs/prd.md (updated - marked task as complete)
+
+**Next steps**: Phase 8 is now complete. Move to Phase 9: Create SessionListView with scrollable list, newest first
+
