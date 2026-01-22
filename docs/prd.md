@@ -81,7 +81,7 @@
 - [x] Create Stop button for ending session early
 - [x] Create SignalQualityIndicator (corner placement, tap for details)
 - [x] Create EntrainmentStateDisplay showing current frequency prominently
-- [ ] Implement session state machine (idle, running, paused, stopped)
+- [x] Implement session state machine (idle, running, paused, stopped)
 - [ ] Add session completion handler with summary display
 
 ## Phase 8: Calibration Flow

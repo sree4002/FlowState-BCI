@@ -817,3 +817,93 @@ Victory Native provides chart components for:
 
 **Next steps**: Implement session state machine (idle, running, paused, stopped) as per Phase 7 task 12
 
+
+### Task: Implement session state machine (idle, running, paused, stopped)
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created SessionStateMachine service in src/services/SessionStateMachine.ts (450+ lines)
+2. Implemented state machine with four states: idle, running, paused, stopped
+3. Defined valid state transitions:
+   - idle → running (START)
+   - running → paused (PAUSE)
+   - running → stopped (STOP)
+   - paused → running (RESUME)
+   - paused → stopped (STOP)
+   - stopped → idle (RESET)
+4. Created 15 exported helper functions:
+   - isValidTransition: Checks if a transition is valid
+   - getNextState: Gets the next state for a given event
+   - getAvailableEvents: Gets available events for the current state
+   - canStart, canPause, canResume, canStop, canReset: State check functions
+   - isSessionActive, isSessionRunning, isSessionPaused, isSessionStopped, isSessionIdle: State query functions
+   - formatTime: Formats seconds to MM:SS string
+   - formatTimeLong: Formats seconds to HH:MM:SS string for longer durations
+5. Implemented SessionStateMachine class with:
+   - State management (currentState, config, timerState)
+   - Timer functionality with setInterval for 1-second ticks
+   - Listener system for state changes, timer updates, and session completion
+   - Public methods: getState, getConfig, getTimerState, setConfig, start, pause, resume, stop, reset, destroy
+   - Unsubscribe pattern for listeners (addStateListener, addTimerListener, addCompletionListener)
+6. Implemented timer state tracking:
+   - elapsedSeconds, remainingSeconds, isComplete
+   - startTimestamp, pausedAt, totalPausedDuration
+7. Added auto-stop when session duration is reached (remainingSeconds <= 0)
+8. Implemented session completion notification with session data (session_type, start_time, end_time, duration_seconds, entrainment_freq, volume)
+9. Added error handling in listeners with try-catch
+10. Created createSessionStateMachine factory function
+11. Updated src/services/index.ts to export the new module
+12. Created comprehensive test suite with 283 tests covering:
+    - File structure and exports
+    - Type exports (SessionEvent, TransitionResult, SessionTimerState, listeners)
+    - Required imports from types
+    - Valid state transitions map
+    - All 15 helper functions with functional tests
+    - SessionStateMachine class structure
+    - Constructor and public methods
+    - Private methods
+    - setConfig validation
+    - Listener methods returning unsubscribe functions
+    - transition method
+    - handleTransitionSideEffects
+    - Timer methods (start, pause, resume, stop, reset)
+    - Convenience methods
+    - reset method behavior
+    - destroy method cleanup
+    - Error handling
+    - Documentation
+    - Instance functional tests (initial state, setConfig, state transitions, invalid transitions, listeners, reset behavior)
+13. Verified all 283 tests pass
+14. Verified linting passes (0 errors, only pre-existing warnings)
+15. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/services/SessionStateMachine.ts (created - 450+ lines with complete implementation)
+- src/services/index.ts (modified - added SessionStateMachine export)
+- __tests__/SessionStateMachine.test.ts (created - 950+ lines with 283 test cases)
+- docs/prd.md (updated - marked task as complete)
+
+**SessionStateMachine Class Features**:
+- **State Machine**: Manages transitions between idle, running, paused, stopped states
+- **Transition Validation**: Rejects invalid transitions with error messages
+- **Timer Management**: Built-in 1-second timer with elapsed/remaining tracking
+- **Auto-Completion**: Automatically stops session when duration is reached
+- **Pause Duration Tracking**: Tracks total paused time for accurate session metrics
+- **Listener System**: State, timer, and completion listeners with unsubscribe pattern
+- **Session Data Generation**: Creates session data on completion for database storage
+- **Error Handling**: Catches and logs errors in listeners without crashing
+- **Cleanup**: destroy() method properly clears intervals and listeners
+
+**TypeScript Types Defined**:
+- SessionEvent: 'START' | 'PAUSE' | 'RESUME' | 'STOP' | 'RESET' | 'TICK'
+- TransitionResult: { success, previousState, newState, event, error? }
+- SessionTimerState: { elapsedSeconds, remainingSeconds, isComplete, startTimestamp, pausedAt, totalPausedDuration }
+- SessionStateListener: (newState, previousState, event) => void
+- SessionTimerListener: (timerState) => void
+- SessionCompletionListener: (sessionData) => void
+
+**Test Coverage**: 283 test cases covering file structure, exports, type exports, imports, state transitions, helper functions (both static analysis and functional tests), class structure, constructor, public methods, private methods, setConfig, listeners, transition method, side effects, timer methods, convenience methods, reset behavior, destroy method, error handling, documentation, and functional instance tests.
+
+**Next steps**: Add session completion handler with summary display as per Phase 7 task 13
+
