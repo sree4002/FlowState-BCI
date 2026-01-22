@@ -25,3 +25,15 @@ export {
   getAccessibilityHint,
   getButtonIcon,
 } from './PauseResumeButton';
+
+export { StopButton } from './StopButton';
+export type { StopButtonProps } from './StopButton';
+export {
+  canStopSession,
+  getStopButtonLabel,
+  getStopButtonColor,
+  getStopAccessibilityLabel,
+  getStopAccessibilityHint,
+  getStopButtonIcon,
+  getStopConfirmationMessage,
+} from './StopButton';

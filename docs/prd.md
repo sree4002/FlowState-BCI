@@ -78,7 +78,7 @@
 - [x] Create FrequencySlider component (4-8 Hz, 0.1 Hz increments)
 - [x] Create VolumeSlider component (0-100%)
 - [x] Create large Pause/Resume button with clear visual state
-- [ ] Create Stop button for ending session early
+- [x] Create Stop button for ending session early
 - [ ] Create SignalQualityIndicator (corner placement, tap for details)
 - [ ] Create EntrainmentStateDisplay showing current frequency prominently
 - [ ] Implement session state machine (idle, running, paused, stopped)

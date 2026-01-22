@@ -546,3 +546,83 @@ Victory Native provides chart components for:
 
 **Next steps**: Create Stop button for ending session early as per Phase 7 task 9
 
+
+### Task: Create Stop button for ending session early
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created StopButton component in src/components/StopButton.tsx (300+ lines)
+2. Implemented button for ending sessions early with clear red destructive action color
+3. Added optional confirmation dialog before stopping session using Alert.alert
+4. Built size variants: small (60x60), medium (80x80), large (100x100)
+5. Implemented helper functions:
+   - canStopSession: Determines if session can be stopped (running or paused)
+   - getStopButtonLabel: Returns label based on session state
+   - getStopButtonColor: Returns color based on state and disabled status
+   - getStopAccessibilityLabel: Returns accessibility label
+   - getStopAccessibilityHint: Returns accessibility hint
+   - getStopButtonIcon: Returns stop symbol (⏹)
+   - getStopConfirmationMessage: Generates confirmation message with elapsed time
+6. Integrated with SessionContext for session state management
+7. Added press animation feedback using Animated.spring
+8. Implemented full accessibility support (role, label, hint, state)
+9. Added status label showing "Session ended" when stopped
+10. Updated src/components/index.ts to export component and helpers
+11. Created comprehensive test suite with 150 tests covering:
+    - File structure and exports
+    - Required imports and dependencies
+    - Props interface (onPress, disabled, size, showConfirmation, testID)
+    - Size variants (small, medium, large)
+    - All 7 helper functions
+    - Context integration
+    - State handling
+    - Confirmation dialog implementation
+    - Animation implementation
+    - Accessibility features
+    - Visual elements
+    - Disabled state
+    - Touch handling
+    - Test IDs
+    - Styling
+    - Custom onPress handler support
+    - Component documentation
+12. Ran Prettier to fix formatting
+13. Verified all 150 tests pass
+14. Verified linting passes with 0 errors
+15. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/components/StopButton.tsx (created - 300+ lines with complete implementation)
+- src/components/index.ts (modified - added StopButton exports)
+- __tests__/StopButton.test.ts (created - 700+ lines with 150 test cases)
+- docs/prd.md (updated - marked task as complete)
+
+**Component features**:
+- **Size Variants**: small (60x60), medium (80x80, default), large (100x100)
+- **Red Color**: Uses Colors.accent.error for destructive action indicator
+- **Confirmation Dialog**: Optional Alert dialog before stopping (enabled by default)
+- **Stop Icon**: Unicode stop symbol (⏹)
+- **Press Feedback**: Spring animation on press (0.95 scale)
+- **Disabled State**: Gray color and reduced opacity when disabled or no active session
+- **Status Label**: Shows "Session ended" text when session is stopped
+- **Full Accessibility**: Role, label, hint, and state properties
+- **Context Integration**: Uses useSession hook for state management
+- **Elapsed Time Display**: Confirmation message shows formatted elapsed time
+
+**TypeScript types defined**:
+- StopButtonProps: Interface for component props (onPress, disabled, size, showConfirmation, testID)
+
+**Exported helper functions**:
+- canStopSession(sessionState): Returns true if session is running or paused
+- getStopButtonLabel(sessionState): Returns "Stop" or "Stopped"
+- getStopButtonColor(sessionState, disabled): Returns appropriate color
+- getStopAccessibilityLabel(sessionState): Returns accessibility label
+- getStopAccessibilityHint(sessionState): Returns accessibility hint
+- getStopButtonIcon(): Returns stop symbol (⏹)
+- getStopConfirmationMessage(sessionState, elapsedSeconds): Returns confirmation message
+
+**Test coverage**: 150 test cases covering file structure, exports, imports, React Native components (including Alert), props interface, size variants, all 7 helper functions, context integration, state handling, confirmation dialog, animation implementation, accessibility features, visual elements, disabled state, touch handling, test IDs, styling, custom handlers, and documentation.
+
+**Next steps**: Create SignalQualityIndicator (corner placement, tap for details) as per Phase 7 task 10
+
