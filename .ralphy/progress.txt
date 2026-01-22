@@ -1009,3 +1009,110 @@ Victory Native provides chart components for:
 
 **Next steps**: Create CalibrationInstructionsScreen with device setup guidance as per Phase 8 task 1
 
+
+### Task: Create CalibrationInstructionsScreen with device setup guidance
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created CalibrationInstructionsScreen component in src/screens/CalibrationInstructionsScreen.tsx (700+ lines)
+2. Implemented comprehensive device setup guidance with 4 setup steps:
+   - Environment: Prepare your environment (quiet space, dim lights, minimize distractions)
+   - Device: Position your device (headband/earpiece positioning, sensor contact)
+   - Connection: Verify connection (signal quality check, device status)
+   - Relax: Get comfortable (posture, breathing, eye closure)
+3. Built CalibrationStep interface with id, title, description, icon, tips[], and importance level
+4. Implemented importance badges (Required/Recommended/Optional) with color coding
+5. Created device status section showing:
+   - Connection status with color indicator
+   - Device name
+   - Signal quality with level and score
+   - Battery level
+   - Warning banner when device not ready
+6. Implemented duration selector (5 or 10 minutes) with descriptions
+7. Created "What to Expect" section showing:
+   - 30-second settle period
+   - Brain activity recording
+   - Personalized baseline
+8. Built step navigation with Previous/Next buttons and progress indicator
+9. Created 6 exported helper functions:
+   - getImportanceColor: Returns color for importance level
+   - getImportanceLabel: Returns label for importance level
+   - formatDurationOption: Formats minutes to human-readable string
+   - getDurationDescription: Returns description for selected duration
+   - isDeviceReadyForCalibration: Checks if device is ready (connected, signal >= 20)
+   - getSignalQualityStatus: Returns label and color for signal score
+10. Added fade and slide entrance animations using Animated.parallel
+11. Implemented confirmation dialogs for Cancel and Skip actions
+12. Added device readiness validation before starting calibration
+13. Integrated with DeviceContext for device info and signal quality
+14. Integrated with SessionContext for calibration state and session config
+15. Built comprehensive accessibility features (roles, labels, hints, states)
+16. Added test IDs for all interactive elements
+17. Updated src/screens/index.ts to export component and all helpers
+18. Created comprehensive test suite with 217 tests covering:
+    - File structure and exports (7 tests)
+    - Index file exports (5 tests)
+    - Required imports (5 tests)
+    - CalibrationStep interface (6 tests)
+    - CalibrationInstructionsScreenProps interface (5 tests)
+    - CALIBRATION_STEPS constant (14 tests)
+    - Helper functions (40 tests for all 6 functions)
+    - Context integration (6 tests)
+    - State management (7 tests)
+    - Animation refs (6 tests)
+    - Event handlers (7 tests)
+    - Alert dialogs (3 tests)
+    - Render functions (4 tests)
+    - UI elements (16 tests)
+    - Accessibility features (9 tests)
+    - Test IDs (11 tests)
+    - Styling (13 tests)
+    - Platform specific (2 tests)
+    - What to expect content (6 tests)
+    - Footer content (3 tests)
+    - Default props (2 tests)
+    - Session config on start (6 tests)
+    - Documentation (4 tests)
+    - Functional tests for all helper functions (25 tests)
+19. Verified all 217 tests pass
+20. Verified linting passes with 0 errors
+21. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/screens/CalibrationInstructionsScreen.tsx (created - 700+ lines with complete implementation)
+- src/screens/index.ts (modified - added CalibrationInstructionsScreen exports)
+- __tests__/CalibrationInstructionsScreen.test.ts (created - 850+ lines with 217 test cases)
+- docs/prd.md (updated - marked task as complete)
+
+**Component features**:
+- **4 Setup Steps**: Environment, Device, Connection, Relax with expandable cards
+- **Importance Badges**: Required (red), Recommended (yellow), Optional (blue)
+- **Device Status Card**: Connection, device name, signal quality, battery level
+- **Warning Banner**: Shows when device not ready for calibration
+- **Duration Selector**: 5 or 10 minute options with descriptions
+- **What to Expect**: 30-second settle, recording, personalized baseline
+- **Step Navigation**: Previous/Next buttons with progress indicator
+- **Animations**: Fade and slide entrance using Animated.parallel
+- **Confirmation Dialogs**: Cancel and Skip confirmation alerts
+- **Start Button**: Disabled when device not ready with helpful message
+- **Theme Integration**: Full use of Colors, Spacing, BorderRadius, Typography, Shadows
+- **Platform Support**: iOS-specific padding adjustments
+- **Full Accessibility**: Roles, labels, hints, and states on all interactive elements
+
+**TypeScript types defined**:
+- CalibrationStep: Interface for step data (id, title, description, icon, tips[], importance)
+- CalibrationInstructionsScreenProps: Interface for props (onStartCalibration, onCancel, onSkip, duration, testID)
+
+**Exported helper functions**:
+- getImportanceColor(importance): Returns color for 'required'/'recommended'/'optional'
+- getImportanceLabel(importance): Returns label string
+- formatDurationOption(minutes): Returns "X minute(s)" string
+- getDurationDescription(minutes): Returns description for 5 or 10 min
+- isDeviceReadyForCalibration(isConnected, signalQuality): Returns { ready, reason }
+- getSignalQualityStatus(score): Returns { label, color } for signal level
+
+**Test coverage**: 217 test cases covering file structure, exports, imports, interfaces, constants, all helper functions, context integration, state management, animations, event handlers, alerts, render functions, UI elements, accessibility, test IDs, styling, platform specific, content, default props, session config, and documentation.
+
+**Next steps**: Create CalibrationCountdownScreen (30-second settle period) as per Phase 8 task 2
+
