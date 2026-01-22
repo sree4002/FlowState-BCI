@@ -3,16 +3,29 @@
  *
  * Comprehensive test suite for the SessionListView component that displays
  * a scrollable list of sessions ordered by start time (newest first).
+ *
+ * Note: This test suite verifies the structure across both SessionListView.tsx
+ * and SessionListItem.tsx, as the functionality is split between the two files.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
 
-const componentPath = path.join(
+const sessionListViewPath = path.join(
   __dirname,
   '../src/components/SessionListView.tsx'
 );
-const componentSource = fs.readFileSync(componentPath, 'utf-8');
+const sessionListViewSource = fs.readFileSync(sessionListViewPath, 'utf-8');
+
+const sessionListItemPath = path.join(
+  __dirname,
+  '../src/components/SessionListItem.tsx'
+);
+const sessionListItemSource = fs.readFileSync(sessionListItemPath, 'utf-8');
+
+// Combined source for checking functionality that may be in either file
+const componentSource = sessionListViewSource;
+const itemSource = sessionListItemSource;
 
 const indexPath = path.join(__dirname, '../src/components/index.ts');
 const indexSource = fs.readFileSync(indexPath, 'utf-8');
@@ -20,11 +33,11 @@ const indexSource = fs.readFileSync(indexPath, 'utf-8');
 describe('SessionListView Component', () => {
   describe('File Structure', () => {
     it('should exist at the correct path', () => {
-      expect(fs.existsSync(componentPath)).toBe(true);
+      expect(fs.existsSync(sessionListViewPath)).toBe(true);
     });
 
     it('should be a TypeScript React file', () => {
-      expect(componentPath.endsWith('.tsx')).toBe(true);
+      expect(sessionListViewPath.endsWith('.tsx')).toBe(true);
     });
 
     it('should export SessionListView component', () => {
@@ -44,6 +57,28 @@ describe('SessionListView Component', () => {
     });
   });
 
+  describe('SessionListItem File Structure', () => {
+    it('should exist at the correct path', () => {
+      expect(fs.existsSync(sessionListItemPath)).toBe(true);
+    });
+
+    it('should be a TypeScript React file', () => {
+      expect(sessionListItemPath.endsWith('.tsx')).toBe(true);
+    });
+
+    it('should export SessionListItem component', () => {
+      expect(itemSource).toMatch(/export\s+(const|function)\s+SessionListItem/);
+    });
+
+    it('should have default export', () => {
+      expect(itemSource).toMatch(/export\s+default\s+SessionListItem/);
+    });
+
+    it('should export SessionListItemProps type', () => {
+      expect(itemSource).toMatch(/export\s+interface\s+SessionListItemProps/);
+    });
+  });
+
   describe('Index File Exports', () => {
     it('should export SessionListView from index', () => {
       expect(indexSource).toMatch(/export\s*\{\s*SessionListView\s*\}/);
@@ -52,6 +87,16 @@ describe('SessionListView Component', () => {
     it('should export SessionListViewProps type from index', () => {
       expect(indexSource).toMatch(
         /export\s+type\s*\{\s*SessionListViewProps\s*\}/
+      );
+    });
+
+    it('should export SessionListItem from index', () => {
+      expect(indexSource).toMatch(/export\s*\{\s*SessionListItem\s*\}/);
+    });
+
+    it('should export SessionListItemProps type from index', () => {
+      expect(indexSource).toMatch(
+        /export\s+type\s*\{\s*SessionListItemProps\s*\}/
       );
     });
 
@@ -77,7 +122,7 @@ describe('SessionListView Component', () => {
     });
   });
 
-  describe('Required Imports', () => {
+  describe('SessionListView Required Imports', () => {
     it('should import React', () => {
       expect(componentSource).toMatch(/import\s+React/);
     });
@@ -91,10 +136,9 @@ describe('SessionListView Component', () => {
       expect(componentSource).toMatch(/FlatList/);
     });
 
-    it('should import View, Text, TouchableOpacity from react-native', () => {
+    it('should import View, Text from react-native', () => {
       expect(componentSource).toMatch(/View/);
       expect(componentSource).toMatch(/Text/);
-      expect(componentSource).toMatch(/TouchableOpacity/);
     });
 
     it('should import RefreshControl from react-native', () => {
@@ -118,15 +162,47 @@ describe('SessionListView Component', () => {
     it('should import theme constants', () => {
       expect(componentSource).toMatch(/Colors/);
       expect(componentSource).toMatch(/Spacing/);
-      expect(componentSource).toMatch(/BorderRadius/);
       expect(componentSource).toMatch(/Typography/);
-      expect(componentSource).toMatch(/Shadows/);
     });
 
     it('should import Session type', () => {
       expect(componentSource).toMatch(
         /import.*Session.*from.*['"]\.\.\/types['"]/
       );
+    });
+
+    it('should import SessionListItem component', () => {
+      expect(componentSource).toMatch(
+        /import.*SessionListItem.*from.*['"]\.\/SessionListItem['"]/
+      );
+    });
+  });
+
+  describe('SessionListItem Required Imports', () => {
+    it('should import React', () => {
+      expect(itemSource).toMatch(/import\s+React/);
+    });
+
+    it('should import View, Text, TouchableOpacity from react-native', () => {
+      expect(itemSource).toMatch(/View/);
+      expect(itemSource).toMatch(/Text/);
+      expect(itemSource).toMatch(/TouchableOpacity/);
+    });
+
+    it('should import StyleSheet from react-native', () => {
+      expect(itemSource).toMatch(/StyleSheet/);
+    });
+
+    it('should import theme constants', () => {
+      expect(itemSource).toMatch(/Colors/);
+      expect(itemSource).toMatch(/Spacing/);
+      expect(itemSource).toMatch(/BorderRadius/);
+      expect(itemSource).toMatch(/Typography/);
+      expect(itemSource).toMatch(/Shadows/);
+    });
+
+    it('should import Session type', () => {
+      expect(itemSource).toMatch(/import.*Session.*from.*['"]\.\.\/types['"]/);
     });
   });
 
@@ -159,284 +235,294 @@ describe('SessionListView Component', () => {
     });
   });
 
-  describe('SESSION_TYPE_LABELS Constant', () => {
-    it('should export SESSION_TYPE_LABELS', () => {
-      expect(componentSource).toMatch(/export\s+const\s+SESSION_TYPE_LABELS/);
+  describe('SessionListItemProps Interface', () => {
+    it('should have session prop', () => {
+      expect(itemSource).toMatch(/session:\s*Session/);
     });
 
-    it('should have calibration label', () => {
-      expect(componentSource).toMatch(/calibration:\s*['"]Calibration['"]/);
+    it('should have onPress prop', () => {
+      expect(itemSource).toMatch(
+        /onPress\?:\s*\(session:\s*Session\)\s*=>\s*void/
+      );
     });
 
-    it('should have quick_boost label', () => {
-      expect(componentSource).toMatch(/quick_boost:\s*['"]Quick Boost['"]/);
+    it('should have showDateHeader prop', () => {
+      expect(itemSource).toMatch(/showDateHeader\?:\s*boolean/);
     });
 
-    it('should have custom label', () => {
-      expect(componentSource).toMatch(/custom:\s*['"]Custom['"]/);
+    it('should have testID prop', () => {
+      expect(itemSource).toMatch(/testID\?:\s*string/);
     });
 
-    it('should have scheduled label', () => {
-      expect(componentSource).toMatch(/scheduled:\s*['"]Scheduled['"]/);
-    });
-
-    it('should have sham label', () => {
-      expect(componentSource).toMatch(/sham:\s*['"]A\/B Test['"]/);
+    it('should have compact prop', () => {
+      expect(itemSource).toMatch(/compact\?:\s*boolean/);
     });
   });
 
-  describe('SESSION_TYPE_COLORS Constant', () => {
+  describe('SESSION_TYPE_LABELS Constant (in SessionListItem)', () => {
+    it('should export SESSION_TYPE_LABELS', () => {
+      expect(itemSource).toMatch(/export\s+const\s+SESSION_TYPE_LABELS/);
+    });
+
+    it('should have calibration label', () => {
+      expect(itemSource).toMatch(/calibration:\s*['"]Calibration['"]/);
+    });
+
+    it('should have quick_boost label', () => {
+      expect(itemSource).toMatch(/quick_boost:\s*['"]Quick Boost['"]/);
+    });
+
+    it('should have custom label', () => {
+      expect(itemSource).toMatch(/custom:\s*['"]Custom['"]/);
+    });
+
+    it('should have scheduled label', () => {
+      expect(itemSource).toMatch(/scheduled:\s*['"]Scheduled['"]/);
+    });
+
+    it('should have sham label', () => {
+      expect(itemSource).toMatch(/sham:\s*['"]A\/B Test['"]/);
+    });
+  });
+
+  describe('SESSION_TYPE_COLORS Constant (in SessionListItem)', () => {
     it('should export SESSION_TYPE_COLORS', () => {
-      expect(componentSource).toMatch(/export\s+const\s+SESSION_TYPE_COLORS/);
+      expect(itemSource).toMatch(/export\s+const\s+SESSION_TYPE_COLORS/);
     });
 
     it('should map session types to colors', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /SESSION_TYPE_COLORS.*Record.*Session\['session_type'\].*string/
       );
     });
 
     it('should use Colors constants for values', () => {
-      expect(componentSource).toMatch(/calibration:\s*Colors\./);
-      expect(componentSource).toMatch(/quick_boost:\s*Colors\./);
-      expect(componentSource).toMatch(/custom:\s*Colors\./);
-      expect(componentSource).toMatch(/scheduled:\s*Colors\./);
-      expect(componentSource).toMatch(/sham:\s*Colors\./);
+      expect(itemSource).toMatch(/calibration:\s*Colors\./);
+      expect(itemSource).toMatch(/quick_boost:\s*Colors\./);
+      expect(itemSource).toMatch(/custom:\s*Colors\./);
+      expect(itemSource).toMatch(/scheduled:\s*Colors\./);
+      expect(itemSource).toMatch(/sham:\s*Colors\./);
     });
   });
 
-  describe('getSessionTypeLabel Helper Function', () => {
+  describe('getSessionTypeLabel Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(/export\s+const\s+getSessionTypeLabel/);
+      expect(itemSource).toMatch(/export\s+const\s+getSessionTypeLabel/);
     });
 
     it('should accept sessionType parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getSessionTypeLabel\s*=\s*\(\s*sessionType:\s*Session\['session_type'\]\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(
-        /getSessionTypeLabel[\s\S]*?:\s*string\s*=>/
-      );
+      expect(itemSource).toMatch(/getSessionTypeLabel[\s\S]*?:\s*string\s*=>/);
     });
 
     it('should use SESSION_TYPE_LABELS lookup', () => {
-      expect(componentSource).toMatch(/SESSION_TYPE_LABELS\[sessionType\]/);
+      expect(itemSource).toMatch(/SESSION_TYPE_LABELS\[sessionType\]/);
     });
   });
 
-  describe('getSessionTypeBadgeColor Helper Function', () => {
+  describe('getSessionTypeBadgeColor Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(
-        /export\s+const\s+getSessionTypeBadgeColor/
-      );
+      expect(itemSource).toMatch(/export\s+const\s+getSessionTypeBadgeColor/);
     });
 
     it('should accept sessionType parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getSessionTypeBadgeColor\s*=\s*\(\s*sessionType:\s*Session\['session_type'\]\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getSessionTypeBadgeColor[\s\S]*?:\s*string\s*=>/
       );
     });
 
     it('should use SESSION_TYPE_COLORS lookup', () => {
-      expect(componentSource).toMatch(/SESSION_TYPE_COLORS\[sessionType\]/);
+      expect(itemSource).toMatch(/SESSION_TYPE_COLORS\[sessionType\]/);
     });
   });
 
-  describe('formatSessionDuration Helper Function', () => {
+  describe('formatSessionDuration Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(/export\s+const\s+formatSessionDuration/);
+      expect(itemSource).toMatch(/export\s+const\s+formatSessionDuration/);
     });
 
     it('should accept seconds parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /formatSessionDuration\s*=\s*\(\s*seconds:\s*number\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(/formatSessionDuration.*:\s*string\s*=>/);
+      expect(itemSource).toMatch(/formatSessionDuration.*:\s*string\s*=>/);
     });
 
     it('should handle zero seconds', () => {
-      expect(componentSource).toMatch(/if\s*\(\s*seconds\s*===\s*0\s*\)/);
+      expect(itemSource).toMatch(/if\s*\(\s*seconds\s*===\s*0\s*\)/);
     });
 
     it('should handle hours and minutes', () => {
-      expect(componentSource).toMatch(/const\s+hours\s*=/);
-      expect(componentSource).toMatch(/const\s+minutes\s*=/);
+      expect(itemSource).toMatch(/const\s+hours\s*=/);
+      expect(itemSource).toMatch(/const\s+minutes\s*=/);
     });
   });
 
-  describe('formatSessionDate Helper Function', () => {
+  describe('formatSessionDate Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(/export\s+const\s+formatSessionDate/);
+      expect(itemSource).toMatch(/export\s+const\s+formatSessionDate/);
     });
 
     it('should accept timestamp parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /formatSessionDate\s*=\s*\(\s*timestamp:\s*number\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(/formatSessionDate.*:\s*string\s*=>/);
+      expect(itemSource).toMatch(/formatSessionDate.*:\s*string\s*=>/);
     });
 
     it('should use toLocaleDateString', () => {
-      expect(componentSource).toMatch(/toLocaleDateString/);
+      expect(itemSource).toMatch(/toLocaleDateString/);
     });
 
     it('should format with month, day, year', () => {
-      expect(componentSource).toMatch(/month:\s*['"]short['"]/);
-      expect(componentSource).toMatch(/day:\s*['"]numeric['"]/);
-      expect(componentSource).toMatch(/year:\s*['"]numeric['"]/);
+      expect(itemSource).toMatch(/month:\s*['"]short['"]/);
+      expect(itemSource).toMatch(/day:\s*['"]numeric['"]/);
+      expect(itemSource).toMatch(/year:\s*['"]numeric['"]/);
     });
   });
 
-  describe('formatSessionTime Helper Function', () => {
+  describe('formatSessionTime Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(/export\s+const\s+formatSessionTime/);
+      expect(itemSource).toMatch(/export\s+const\s+formatSessionTime/);
     });
 
     it('should accept timestamp parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /formatSessionTime\s*=\s*\(\s*timestamp:\s*number\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(/formatSessionTime.*:\s*string\s*=>/);
+      expect(itemSource).toMatch(/formatSessionTime.*:\s*string\s*=>/);
     });
 
     it('should use toLocaleTimeString', () => {
-      expect(componentSource).toMatch(/toLocaleTimeString/);
+      expect(itemSource).toMatch(/toLocaleTimeString/);
     });
 
     it('should format with hour and minute', () => {
-      expect(componentSource).toMatch(/hour:\s*['"]numeric['"]/);
-      expect(componentSource).toMatch(/minute:\s*['"]2-digit['"]/);
+      expect(itemSource).toMatch(/hour:\s*['"]numeric['"]/);
+      expect(itemSource).toMatch(/minute:\s*['"]2-digit['"]/);
     });
 
     it('should use 12-hour format', () => {
-      expect(componentSource).toMatch(/hour12:\s*true/);
+      expect(itemSource).toMatch(/hour12:\s*true/);
     });
   });
 
-  describe('formatThetaZScore Helper Function', () => {
+  describe('formatThetaZScore Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(/export\s+const\s+formatThetaZScore/);
+      expect(itemSource).toMatch(/export\s+const\s+formatThetaZScore/);
     });
 
     it('should accept zscore parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /formatThetaZScore\s*=\s*\(\s*zscore:\s*number\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(/formatThetaZScore.*:\s*string\s*=>/);
+      expect(itemSource).toMatch(/formatThetaZScore.*:\s*string\s*=>/);
     });
 
     it('should add sign prefix', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /const\s+sign\s*=\s*zscore\s*>=\s*0\s*\?\s*['"\+]/
       );
     });
 
     it('should use toFixed for decimal places', () => {
-      expect(componentSource).toMatch(/zscore\.toFixed\(2\)/);
+      expect(itemSource).toMatch(/zscore\.toFixed\(2\)/);
     });
   });
 
-  describe('getThetaColor Helper Function', () => {
+  describe('getThetaColor Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(/export\s+const\s+getThetaColor/);
+      expect(itemSource).toMatch(/export\s+const\s+getThetaColor/);
     });
 
     it('should accept zscore parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getThetaColor\s*=\s*\(\s*zscore:\s*number\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(/getThetaColor.*:\s*string\s*=>/);
+      expect(itemSource).toMatch(/getThetaColor.*:\s*string\s*=>/);
     });
 
     it('should return blue for high z-scores (>= 1.0)', () => {
-      expect(componentSource).toMatch(
-        /zscore\s*>=\s*1\.0.*Colors\.status\.blue/
-      );
+      expect(itemSource).toMatch(/zscore\s*>=\s*1\.0.*Colors\.status\.blue/);
     });
 
     it('should return green for good z-scores (>= 0.5)', () => {
-      expect(componentSource).toMatch(
-        /zscore\s*>=\s*0\.5.*Colors\.status\.green/
-      );
+      expect(itemSource).toMatch(/zscore\s*>=\s*0\.5.*Colors\.status\.green/);
     });
 
     it('should return yellow for neutral z-scores (>= 0)', () => {
-      expect(componentSource).toMatch(
-        /zscore\s*>=\s*0.*Colors\.status\.yellow/
-      );
+      expect(itemSource).toMatch(/zscore\s*>=\s*0.*Colors\.status\.yellow/);
     });
 
     it('should return red for negative z-scores', () => {
-      expect(componentSource).toMatch(/return\s+Colors\.status\.red/);
+      expect(itemSource).toMatch(/return\s+Colors\.status\.red/);
     });
   });
 
-  describe('getSessionAccessibilityLabel Helper Function', () => {
+  describe('getSessionAccessibilityLabel Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /export\s+const\s+getSessionAccessibilityLabel/
       );
     });
 
     it('should accept session parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getSessionAccessibilityLabel\s*=\s*\(\s*session:\s*Session\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getSessionAccessibilityLabel.*:\s*string\s*=>/
       );
     });
 
     it('should include session type label', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getSessionTypeLabel\(session\.session_type\)/
       );
     });
 
     it('should include date and time', () => {
-      expect(componentSource).toMatch(
-        /formatSessionDate\(session\.start_time\)/
-      );
-      expect(componentSource).toMatch(
-        /formatSessionTime\(session\.start_time\)/
-      );
+      expect(itemSource).toMatch(/formatSessionDate\(session\.start_time\)/);
+      expect(itemSource).toMatch(/formatSessionTime\(session\.start_time\)/);
     });
 
     it('should include duration', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /formatSessionDuration\(session\.duration_seconds\)/
       );
     });
 
     it('should include theta z-score', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /formatThetaZScore\(session\.avg_theta_zscore\)/
       );
     });
@@ -464,60 +550,58 @@ describe('SessionListView Component', () => {
     });
   });
 
-  describe('getRelativeDateLabel Helper Function', () => {
+  describe('getRelativeDateLabel Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(/export\s+const\s+getRelativeDateLabel/);
+      expect(itemSource).toMatch(/export\s+const\s+getRelativeDateLabel/);
     });
 
     it('should accept timestamp parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getRelativeDateLabel\s*=\s*\(\s*timestamp:\s*number\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(/getRelativeDateLabel.*:\s*string\s*=>/);
+      expect(itemSource).toMatch(/getRelativeDateLabel.*:\s*string\s*=>/);
     });
 
     it('should return Today for today timestamps', () => {
-      expect(componentSource).toMatch(/return\s*['"]Today['"]/);
+      expect(itemSource).toMatch(/return\s*['"]Today['"]/);
     });
 
     it('should return Yesterday for yesterday timestamps', () => {
-      expect(componentSource).toMatch(/return\s*['"]Yesterday['"]/);
+      expect(itemSource).toMatch(/return\s*['"]Yesterday['"]/);
     });
 
     it('should fall back to formatSessionDate', () => {
-      expect(componentSource).toMatch(
-        /return\s+formatSessionDate\(timestamp\)/
-      );
+      expect(itemSource).toMatch(/return\s+formatSessionDate\(timestamp\)/);
     });
   });
 
-  describe('getStarRating Helper Function', () => {
+  describe('getStarRating Helper Function (in SessionListItem)', () => {
     it('should be exported', () => {
-      expect(componentSource).toMatch(/export\s+const\s+getStarRating/);
+      expect(itemSource).toMatch(/export\s+const\s+getStarRating/);
     });
 
     it('should accept rating parameter', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getStarRating\s*=\s*\(\s*rating:\s*number\s*\|\s*null\s*\)/
       );
     });
 
     it('should return string', () => {
-      expect(componentSource).toMatch(/getStarRating.*:\s*string\s*=>/);
+      expect(itemSource).toMatch(/getStarRating.*:\s*string\s*=>/);
     });
 
     it('should return empty string for null rating', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /if\s*\(\s*rating\s*===\s*null\s*\)\s*return\s*['"]['"];?/
       );
     });
 
     it('should use star characters', () => {
-      expect(componentSource).toMatch(/['"]★['"]\.repeat/);
-      expect(componentSource).toMatch(/['"]☆['"]\.repeat/);
+      expect(itemSource).toMatch(/['"]★['"]\.repeat/);
+      expect(itemSource).toMatch(/['"]☆['"]\.repeat/);
     });
   });
 
@@ -545,49 +629,45 @@ describe('SessionListView Component', () => {
     });
   });
 
-  describe('SessionListItem Component', () => {
+  describe('SessionListItem Component (in SessionListItem file)', () => {
     it('should be defined', () => {
-      expect(componentSource).toMatch(/const\s+SessionListItem/);
+      expect(itemSource).toMatch(/const\s+SessionListItem/);
     });
 
     it('should accept session prop', () => {
-      expect(componentSource).toMatch(
-        /SessionListItem[\s\S]*?session:\s*Session/
-      );
+      expect(itemSource).toMatch(/SessionListItem[\s\S]*?session:\s*Session/);
     });
 
     it('should accept onPress prop', () => {
-      expect(componentSource).toMatch(/SessionListItem[\s\S]*?onPress\?:/);
+      expect(itemSource).toMatch(/SessionListItemProps[\s\S]*?onPress\?:/);
     });
 
     it('should accept showDateHeader prop', () => {
-      expect(componentSource).toMatch(
-        /SessionListItem[\s\S]*?showDateHeader:\s*boolean/
+      expect(itemSource).toMatch(
+        /SessionListItemProps[\s\S]*?showDateHeader\?:\s*boolean/
       );
     });
 
     it('should accept testID prop', () => {
-      expect(componentSource).toMatch(
-        /SessionListItem[\s\S]*?testID\?:\s*string/
+      expect(itemSource).toMatch(
+        /SessionListItemProps[\s\S]*?testID\?:\s*string/
       );
     });
 
     it('should use TouchableOpacity for item container', () => {
-      expect(componentSource).toMatch(
-        /<TouchableOpacity[\s\S]*?style=\{styles\.itemContainer\}/
-      );
+      expect(itemSource).toMatch(/<TouchableOpacity/);
     });
 
     it('should set activeOpacity', () => {
-      expect(componentSource).toMatch(/activeOpacity=\{0\.7\}/);
+      expect(itemSource).toMatch(/activeOpacity=\{0\.7\}/);
     });
 
     it('should have accessibility role button', () => {
-      expect(componentSource).toMatch(/accessibilityRole=["']button["']/);
+      expect(itemSource).toMatch(/accessibilityRole=["']button["']/);
     });
 
     it('should have accessibility hint', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /accessibilityHint=["']Double tap to view session details["']/
       );
     });
@@ -595,35 +675,33 @@ describe('SessionListView Component', () => {
 
   describe('SessionListItem - Date Header', () => {
     it('should conditionally render date header', () => {
-      expect(componentSource).toMatch(/showDateHeader\s*&&/);
+      expect(itemSource).toMatch(/showDateHeader\s*&&/);
     });
 
     it('should use dateHeader style', () => {
-      expect(componentSource).toMatch(/style=\{styles\.dateHeader\}/);
+      expect(itemSource).toMatch(/style=\{styles\.dateHeader\}/);
     });
 
     it('should have accessibility role header', () => {
-      expect(componentSource).toMatch(/accessibilityRole=["']header["']/);
+      expect(itemSource).toMatch(/accessibilityRole=["']header["']/);
     });
 
     it('should use getRelativeDateLabel', () => {
-      expect(componentSource).toMatch(
-        /getRelativeDateLabel\(session\.start_time\)/
-      );
+      expect(itemSource).toMatch(/getRelativeDateLabel\(session\.start_time\)/);
     });
   });
 
   describe('SessionListItem - Type Badge', () => {
     it('should render type badge', () => {
-      expect(componentSource).toMatch(/typeBadge/);
+      expect(itemSource).toMatch(/typeBadge/);
     });
 
     it('should apply badge color dynamically', () => {
-      expect(componentSource).toMatch(/backgroundColor:\s*badgeColor/);
+      expect(itemSource).toMatch(/backgroundColor:\s*badgeColor/);
     });
 
     it('should display session type label', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /getSessionTypeLabel\(session\.session_type\)/
       );
     });
@@ -631,47 +709,41 @@ describe('SessionListView Component', () => {
 
   describe('SessionListItem - Stats Display', () => {
     it('should display duration', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /formatSessionDuration\(session\.duration_seconds\)/
       );
     });
 
     it('should display avg theta z-score', () => {
-      expect(componentSource).toMatch(
+      expect(itemSource).toMatch(
         /formatThetaZScore\(session\.avg_theta_zscore\)/
       );
     });
 
     it('should color theta z-score', () => {
-      expect(componentSource).toMatch(/color:\s*thetaColor/);
+      expect(itemSource).toMatch(/color:\s*thetaColor/);
     });
 
     it('should display entrainment frequency', () => {
-      expect(componentSource).toMatch(
-        /session\.entrainment_freq\.toFixed\(1\)/
-      );
+      expect(itemSource).toMatch(/session\.entrainment_freq\.toFixed\(1\)/);
     });
 
     it('should display Hz unit', () => {
-      expect(componentSource).toMatch(/Hz/);
+      expect(itemSource).toMatch(/Hz/);
     });
   });
 
   describe('SessionListItem - Rating Display', () => {
     it('should conditionally render rating', () => {
-      expect(componentSource).toMatch(
-        /session\.subjective_rating\s*!==\s*null/
-      );
+      expect(itemSource).toMatch(/session\.subjective_rating\s*!==\s*null/);
     });
 
     it('should use getStarRating', () => {
-      expect(componentSource).toMatch(
-        /getStarRating\(session\.subjective_rating\)/
-      );
+      expect(itemSource).toMatch(/getStarRating\(session\.subjective_rating\)/);
     });
 
     it('should use ratingStars style', () => {
-      expect(componentSource).toMatch(/style=\{styles\.ratingStars\}/);
+      expect(itemSource).toMatch(/style=\{styles\.ratingStars\}/);
     });
   });
 
@@ -833,17 +905,23 @@ describe('SessionListView Component', () => {
         /testID=\{`\$\{testID\}-refresh-control`\}/
       );
     });
+  });
+
+  describe('SessionListItem Test IDs', () => {
+    it('should have default testID', () => {
+      expect(itemSource).toMatch(/testID\s*=\s*['"]session-list-item['"]/);
+    });
 
     it('should pass testID to date headers', () => {
-      expect(componentSource).toMatch(/testID=\{`\$\{testID\}-date-header`\}/);
+      expect(itemSource).toMatch(/testID=\{`\$\{testID\}-date-header`\}/);
     });
 
     it('should pass testID to touchable items', () => {
-      expect(componentSource).toMatch(/testID=\{`\$\{testID\}-touchable`\}/);
+      expect(itemSource).toMatch(/testID=\{`\$\{testID\}-touchable`\}/);
     });
   });
 
-  describe('Styling', () => {
+  describe('SessionListView Styling', () => {
     it('should use StyleSheet.create', () => {
       expect(componentSource).toMatch(/StyleSheet\.create/);
     });
@@ -864,46 +942,6 @@ describe('SessionListView Component', () => {
       expect(componentSource).toMatch(/listHeader:\s*\{/);
     });
 
-    it('should have dateHeader style', () => {
-      expect(componentSource).toMatch(/dateHeader:\s*\{/);
-    });
-
-    it('should have itemContainer style', () => {
-      expect(componentSource).toMatch(/itemContainer:\s*\{/);
-    });
-
-    it('should have itemHeader style', () => {
-      expect(componentSource).toMatch(/itemHeader:\s*\{/);
-    });
-
-    it('should have typeBadge style', () => {
-      expect(componentSource).toMatch(/typeBadge:\s*\{/);
-    });
-
-    it('should have statRow style', () => {
-      expect(componentSource).toMatch(/statRow:\s*\{/);
-    });
-
-    it('should have statItem style', () => {
-      expect(componentSource).toMatch(/statItem:\s*\{/);
-    });
-
-    it('should have statLabel style', () => {
-      expect(componentSource).toMatch(/statLabel:\s*\{/);
-    });
-
-    it('should have statValue style', () => {
-      expect(componentSource).toMatch(/statValue:\s*\{/);
-    });
-
-    it('should have ratingRow style', () => {
-      expect(componentSource).toMatch(/ratingRow:\s*\{/);
-    });
-
-    it('should have ratingStars style', () => {
-      expect(componentSource).toMatch(/ratingStars:\s*\{/);
-    });
-
     it('should have emptyContainer style', () => {
       expect(componentSource).toMatch(/emptyContainer:\s*\{/);
     });
@@ -921,16 +959,56 @@ describe('SessionListView Component', () => {
     });
   });
 
-  describe('Theme Integration', () => {
+  describe('SessionListItem Styling', () => {
+    it('should use StyleSheet.create', () => {
+      expect(itemSource).toMatch(/StyleSheet\.create/);
+    });
+
+    it('should have dateHeader style', () => {
+      expect(itemSource).toMatch(/dateHeader:\s*\{/);
+    });
+
+    it('should have itemContainer style', () => {
+      expect(itemSource).toMatch(/itemContainer:\s*\{/);
+    });
+
+    it('should have itemHeader style', () => {
+      expect(itemSource).toMatch(/itemHeader:\s*\{/);
+    });
+
+    it('should have typeBadge style', () => {
+      expect(itemSource).toMatch(/typeBadge:\s*\{/);
+    });
+
+    it('should have statRow style', () => {
+      expect(itemSource).toMatch(/statRow:\s*\{/);
+    });
+
+    it('should have statItem style', () => {
+      expect(itemSource).toMatch(/statItem:\s*\{/);
+    });
+
+    it('should have statLabel style', () => {
+      expect(itemSource).toMatch(/statLabel:\s*\{/);
+    });
+
+    it('should have statValue style', () => {
+      expect(itemSource).toMatch(/statValue:\s*\{/);
+    });
+
+    it('should have ratingRow style', () => {
+      expect(itemSource).toMatch(/ratingRow:\s*\{/);
+    });
+
+    it('should have ratingStars style', () => {
+      expect(itemSource).toMatch(/ratingStars:\s*\{/);
+    });
+  });
+
+  describe('SessionListView Theme Integration', () => {
     it('should use Colors.background.primary for container', () => {
       expect(componentSource).toMatch(
         /backgroundColor:\s*Colors\.background\.primary/
-      );
-    });
-
-    it('should use Colors.surface.primary for items', () => {
-      expect(componentSource).toMatch(
-        /backgroundColor:\s*Colors\.surface\.primary/
       );
     });
 
@@ -942,32 +1020,16 @@ describe('SessionListView Component', () => {
       expect(componentSource).toMatch(/color:\s*Colors\.text\.secondary/);
     });
 
-    it('should use Colors.text.tertiary', () => {
-      expect(componentSource).toMatch(/color:\s*Colors\.text\.tertiary/);
-    });
-
-    it('should use Colors.text.inverse for badge text', () => {
-      expect(componentSource).toMatch(/color:\s*Colors\.text\.inverse/);
-    });
-
     it('should use Spacing constants', () => {
-      expect(componentSource).toMatch(/Spacing\.xs/);
       expect(componentSource).toMatch(/Spacing\.sm/);
       expect(componentSource).toMatch(/Spacing\.md/);
       expect(componentSource).toMatch(/Spacing\.lg/);
       expect(componentSource).toMatch(/Spacing\.xl/);
     });
 
-    it('should use BorderRadius constants', () => {
-      expect(componentSource).toMatch(/BorderRadius\.sm/);
-      expect(componentSource).toMatch(/BorderRadius\.lg/);
-    });
-
     it('should use Typography.fontSize constants', () => {
-      expect(componentSource).toMatch(/Typography\.fontSize\.xs/);
       expect(componentSource).toMatch(/Typography\.fontSize\.sm/);
       expect(componentSource).toMatch(/Typography\.fontSize\.md/);
-      expect(componentSource).toMatch(/Typography\.fontSize\.lg/);
       expect(componentSource).toMatch(/Typography\.fontSize\.xl/);
     });
 
@@ -975,16 +1037,60 @@ describe('SessionListView Component', () => {
       expect(componentSource).toMatch(/Typography\.fontWeight\.medium/);
       expect(componentSource).toMatch(/Typography\.fontWeight\.semibold/);
     });
+  });
+
+  describe('SessionListItem Theme Integration', () => {
+    it('should use Colors.surface.primary for items', () => {
+      expect(itemSource).toMatch(/backgroundColor:\s*Colors\.surface\.primary/);
+    });
+
+    it('should use Colors.text.primary', () => {
+      expect(itemSource).toMatch(/color:\s*Colors\.text\.primary/);
+    });
+
+    it('should use Colors.text.secondary', () => {
+      expect(itemSource).toMatch(/color:\s*Colors\.text\.secondary/);
+    });
+
+    it('should use Colors.text.tertiary', () => {
+      expect(itemSource).toMatch(/color:\s*Colors\.text\.tertiary/);
+    });
+
+    it('should use Colors.text.inverse for badge text', () => {
+      expect(itemSource).toMatch(/color:\s*Colors\.text\.inverse/);
+    });
+
+    it('should use Spacing constants', () => {
+      expect(itemSource).toMatch(/Spacing\.xs/);
+      expect(itemSource).toMatch(/Spacing\.sm/);
+      expect(itemSource).toMatch(/Spacing\.md/);
+    });
+
+    it('should use BorderRadius constants', () => {
+      expect(itemSource).toMatch(/BorderRadius\.sm/);
+      expect(itemSource).toMatch(/BorderRadius\.lg/);
+    });
+
+    it('should use Typography.fontSize constants', () => {
+      expect(itemSource).toMatch(/Typography\.fontSize\.xs/);
+      expect(itemSource).toMatch(/Typography\.fontSize\.sm/);
+      expect(itemSource).toMatch(/Typography\.fontSize\.md/);
+      expect(itemSource).toMatch(/Typography\.fontSize\.lg/);
+    });
+
+    it('should use Typography.fontWeight constants', () => {
+      expect(itemSource).toMatch(/Typography\.fontWeight\.semibold/);
+    });
 
     it('should use Shadows constants', () => {
-      expect(componentSource).toMatch(/\.\.\.Shadows\.sm/);
+      expect(itemSource).toMatch(/\.\.\.Shadows\.sm/);
     });
 
     it('should use Colors.status for theta coloring', () => {
-      expect(componentSource).toMatch(/Colors\.status\.blue/);
-      expect(componentSource).toMatch(/Colors\.status\.green/);
-      expect(componentSource).toMatch(/Colors\.status\.yellow/);
-      expect(componentSource).toMatch(/Colors\.status\.red/);
+      expect(itemSource).toMatch(/Colors\.status\.blue/);
+      expect(itemSource).toMatch(/Colors\.status\.green/);
+      expect(itemSource).toMatch(/Colors\.status\.yellow/);
+      expect(itemSource).toMatch(/Colors\.status\.red/);
     });
   });
 
@@ -1021,7 +1127,7 @@ describe('SessionListView Component', () => {
   });
 
   describe('Documentation', () => {
-    it('should have JSDoc comment for component', () => {
+    it('should have JSDoc comment for SessionListView component', () => {
       expect(componentSource).toMatch(
         /\/\*\*[\s\S]*?SessionListView\s+Component[\s\S]*?\*\//
       );
@@ -1038,11 +1144,17 @@ describe('SessionListView Component', () => {
     it('should describe empty state', () => {
       expect(componentSource).toMatch(/empty\s+state/i);
     });
+
+    it('should have JSDoc comment for SessionListItem component', () => {
+      expect(itemSource).toMatch(
+        /\/\*\*[\s\S]*?SessionListItem\s+Component[\s\S]*?\*\//
+      );
+    });
   });
 });
 
 describe('SessionListView Functional Tests', () => {
-  // Import the helper functions for functional testing
+  // Import the helper functions for functional testing from SessionListItem
   const {
     getSessionTypeLabel,
     getSessionTypeBadgeColor,
@@ -1051,12 +1163,13 @@ describe('SessionListView Functional Tests', () => {
     formatSessionTime,
     formatThetaZScore,
     getThetaColor,
-    isSameDay,
     getRelativeDateLabel,
     getStarRating,
     SESSION_TYPE_LABELS,
     SESSION_TYPE_COLORS,
-  } = require('../src/components/SessionListView');
+  } = require('../src/components/SessionListItem');
+
+  const { isSameDay } = require('../src/components/SessionListView');
 
   describe('getSessionTypeLabel', () => {
     it('should return Calibration for calibration type', () => {

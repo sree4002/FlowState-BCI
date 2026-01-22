@@ -90,8 +90,8 @@ export {
   RATING_LABELS,
 } from './SessionCompletionHandler';
 
-export { SessionListView } from './SessionListView';
-export type { SessionListViewProps } from './SessionListView';
+export { SessionListItem } from './SessionListItem';
+export type { SessionListItemProps } from './SessionListItem';
 export {
   SESSION_TYPE_LABELS,
   SESSION_TYPE_COLORS,
@@ -103,7 +103,10 @@ export {
   formatThetaZScore,
   getThetaColor,
   getSessionAccessibilityLabel,
-  isSameDay,
   getRelativeDateLabel,
   getStarRating,
-} from './SessionListView';
+} from './SessionListItem';
+
+export { SessionListView } from './SessionListView';
+export type { SessionListViewProps } from './SessionListView';
+export { isSameDay } from './SessionListView';

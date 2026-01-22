@@ -1826,3 +1826,63 @@ The recalibration prompt for poor quality scores was already implemented in Cali
 
 **Next steps**: Create SessionListItem showing date, duration, avg theta, frequency, rating as per Phase 9 task 2
 
+
+---
+
+## 2026-01-21: Phase 9 Task 2 - Create SessionListItem Component
+
+**Task**: Create SessionListItem showing date, duration, avg theta, frequency, rating
+
+**Implementation**:
+Created a standalone `SessionListItem` component extracted from `SessionListView`:
+- New file: `src/components/SessionListItem.tsx`
+- Refactored `SessionListView.tsx` to import from `SessionListItem`
+- Updated `src/components/index.ts` to export the new component
+
+**SessionListItem Component Features**:
+- Session type badge with color coding (calibration, quick_boost, custom, scheduled, sham)
+- Date display with relative labels (Today, Yesterday, or formatted date)
+- Time display in 12-hour format
+- Duration display (formatted as Xh Xm Xs)
+- Average theta z-score with color coding (blue ≥1.0, green ≥0.5, yellow ≥0, red <0)
+- Entrainment frequency in Hz
+- Subjective rating as star display (★★★☆☆ format)
+- Support for compact mode
+- Full accessibility support with labels and hints
+- Test IDs for testing
+
+**SessionListItemProps Interface**:
+- session: Session (required)
+- onPress?: (session: Session) => void
+- showDateHeader?: boolean (default: false)
+- testID?: string (default: 'session-list-item')
+- compact?: boolean (default: false)
+
+**Exported Helper Functions (from SessionListItem)**:
+- SESSION_TYPE_LABELS: Record of session type display names
+- SESSION_TYPE_COLORS: Record of session type badge colors
+- getSessionTypeLabel(sessionType): Returns human-readable label
+- getSessionTypeBadgeColor(sessionType): Returns badge color
+- formatSessionDuration(seconds): Returns "Xh Xm Xs" format
+- formatSessionDate(timestamp): Returns "Jan 15, 2026" format
+- formatSessionTime(timestamp): Returns "2:30 PM" format
+- formatThetaZScore(zscore): Returns "+X.XX" format
+- getThetaColor(zscore): Returns color for z-score range
+- getSessionAccessibilityLabel(session): Returns comprehensive accessibility label
+- getRelativeDateLabel(timestamp): Returns Today/Yesterday/date
+- getStarRating(rating): Returns "★★★☆☆" format
+
+**Test Coverage**:
+- Created `__tests__/SessionListItem.test.tsx` with 53 test cases
+- Updated `__tests__/SessionListView.test.ts` to verify both files (317 tests total)
+- All tests passing
+
+**Files Changed**:
+- Created: `src/components/SessionListItem.tsx`
+- Modified: `src/components/SessionListView.tsx`
+- Modified: `src/components/index.ts`
+- Created: `__tests__/SessionListItem.test.tsx`
+- Modified: `__tests__/SessionListView.test.ts`
+- Modified: `docs/prd.md`
+
+**Next steps**: Add filter controls for date range and session type (Phase 9 Task 3)
