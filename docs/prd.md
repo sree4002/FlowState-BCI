@@ -88,7 +88,7 @@
 
 - [x] Create CalibrationInstructionsScreen with device setup guidance
 - [x] Create CalibrationCountdownScreen (30-second settle period)
-- [ ] Create CalibrationProgressScreen with real-time signal quality display
+- [x] Create CalibrationProgressScreen with real-time signal quality display
 - [ ] Create CalibrationSummaryScreen showing baseline results
 - [ ] Implement calibration session state machine
 - [ ] Add auto-pause when signal quality critically degraded (<20%)
