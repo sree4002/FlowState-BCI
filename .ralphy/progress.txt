@@ -1353,3 +1353,129 @@ Victory Native provides chart components for:
 
 **Next steps**: Create CalibrationSummaryScreen showing baseline results as per Phase 8 task 4
 
+
+### Task: Create CalibrationSummaryScreen showing baseline results
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created CalibrationSummaryScreen component in src/screens/CalibrationSummaryScreen.tsx (700+ lines)
+2. Implemented baseline results display showing calibration quality and baseline profile data
+3. Built quality badge with animated entrance showing quality level (Excellent/Good/Acceptable/Poor)
+4. Created summary message section with quality-based messaging and recommendations
+5. Implemented calibration statistics display showing:
+   - Clean data percentage
+   - Average signal quality
+   - Recorded duration
+   - Auto-pause count (conditional)
+6. Built baseline profile section showing:
+   - Theta band power (mean and variability)
+   - Peak theta frequency
+   - Optimal entrainment frequency
+   - Alpha and Beta band powers
+   - Quality score with progress bar
+7. Implemented 14 exported helper functions:
+   - getCalibrationQualityLevel: Determines quality level from score and clean data percentage
+   - getQualityLevelColor: Returns color for quality level
+   - getQualityLevelLabel: Returns human-readable label for quality level
+   - getQualityLevelIcon: Returns emoji icon for quality level
+   - getQualitySummaryMessage: Returns summary message based on quality
+   - getQualityRecommendation: Returns recommendation based on quality
+   - formatFrequencyValue: Formats frequency with Hz suffix
+   - formatPowerValue: Formats power value with µV² suffix
+   - formatStdValue: Formats standard deviation with ± prefix
+   - formatPercentage: Formats percentage with % suffix
+   - formatCalibrationDuration: Formats duration as Xm Xs
+   - getStatAccessibilityLabel: Returns accessibility label for stats
+   - isBaselineValid: Validates baseline profile
+   - getFrequencyBandLabel: Returns band label (Theta/Alpha/Beta/Delta)
+8. Added animated entrance with fade, scale, and sequential animations
+9. Implemented save and recalibrate action buttons with appropriate states
+10. Added warning display when calibration quality is too low
+11. Integrated with SessionContext for calibration state management
+12. Built comprehensive accessibility features (roles, labels, hints)
+13. Updated src/screens/index.ts to export component, types, constants, and helper functions
+14. Created comprehensive test suite with 288 tests covering:
+    - File structure and exports (10 tests)
+    - Index file exports (9 tests)
+    - Required imports (6 tests)
+    - CalibrationQualityLevel type (4 tests)
+    - BaselineStats interface (7 tests)
+    - CalibrationSummaryScreenProps interface (6 tests)
+    - Constants (6 tests)
+    - All 14 helper functions (80+ tests)
+    - Context integration (4 tests)
+    - State management (2 tests)
+    - Animation refs and implementation (11 tests)
+    - Event handlers (5 tests)
+    - Render functions (5 tests)
+    - UI elements (19 tests)
+    - Baseline profile display (7 tests)
+    - Calibration stats display (4 tests)
+    - Accessibility features (6 tests)
+    - Test IDs (8 tests)
+    - Styling (13 tests)
+    - Theme integration (12 tests)
+    - Platform specific (2 tests)
+    - Default props (1 test)
+    - Warning display (4 tests)
+    - Footer note (3 tests)
+    - Documentation (5 tests)
+    - Derived values (10 tests)
+    - useEffect hooks (2 tests)
+    - Functional tests for all helper functions (35+ tests)
+15. Ran Prettier to fix formatting
+16. Verified all 288 tests pass
+17. Verified linting passes with 0 errors
+18. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/screens/CalibrationSummaryScreen.tsx (created - 700+ lines with complete implementation)
+- src/screens/index.ts (modified - added CalibrationSummaryScreen exports)
+- __tests__/CalibrationSummaryScreen.test.ts (created - 1600+ lines with 288 test cases)
+- docs/prd.md (updated - marked task as complete)
+
+**Component features**:
+- **Quality Badge**: Animated badge showing quality level with icon and color
+- **Summary Message**: Quality-based messaging with recommendations
+- **Calibration Stats**: Grid showing clean data %, signal quality, duration, auto-pauses
+- **Baseline Profile**: Detailed display of theta, alpha, beta band powers
+- **Peak Frequency Display**: Shows peak theta and optimal entrainment frequencies
+- **Quality Score Bar**: Visual progress bar for baseline quality
+- **Action Buttons**: Save & Continue (when valid) or Warning message (when invalid)
+- **Recalibrate Button**: Always available for starting new calibration
+- **Entrance Animations**: Fade, scale, and sequential animations for visual polish
+- **Theme Integration**: Full use of Colors, Spacing, BorderRadius, Typography, Shadows
+- **Platform Support**: iOS-specific padding adjustments
+- **Full Accessibility**: Roles, labels, hints on all interactive elements
+
+**TypeScript types defined**:
+- CalibrationQualityLevel: Type for quality levels ('excellent' | 'good' | 'acceptable' | 'poor')
+- CalibrationSummaryScreenProps: Interface for component props (6 optional props)
+- BaselineStats: Interface for baseline statistics display (7 fields)
+
+**Constants defined**:
+- GOOD_QUALITY_THRESHOLD: 70 (quality threshold for good calibration)
+- ACCEPTABLE_QUALITY_THRESHOLD: 50 (quality threshold for acceptable calibration)
+- MIN_CLEAN_DATA_PERCENTAGE: 50 (minimum clean data for valid baseline)
+
+**Exported helper functions**:
+- getCalibrationQualityLevel(qualityScore, cleanDataPercentage): Returns CalibrationQualityLevel
+- getQualityLevelColor(level): Returns color string
+- getQualityLevelLabel(level): Returns label string (Excellent/Good/Acceptable/Poor)
+- getQualityLevelIcon(level): Returns emoji icon
+- getQualitySummaryMessage(level): Returns summary message
+- getQualityRecommendation(level): Returns recommendation string
+- formatFrequencyValue(frequency): Returns "X.X Hz" format
+- formatPowerValue(power): Returns "X.XX µV²" format
+- formatStdValue(std): Returns "±X.XX µV²" format
+- formatPercentage(value): Returns "X%" format
+- formatCalibrationDuration(seconds): Returns "Xm Xs" format
+- getStatAccessibilityLabel(label, value): Returns accessibility label
+- isBaselineValid(profile): Returns boolean
+- getFrequencyBandLabel(frequency): Returns band name
+
+**Test coverage**: 288 test cases covering file structure, exports, imports, types, interfaces, constants, all 14 helper functions, context integration, state management, animation refs, animation functions, event handlers, render functions, UI elements, baseline profile display, calibration stats display, accessibility features, test IDs, styling, theme integration, platform specific, default props, warning display, footer note, documentation, derived values, useEffect hooks, and functional tests.
+
+**Next steps**: Implement calibration session state machine as per Phase 8 task 5
+
