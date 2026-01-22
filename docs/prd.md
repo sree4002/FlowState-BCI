@@ -87,7 +87,7 @@
 ## Phase 8: Calibration Flow
 
 - [x] Create CalibrationInstructionsScreen with device setup guidance
-- [ ] Create CalibrationCountdownScreen (30-second settle period)
+- [x] Create CalibrationCountdownScreen (30-second settle period)
 - [ ] Create CalibrationProgressScreen with real-time signal quality display
 - [ ] Create CalibrationSummaryScreen showing baseline results
 - [ ] Implement calibration session state machine

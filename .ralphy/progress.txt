@@ -1116,3 +1116,108 @@ Victory Native provides chart components for:
 
 **Next steps**: Create CalibrationCountdownScreen (30-second settle period) as per Phase 8 task 2
 
+
+### Task: Create CalibrationCountdownScreen (30-second settle period)
+
+**Status**: Completed
+
+**What was done**:
+1. Created CalibrationCountdownScreen component in src/screens/CalibrationCountdownScreen.tsx (600+ lines)
+2. Implemented 30-second countdown timer with visual feedback for calibration settle period
+3. Built countdown state machine with four states: waiting, counting, complete, cancelled
+4. Created animated countdown circle with pulse animation during active countdown
+5. Implemented 7 exported helper functions:
+   - formatCountdownTime: Formats seconds to "MM:SS" display
+   - formatCountdownLabel: Returns human-readable time label ("30 seconds", "1 minute")
+   - getCountdownProgress: Calculates progress percentage (0-100)
+   - getCountdownSignalStatus: Returns signal quality status with label, color, isGood
+   - getCountdownInstruction: Returns contextual instruction based on state and remaining time
+   - getCountdownStateColor: Returns color for countdown state
+   - getCountdownAccessibilityLabel: Returns accessibility label for countdown
+6. Added pause/resume functionality for countdown timer
+7. Created signal quality indicator section showing current signal status
+8. Built progress bar visualization with animated fill
+9. Added relaxation tips section displayed during countdown
+10. Implemented cancel confirmation dialog with Alert.alert
+11. Integrated with DeviceContext for signal quality data
+12. Integrated with SessionContext for calibration state management
+13. Added entrance animation with fade and scale effects
+14. Implemented pulse animation for countdown circle using Animated.loop
+15. Added comprehensive accessibility features (roles, labels, hints)
+16. Updated src/screens/index.ts to export component, types, and helper functions
+17. Created comprehensive test suite with 225 tests covering:
+    - File structure and exports (7 tests)
+    - Index file exports (5 tests)
+    - Required imports (7 tests)
+    - CountdownState type (4 tests)
+    - CalibrationCountdownScreenProps interface (4 tests)
+    - DEFAULT_COUNTDOWN_DURATION constant (2 tests)
+    - All 7 helper functions (40+ tests)
+    - Context integration (4 tests)
+    - State management (6 tests)
+    - Animation refs (5 tests)
+    - Animation functions (7 tests)
+    - Event handlers (5 tests)
+    - Timer logic (5 tests)
+    - Alert dialogs (3 tests)
+    - Render functions (5 tests)
+    - UI elements (16 tests)
+    - Countdown circle (4 tests)
+    - Signal indicator (4 tests)
+    - Tips content (5 tests)
+    - Accessibility features (5 tests)
+    - Test IDs (11 tests)
+    - Styling (12 tests)
+    - Platform specific (2 tests)
+    - Default props (2 tests)
+    - Calibration state transitions (4 tests)
+    - Footer content (3 tests)
+    - Documentation (4 tests)
+    - useEffect hooks (4 tests)
+    - Functional tests for all helper functions (44 tests)
+18. Fixed unused variable warning in linting
+19. Verified all 225 tests pass
+20. Verified linting passes with 0 errors
+21. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/screens/CalibrationCountdownScreen.tsx (created - 600+ lines with complete implementation)
+- src/screens/index.ts (modified - added CalibrationCountdownScreen exports)
+- __tests__/CalibrationCountdownScreen.test.ts (created - 900+ lines with 225 test cases)
+- docs/prd.md (updated - marked task as complete)
+
+**Component features**:
+- **30-Second Countdown**: Default settle period with configurable duration
+- **Animated Circle**: Large countdown circle with pulse animation
+- **State Machine**: waiting -> counting -> complete (or cancelled)
+- **Timer Display**: Large MM:SS format with tabular-nums for consistent width
+- **Label Display**: Human-readable countdown label ("30 seconds", "1 minute")
+- **Contextual Instructions**: Changes based on remaining time ("Close your eyes", "Breathe slowly")
+- **Signal Quality Indicator**: Shows current signal status with warning for poor signal
+- **Progress Bar**: Visual progress indicator with percentage
+- **Pause/Resume**: Ability to pause and resume countdown
+- **Cancel Confirmation**: Alert dialog before cancelling
+- **Tips Section**: Relaxation tips displayed during countdown
+- **Entrance Animation**: Fade and scale animation on mount
+- **Theme Integration**: Full use of Colors, Spacing, BorderRadius, Typography, Shadows
+- **Platform Support**: iOS-specific padding adjustments
+- **Full Accessibility**: Roles, labels, hints on all interactive elements
+
+**TypeScript types defined**:
+- CountdownState: Type for countdown states ('waiting' | 'counting' | 'complete' | 'cancelled')
+- CalibrationCountdownScreenProps: Interface for props (onCountdownComplete, onCancel, duration, testID)
+- DEFAULT_COUNTDOWN_DURATION: Constant for 30-second default duration
+
+**Exported helper functions**:
+- formatCountdownTime(seconds): Returns "MM:SS" format
+- formatCountdownLabel(seconds): Returns human-readable label
+- getCountdownProgress(remaining, total): Returns progress percentage (0-100)
+- getCountdownSignalStatus(quality): Returns { label, color, isGood }
+- getCountdownInstruction(state, remaining): Returns contextual instruction
+- getCountdownStateColor(state): Returns color for state
+- getCountdownAccessibilityLabel(state, remaining): Returns accessibility label
+
+**Test coverage**: 225 test cases covering file structure, exports, imports, types, interfaces, constants, all 7 helper functions, context integration, state management, animation refs, animation functions, event handlers, timer logic, alert dialogs, render functions, UI elements, countdown circle, signal indicator, tips content, accessibility, test IDs, styling, platform specific, default props, calibration state transitions, footer content, documentation, useEffect hooks, and functional tests.
+
+**Next steps**: Create CalibrationProgressScreen with real-time signal quality display as per Phase 8 task 3
+
