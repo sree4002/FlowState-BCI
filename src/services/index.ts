@@ -3,3 +3,4 @@
 export * from './database';
 export * from './ble';
 export * from './SessionStateMachine';
+export * from './CalibrationStateMachine';

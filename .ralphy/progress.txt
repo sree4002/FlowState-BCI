@@ -1479,3 +1479,109 @@ Victory Native provides chart components for:
 
 **Next steps**: Implement calibration session state machine as per Phase 8 task 5
 
+
+### Task: Implement calibration session state machine
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created CalibrationStateMachine service in src/services/CalibrationStateMachine.ts (850+ lines)
+2. Implemented extended calibration state type with 8 states: idle, instructions, countdown, recording, paused, processing, complete, failed
+3. Defined 10 calibration event types: START, NEXT, PAUSE, RESUME, COMPLETE, FAIL, CANCEL, RESET, RETRY, TICK
+4. Created valid state transitions map with complete flow support:
+   - idle → instructions (START)
+   - instructions → countdown (NEXT) or idle (CANCEL)
+   - countdown → recording (NEXT) or idle (CANCEL)
+   - recording → processing (COMPLETE), paused (PAUSE), or idle (CANCEL)
+   - paused → recording (RESUME) or idle (CANCEL)
+   - processing → complete (COMPLETE) or failed (FAIL)
+   - complete → idle (RESET)
+   - failed → instructions (RETRY) or idle (CANCEL)
+5. Implemented CalibrationStateMachine class with:
+   - State management (currentState, config, timerState, calibrationData)
+   - Timer functionality for countdown and recording phases
+   - Signal quality tracking and sample recording
+   - Auto-pause functionality when signal quality is critical (<20%) for 10+ seconds
+   - Listener system for state changes, timer updates, completion, and signal quality
+   - Calibration data collection (signalSamples, cleanDataPercentage, averageSignalQuality, autoPauseCount)
+6. Created CalibrationConfig interface with 6 configurable properties:
+   - countdownDuration (default: 30 seconds)
+   - recordingDuration (default: 300 seconds / 5 minutes)
+   - minRecordingDuration (default: 180 seconds / 3 minutes)
+   - minCleanDataPercentage (default: 50%)
+   - criticalSignalThreshold (default: 20)
+   - autoPauseDelaySeconds (default: 10 seconds)
+7. Created CalibrationResult interface with baseline profile generation
+8. Implemented 24 exported helper functions:
+   - isValidCalibrationTransition, getNextCalibrationState, getAvailableCalibrationEvents
+   - canStartCalibration, canPauseCalibration, canResumeCalibration, canCancelCalibration, canAdvanceCalibration
+   - isCalibrationActive, isCalibrationRecording, isCalibrationPaused, isCalibrationComplete, isCalibrationFailed, isCalibrationCountdown, isCalibrationProcessing
+   - isSignalQualitySufficient, calculateCleanDataPercentage, calculateAverageSignalQuality, meetsMinimumCalibrationRequirements
+   - formatCalibrationTime, getCalibrationPhaseLabel, getCalibrationStepNumber, getTotalCalibrationSteps
+9. Added convenience methods: start(), next(), pause(), resume(), complete(), fail(), cancel(), reset(), retry(), destroy()
+10. Implemented error handling in all listeners with try-catch
+11. Updated src/services/index.ts to export the new module
+12. Created comprehensive test suite with 243 tests covering:
+    - File structure and exports (5 tests)
+    - Type exports (12 tests)
+    - Required imports (3 tests)
+    - ExtendedCalibrationState type values (8 tests)
+    - CalibrationEvent type values (10 tests)
+    - CalibrationTransitionResult interface (5 tests)
+    - CalibrationTimerState interface (8 tests)
+    - CalibrationSignalSample interface (4 tests)
+    - CalibrationData interface (6 tests)
+    - CalibrationResult interface (5 tests)
+    - CalibrationConfig interface (6 tests)
+    - DEFAULT_CALIBRATION_CONFIG (7 tests)
+    - Valid state transitions map (12 tests)
+    - Helper functions export (23 tests)
+    - All 24 helper functions with functional tests (50+ tests)
+    - CalibrationStateMachine class structure (22 tests)
+    - CalibrationStateMachine private methods (19 tests)
+    - CalibrationStateMachine instance tests (19 tests)
+    - CalibrationStateMachine signal recording (5 tests)
+    - CalibrationStateMachine pause/resume (3 tests)
+    - Error handling (3 tests)
+    - Documentation (4 tests)
+    - Index exports (1 test)
+13. Ran Prettier to fix formatting
+14. Verified all 243 tests pass
+15. Verified linting passes with 0 errors
+16. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/services/CalibrationStateMachine.ts (created - 850+ lines with complete implementation)
+- src/services/index.ts (modified - added CalibrationStateMachine export)
+- __tests__/CalibrationStateMachine.test.ts (created - 1650+ lines with 243 test cases)
+- docs/prd.md (updated - marked task as complete)
+
+**CalibrationStateMachine Class Features**:
+- **State Machine**: Manages transitions between 8 calibration states
+- **Transition Validation**: Rejects invalid transitions with error messages
+- **Countdown Timer**: Manages 30-second settle period with automatic transition to recording
+- **Recording Timer**: Manages recording phase with configurable duration
+- **Auto-Completion**: Automatically completes calibration when duration is reached
+- **Auto-Pause**: Pauses when signal quality is critical for extended period
+- **Signal Quality Tracking**: Records signal samples during recording phase
+- **Data Quality Stats**: Calculates clean data percentage and average signal quality
+- **Listener System**: State, timer, completion, and signal listeners with unsubscribe pattern
+- **Baseline Generation**: Creates mock baseline profile on successful completion
+- **Error Handling**: Catches and logs errors in listeners without crashing
+- **Cleanup**: destroy() method properly clears intervals and listeners
+
+**TypeScript Types Defined**:
+- ExtendedCalibrationState: 'idle' | 'instructions' | 'countdown' | 'recording' | 'paused' | 'processing' | 'complete' | 'failed'
+- CalibrationEvent: 'START' | 'NEXT' | 'PAUSE' | 'RESUME' | 'COMPLETE' | 'FAIL' | 'CANCEL' | 'RESET' | 'RETRY' | 'TICK'
+- CalibrationTransitionResult: { success, previousState, newState, event, error? }
+- CalibrationTimerState: { elapsedSeconds, remainingSeconds, isPhaseComplete, startTimestamp, pausedAt, totalPausedDuration, countdownSeconds, recordingDurationSeconds }
+- CalibrationSignalSample: { timestamp, score, isClean, artifactPercentage }
+- CalibrationData: { signalSamples, cleanDataPercentage, averageSignalQuality, autoPauseCount, recordingDuration, meetsMinimumRequirements }
+- CalibrationResult: { success, data, baseline, qualityScore, errorMessage? }
+- CalibrationConfig: { countdownDuration, recordingDuration, minRecordingDuration, minCleanDataPercentage, criticalSignalThreshold, autoPauseDelaySeconds }
+- CalibrationStateListener, CalibrationTimerListener, CalibrationCompletionListener, CalibrationSignalListener
+
+**Test Coverage**: 243 test cases covering file structure, exports, type exports, imports, state values, event values, interfaces, configuration, state transitions, all 24 helper functions, class structure, private methods, instance tests, signal recording, pause/resume, error handling, documentation, and index exports.
+
+**Next steps**: Add auto-pause when signal quality critically degraded (<20%) as per Phase 8 task 6
+
