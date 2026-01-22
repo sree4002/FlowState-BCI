@@ -1585,3 +1585,49 @@ Victory Native provides chart components for:
 
 **Next steps**: Add auto-pause when signal quality critically degraded (<20%) as per Phase 8 task 6
 
+
+### Task: Add auto-pause when signal quality critically degraded (<20%)
+
+**Status**: ✅ Completed (Already Implemented)
+
+**What was found**:
+The auto-pause functionality was already fully implemented as part of the CalibrationStateMachine and CalibrationProgressScreen development. The task was marked incomplete in the PRD but the implementation exists:
+
+1. **CalibrationStateMachine.ts** (lines 734-767):
+   - `checkCriticalSignal(signalQuality)`: Checks if signal is below `criticalSignalThreshold` (default: 20)
+   - Tracks how long signal has been critical with `criticalSignalStartTime`
+   - `autoPause()`: Triggers after signal is critical for `autoPauseDelaySeconds` (default: 10 seconds)
+   - Increments `calibrationData.autoPauseCount` and transitions to 'paused' state
+
+2. **CalibrationProgressScreen.tsx** (lines 583-601):
+   - useEffect hook monitors `signalStatus.isCritical`
+   - Sets 10-second timeout when critical signal detected
+   - Calls `pauseRecording(true)` to trigger auto-pause
+   - Clears timeout if signal recovers
+
+3. **Configuration Constants**:
+   - `criticalSignalThreshold: 20` - Signal score below which is considered critical
+   - `autoPauseDelaySeconds: 10` - Duration before auto-pause triggers
+   - `CRITICAL_SIGNAL_THRESHOLD: 20` - UI-level constant matching state machine
+
+4. **User Experience**:
+   - Warning message displayed when signal is critical
+   - Auto-pause counter shown during recording
+   - UI state changes to 'auto_paused' with appropriate messaging
+   - Resume button allows user to continue after adjusting device
+
+**Files verified**:
+- src/services/CalibrationStateMachine.ts (implementation)
+- src/screens/CalibrationProgressScreen.tsx (UI implementation)
+- __tests__/CalibrationStateMachine.test.ts (tests for auto-pause)
+- __tests__/CalibrationProgressScreen.test.ts (tests for UI auto-pause)
+
+**Test verification**:
+- 561 tests pass in CalibrationStateMachine.test.ts and CalibrationProgressScreen.test.ts
+- Tests cover auto-pause timeout, state tracking, count incrementing, and cleanup
+
+**Files modified**:
+- docs/prd.md (updated - marked task as complete)
+
+**Next steps**: Display percentage of clean data during calibration as per Phase 8 task 7
+

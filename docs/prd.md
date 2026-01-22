@@ -91,7 +91,7 @@
 - [x] Create CalibrationProgressScreen with real-time signal quality display
 - [x] Create CalibrationSummaryScreen showing baseline results
 - [x] Implement calibration session state machine
-- [ ] Add auto-pause when signal quality critically degraded (<20%)
+- [x] Add auto-pause when signal quality critically degraded (<20%)
 - [ ] Display percentage of clean data during calibration
 - [ ] Implement calibration data collection (5-10 minute duration options)
 - [ ] Add recalibration prompt if quality score is poor (<50)
