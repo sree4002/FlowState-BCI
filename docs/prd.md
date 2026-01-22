@@ -79,7 +79,7 @@
 - [x] Create VolumeSlider component (0-100%)
 - [x] Create large Pause/Resume button with clear visual state
 - [x] Create Stop button for ending session early
-- [ ] Create SignalQualityIndicator (corner placement, tap for details)
+- [x] Create SignalQualityIndicator (corner placement, tap for details)
 - [ ] Create EntrainmentStateDisplay showing current frequency prominently
 - [ ] Implement session state machine (idle, running, paused, stopped)
 - [ ] Add session completion handler with summary display

@@ -37,3 +37,20 @@ export {
   getStopButtonIcon,
   getStopConfirmationMessage,
 } from './StopButton';
+
+export { SignalQualityIndicator } from './SignalQualityIndicator';
+export type {
+  SignalQualityIndicatorProps,
+  SignalQualityLevel,
+} from './SignalQualityIndicator';
+export {
+  getSignalQualityLevel,
+  getSignalQualityColor,
+  getSignalQualityLabel,
+  getSignalQualityIcon,
+  getSignalBars,
+  getSignalAccessibilityLabel,
+  getSignalAccessibilityHint,
+  getSignalQualityDetails,
+  getPositionStyles,
+} from './SignalQualityIndicator';
