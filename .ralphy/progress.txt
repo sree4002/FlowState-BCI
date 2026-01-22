@@ -907,3 +907,105 @@ Victory Native provides chart components for:
 
 **Next steps**: Add session completion handler with summary display as per Phase 7 task 13
 
+
+### Task: Add session completion handler with summary display
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created SessionCompletionHandler component in src/components/SessionCompletionHandler.tsx (750+ lines)
+2. Implemented modal-based session summary display showing:
+   - Session duration (formatted as MM:SS and human-readable)
+   - Average theta z-score with performance level (Excellent/Great/Good/Fair/Below Baseline)
+   - Signal quality average with level indicator
+   - Session type and entrainment frequency details
+   - Peak theta z-score (conditional display)
+3. Built 1-5 star rating system for subjective session feedback
+4. Added optional notes text input (500 character limit)
+5. Implemented 9 exported helper functions:
+   - formatDuration: Formats seconds to "Xh Xm Xs" human-readable string
+   - formatDurationClock: Formats seconds to "HH:MM:SS" or "MM:SS" clock format
+   - getCompletionMessage: Returns congratulatory message based on theta performance and duration
+   - getThetaPerformanceLevel: Returns label and color for theta z-score level
+   - getSignalQualityLevel: Returns label and color for signal quality score
+   - formatZScore: Formats z-score with sign prefix (+/-) and 2 decimal places
+   - getSessionTypeLabel: Returns human-readable session type label
+   - getRatingAccessibilityLabel: Returns accessibility label for rating stars
+   - RATING_LABELS: Constant mapping 1-5 ratings to Poor/Fair/Good/Great/Excellent
+6. Implemented auto-show behavior when session state transitions to 'stopped'
+7. Added animated entrance/exit with fade and slide animations using Animated.parallel
+8. Built comprehensive accessibility features (roles, labels, hints on all interactive elements)
+9. Integrated with SessionContext for session data and state management
+10. Added keyboard avoiding view for notes input on iOS/Android
+11. Implemented save, dismiss, and new session action buttons
+12. Updated src/components/index.ts to export component and all helpers
+13. Created comprehensive test suite with 264 tests covering:
+    - File structure and exports
+    - Required imports and dependencies
+    - SessionCompletionData interface (11 fields)
+    - SessionCompletionHandlerProps interface (7 props)
+    - All 9 helper functions with complete coverage
+    - Context integration
+    - State management (4 state variables, 1 ref)
+    - Auto-show behavior
+    - Animation implementation (fade, slide, parallel)
+    - Modal component structure
+    - Rating section (5 stars, toggle, labels)
+    - Notes section (TextInput, multiline, max length)
+    - Summary stats display (duration, theta, signal)
+    - Session details display
+    - Header section (icon, title, message)
+    - Action buttons (save, new session, dismiss)
+    - Event handlers (handleSave, handleClose, handleNewSession, handleRatingSelect)
+    - Accessibility features
+    - Styling (19 style definitions)
+    - Theme integration
+    - KeyboardAvoidingView behavior
+    - ScrollView configuration
+    - Modal dimensions
+    - Default props
+    - Documentation
+    - Build session data function
+14. Ran Prettier to fix formatting
+15. Verified all 264 tests pass
+16. Verified linting passes (0 errors)
+17. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/components/SessionCompletionHandler.tsx (created - 750+ lines with complete implementation)
+- src/components/index.ts (modified - added SessionCompletionHandler exports)
+- __tests__/SessionCompletionHandler.test.ts (created - 1230+ lines with 264 test cases)
+- docs/prd.md (updated - marked task as complete)
+
+**Component features**:
+- **Modal Display**: Full-screen modal with dark overlay and centered content card
+- **Session Summary**: Duration, theta z-score, and signal quality stats in card layout
+- **Rating System**: 5-star rating with filled/empty star toggle and labels
+- **Notes Input**: Multi-line text input for optional session notes
+- **Auto-Show**: Automatically displays when session transitions to 'stopped' state
+- **Animation**: Smooth fade and slide entrance/exit animations
+- **Theme Integration**: Full use of Colors, Spacing, BorderRadius, Typography, Shadows
+- **Keyboard Support**: KeyboardAvoidingView for iOS/Android
+- **Accessibility**: Complete ARIA labels, hints, and roles on all interactive elements
+- **Context Integration**: Uses useSession hook for state and actions
+- **Responsive Width**: Modal width adapts to screen size (max 400px)
+
+**TypeScript types defined**:
+- SessionCompletionData: Interface for session completion data (11 fields)
+- SessionCompletionHandlerProps: Interface for component props (visible, sessionData, onSave, onDismiss, onNewSession, autoShow, testID)
+
+**Exported helper functions**:
+- formatDuration(seconds): Returns "Xh Xm Xs" or "Xm Xs" or "Xs"
+- formatDurationClock(seconds): Returns "HH:MM:SS" or "MM:SS"
+- getCompletionMessage(duration, avgTheta, maxTheta): Returns congratulatory message
+- getThetaPerformanceLevel(avgZScore): Returns { label, color } for theta level
+- getSignalQualityLevel(score): Returns { label, color } for signal level
+- formatZScore(zscore): Returns "+X.XX" or "--" for null/undefined
+- getSessionTypeLabel(type): Returns human-readable session type
+- getRatingAccessibilityLabel(rating, selected): Returns accessibility label
+- RATING_LABELS: { 1: 'Poor', 2: 'Fair', 3: 'Good', 4: 'Great', 5: 'Excellent' }
+
+**Test coverage**: 264 test cases covering file structure, exports, imports, interfaces, helper functions, context integration, state management, auto-show behavior, animations, modal structure, rating section, notes section, stats display, details display, header section, action buttons, event handlers, accessibility, styling, theme integration, keyboard avoiding, scroll view, modal dimensions, default props, documentation, and build session data function.
+
+**Next steps**: Create CalibrationInstructionsScreen with device setup guidance as per Phase 8 task 1
+

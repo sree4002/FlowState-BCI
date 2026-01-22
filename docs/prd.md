@@ -82,7 +82,7 @@
 - [x] Create SignalQualityIndicator (corner placement, tap for details)
 - [x] Create EntrainmentStateDisplay showing current frequency prominently
 - [x] Implement session state machine (idle, running, paused, stopped)
-- [ ] Add session completion handler with summary display
+- [x] Add session completion handler with summary display
 
 ## Phase 8: Calibration Flow
 

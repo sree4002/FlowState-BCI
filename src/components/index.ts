@@ -72,3 +72,20 @@ export {
   getFrequencyBandLabel,
   isValidThetaFrequency,
 } from './EntrainmentStateDisplay';
+
+export { SessionCompletionHandler } from './SessionCompletionHandler';
+export type {
+  SessionCompletionHandlerProps,
+  SessionCompletionData,
+} from './SessionCompletionHandler';
+export {
+  formatDuration,
+  formatDurationClock,
+  getCompletionMessage,
+  getThetaPerformanceLevel,
+  getSignalQualityLevel,
+  formatZScore as formatCompletionZScore,
+  getSessionTypeLabel,
+  getRatingAccessibilityLabel,
+  RATING_LABELS,
+} from './SessionCompletionHandler';
