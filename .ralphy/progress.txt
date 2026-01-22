@@ -725,3 +725,95 @@ Victory Native provides chart components for:
 
 **Next steps**: Create EntrainmentStateDisplay showing current frequency prominently as per Phase 7 task 11
 
+
+### Task: Create EntrainmentStateDisplay showing current frequency prominently
+
+**Status**: ✅ Completed
+
+**What was done**:
+1. Created EntrainmentStateDisplay component in src/components/EntrainmentStateDisplay.tsx (330+ lines)
+2. Implemented prominent frequency display showing entrainment frequency in Hz (e.g., "6.0 Hz")
+3. Built state badge showing current entrainment state (Active/Paused/Stopped/Ready) with color coding
+4. Implemented frequency band label showing "Theta Band", "Alpha Band", etc.
+5. Added pulsing animation when entrainment is active (1.02 scale, 1000ms)
+6. Created 9 helper functions:
+   - formatFrequency: Formats frequency value to "X.X Hz"
+   - getEntrainmentState: Maps SessionState to EntrainmentState
+   - getEntrainmentStateColor: Returns color for state (green=active, yellow=paused, red=stopped, gray=idle)
+   - getEntrainmentStateLabel: Returns label (Active, Paused, Stopped, Ready)
+   - getEntrainmentStateIcon: Returns emoji icon (🔊, ⏸, ⏹, ⏻)
+   - getFrequencyColor: Returns color based on frequency range
+   - getEntrainmentAccessibilityLabel: Returns accessibility label
+   - getFrequencyBandLabel: Returns frequency band name (Theta/Alpha/Beta/Delta)
+   - isValidThetaFrequency: Validates if frequency is in theta range (4-8 Hz)
+7. Integrated with SessionContext for session config and state
+8. Supports size variants: small, medium (default), large
+9. Added comprehensive accessibility features (role, label)
+10. Added active indicator ring when session is running
+11. Updated src/components/index.ts to export component and helpers
+12. Created comprehensive test suite with 198 tests covering:
+    - File structure and exports
+    - Required imports and dependencies
+    - Props interface
+    - EntrainmentStateDisplaySize and EntrainmentState types
+    - Size variants
+    - All 9 helper functions
+    - Context integration
+    - Animation implementation
+    - Accessibility features
+    - Visual elements
+    - Conditional rendering
+    - Test IDs
+    - Styling
+    - Theme integration
+    - Frequency display styling
+    - Active indicator styling
+    - Default prop values
+    - Component documentation
+    - Prop value handling
+    - State badge styling
+    - Animated view
+13. Ran Prettier to fix formatting
+14. Verified all 198 tests pass
+15. Verified linting passes with 0 errors
+16. Updated PRD to mark task as complete
+
+**Files created/modified**:
+- src/components/EntrainmentStateDisplay.tsx (created - 330+ lines with complete implementation)
+- src/components/index.ts (modified - added EntrainmentStateDisplay exports)
+- __tests__/EntrainmentStateDisplay.test.ts (created - 890+ lines with 198 test cases)
+- docs/prd.md (updated - marked task as complete)
+
+**Component features**:
+- **Prominent Frequency Display**: Large font (48px medium, 64px large) showing frequency in Hz
+- **Frequency Band Label**: Shows Theta Band, Alpha Band, etc. below frequency
+- **State Badge**: Color-coded badge showing Active (green), Paused (yellow), Stopped (red), Ready (gray)
+- **State Icon**: Emoji icons for each state (🔊 active, ⏸ paused, ⏹ stopped, ⏻ idle)
+- **Pulse Animation**: Subtle pulse when entrainment is active (1.02 scale, 1000ms)
+- **Active Indicator Ring**: Border ring around component when session is running
+- **Size Variants**: small, medium (default), large
+- **Full Accessibility**: Role and label properties
+- **Context Integration**: Uses useSession hook for session config and state
+- **Theme Integration**: Full use of theme colors, spacing, typography, and shadows
+- **Tabular Nums**: Consistent number width for frequency display
+
+**TypeScript types defined**:
+- EntrainmentStateDisplayProps: Interface for component props (frequency, sessionState, size, showLabel, showState, showPulse, testID)
+- EntrainmentStateDisplaySize: Type for size variants ('small' | 'medium' | 'large')
+- EntrainmentState: Type for entrainment states ('idle' | 'active' | 'paused' | 'stopped')
+
+**Exported helper functions**:
+- formatFrequency(frequency): Formats frequency to "X.X Hz" or "-- Hz" for null
+- getEntrainmentState(sessionState): Maps SessionState to EntrainmentState
+- getEntrainmentStateColor(state): Returns color for entrainment state
+- getEntrainmentStateLabel(state): Returns human-readable label
+- getEntrainmentStateIcon(state): Returns emoji icon
+- getFrequencyColor(frequency, state): Returns color based on frequency and state
+- getEntrainmentAccessibilityLabel(frequency, state): Returns accessibility label
+- getFrequencyBandLabel(frequency): Returns frequency band name
+- isValidThetaFrequency(frequency): Validates theta range (4-8 Hz)
+
+**Test coverage**: 198 test cases covering file structure, exports, imports, React Native components (View, Text, StyleSheet, Animated), props interface, type definitions, size variants, all 9 helper functions, context integration, animation implementation (pulse), accessibility features, visual elements, conditional rendering, test IDs, styling, theme integration, frequency display, active indicator, default prop values, documentation, prop value handling, state badge styling, and animated view.
+
+**Next steps**: Implement session state machine (idle, running, paused, stopped) as per Phase 7 task 12
+

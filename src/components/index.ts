@@ -54,3 +54,21 @@ export {
   getSignalQualityDetails,
   getPositionStyles,
 } from './SignalQualityIndicator';
+
+export { EntrainmentStateDisplay } from './EntrainmentStateDisplay';
+export type {
+  EntrainmentStateDisplayProps,
+  EntrainmentStateDisplaySize,
+  EntrainmentState,
+} from './EntrainmentStateDisplay';
+export {
+  formatFrequency,
+  getEntrainmentState,
+  getEntrainmentStateColor,
+  getEntrainmentStateLabel,
+  getEntrainmentStateIcon,
+  getFrequencyColor,
+  getEntrainmentAccessibilityLabel,
+  getFrequencyBandLabel,
+  isValidThetaFrequency,
+} from './EntrainmentStateDisplay';
