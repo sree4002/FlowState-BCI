@@ -1,5 +1,5 @@
 # Python
-/venv/
+venv/
 __pycache__/
 *.py[cod]
 *.so
@@ -7,6 +7,9 @@ __pycache__/
 *.egg-info
 dist/
 build/
+
+# Simulator venv
+simulator/venv/
 
 # Node
 node_modules/
@@ -46,3 +49,10 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Claude/Ralphy working directories
+.claude/
+.ralphy/
+
+# Generated/temp files
+*.png
