@@ -147,7 +147,8 @@ export class ConnectionQualityMonitor {
     }
 
     try {
-      const rssi = await this.device.readRSSI();
+      const device = await this.device.readRSSI();
+      const rssi = device.rssi;
 
       if (rssi !== null) {
         this.addReading(rssi);
@@ -335,7 +336,9 @@ export class ConnectionQualityMonitor {
 /**
  * Utility function to get a human-readable description of quality level
  */
-export function getQualityLevelDescription(level: ConnectionQualityLevel): string {
+export function getQualityLevelDescription(
+  level: ConnectionQualityLevel
+): string {
   switch (level) {
     case 'excellent':
       return 'Excellent - Optimal signal strength';

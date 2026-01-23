@@ -196,10 +196,7 @@ describe('SessionTimer', () => {
     it('should display correct total time from config', () => {
       const { container } = render(
         <SessionProvider>
-          <TestTimerWithSession
-            elapsedSeconds={0}
-            sessionConfig={mockConfig}
-          />
+          <TestTimerWithSession elapsedSeconds={0} sessionConfig={mockConfig} />
         </SessionProvider>
       );
       // 10 minutes = 10:00

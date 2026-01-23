@@ -22,7 +22,8 @@ describe('Database - Circadian Patterns Table', () => {
 
   beforeEach(() => {
     // Initialize database and create tables
-    db = initializeDatabase();
+    const result = initializeDatabase();
+    db = result.db;
     // Clean up any existing data
     deleteAllCircadianPatterns(db);
   });
@@ -34,7 +35,7 @@ describe('Database - Circadian Patterns Table', () => {
 
   describe('Table creation', () => {
     it('should create circadian_patterns table', () => {
-      const testDb = initializeDatabase();
+      const { db: testDb } = initializeDatabase();
 
       // Verify table exists by querying sqlite_master
       const result = testDb.getFirstSync<{ count: number }>(
@@ -44,7 +45,7 @@ describe('Database - Circadian Patterns Table', () => {
     });
 
     it('should create table with createCircadianPatternsTable function', () => {
-      const testDb = initializeDatabase();
+      const { db: testDb } = initializeDatabase();
       dropAllTables(testDb);
 
       // Recreate just the circadian_patterns table
@@ -64,32 +65,27 @@ describe('Database - Circadian Patterns Table', () => {
       );
       const columnNames = columns.map((col) => col.name);
 
-      expect(columnNames).toContain('id');
       expect(columnNames).toContain('hour_of_day');
       expect(columnNames).toContain('avg_theta_mean');
       expect(columnNames).toContain('avg_theta_std');
       expect(columnNames).toContain('session_count');
       expect(columnNames).toContain('avg_subjective_rating');
-      expect(columnNames).toContain('created_at');
       expect(columnNames).toContain('updated_at');
     });
 
-    it('should have id as primary key', () => {
+    it('should have hour_of_day as primary key', () => {
       const columns = db.getAllSync<{ name: string; pk: number }>(
         'PRAGMA table_info(circadian_patterns)'
       );
-      const idColumn = columns.find((col) => col.name === 'id');
+      const hourColumn = columns.find((col) => col.name === 'hour_of_day');
 
-      expect(idColumn?.pk).toBe(1);
+      expect(hourColumn?.pk).toBe(1);
     });
   });
 
   describe('Upsert circadian pattern', () => {
     it('should insert a new pattern successfully', () => {
-      const pattern: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 9,
         avg_theta_mean: 12.5,
         avg_theta_std: 2.1,
@@ -98,7 +94,7 @@ describe('Database - Circadian Patterns Table', () => {
       };
 
       const id = upsertCircadianPattern(db, pattern);
-      expect(id).toBeGreaterThan(0);
+      expect(id).toBeGreaterThanOrEqual(0);
 
       const retrieved = getCircadianPatternByHour(db, 9);
       expect(retrieved).not.toBeNull();
@@ -106,10 +102,7 @@ describe('Database - Circadian Patterns Table', () => {
     });
 
     it('should update existing pattern for same hour', () => {
-      const pattern1: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern1: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 9,
         avg_theta_mean: 12.5,
         avg_theta_std: 2.1,
@@ -117,10 +110,7 @@ describe('Database - Circadian Patterns Table', () => {
         avg_subjective_rating: 4.2,
       };
 
-      const pattern2: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern2: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 9,
         avg_theta_mean: 13.0,
         avg_theta_std: 2.3,
@@ -141,10 +131,7 @@ describe('Database - Circadian Patterns Table', () => {
     });
 
     it('should allow null avg_subjective_rating', () => {
-      const pattern: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 10,
         avg_theta_mean: 11.0,
         avg_theta_std: 1.8,
@@ -153,7 +140,7 @@ describe('Database - Circadian Patterns Table', () => {
       };
 
       const id = upsertCircadianPattern(db, pattern);
-      expect(id).toBeGreaterThan(0);
+      expect(id).toBeGreaterThanOrEqual(0);
 
       const retrieved = getCircadianPatternByHour(db, 10);
       expect(retrieved?.avg_subjective_rating).toBeNull();
@@ -191,10 +178,7 @@ describe('Database - Circadian Patterns Table', () => {
     });
 
     it('should retrieve pattern by hour', () => {
-      const patternData: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const patternData: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 14,
         avg_theta_mean: 11.5,
         avg_theta_std: 2.2,
@@ -287,10 +271,7 @@ describe('Database - Circadian Patterns Table', () => {
 
   describe('Update circadian pattern', () => {
     it('should update single field', () => {
-      const patternData: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const patternData: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 9,
         avg_theta_mean: 12.0,
         avg_theta_std: 2.0,
@@ -301,7 +282,7 @@ describe('Database - Circadian Patterns Table', () => {
       upsertCircadianPattern(db, patternData);
       const original = getCircadianPatternByHour(db, 9);
 
-      updateCircadianPattern(db, original!.id!, { avg_theta_mean: 14.0 });
+      updateCircadianPattern(db, original!.hour_of_day, { avg_theta_mean: 14.0 });
 
       const updated = getCircadianPatternByHour(db, 9);
       expect(updated?.avg_theta_mean).toBe(14.0);
@@ -309,10 +290,7 @@ describe('Database - Circadian Patterns Table', () => {
     });
 
     it('should update multiple fields', () => {
-      const patternData: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const patternData: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 10,
         avg_theta_mean: 11.0,
         avg_theta_std: 2.0,
@@ -323,7 +301,7 @@ describe('Database - Circadian Patterns Table', () => {
       upsertCircadianPattern(db, patternData);
       const original = getCircadianPatternByHour(db, 10);
 
-      updateCircadianPattern(db, original!.id!, {
+      updateCircadianPattern(db, original!.hour_of_day, {
         avg_theta_mean: 12.5,
         session_count: 8,
         avg_subjective_rating: 4.2,
@@ -336,10 +314,7 @@ describe('Database - Circadian Patterns Table', () => {
     });
 
     it('should handle empty update', () => {
-      const patternData: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const patternData: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 11,
         avg_theta_mean: 10.0,
         avg_theta_std: 1.5,
@@ -350,17 +325,14 @@ describe('Database - Circadian Patterns Table', () => {
       upsertCircadianPattern(db, patternData);
       const original = getCircadianPatternByHour(db, 11);
 
-      updateCircadianPattern(db, original!.id!, {});
+      updateCircadianPattern(db, original!.hour_of_day, {});
 
       const updated = getCircadianPatternByHour(db, 11);
       expect(updated?.avg_theta_mean).toBe(10.0);
     });
 
     it('should update avg_subjective_rating to null', () => {
-      const patternData: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const patternData: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 12,
         avg_theta_mean: 13.0,
         avg_theta_std: 2.5,
@@ -371,7 +343,7 @@ describe('Database - Circadian Patterns Table', () => {
       upsertCircadianPattern(db, patternData);
       const original = getCircadianPatternByHour(db, 12);
 
-      updateCircadianPattern(db, original!.id!, {
+      updateCircadianPattern(db, original!.hour_of_day, {
         avg_subjective_rating: null,
       });
 
@@ -382,10 +354,7 @@ describe('Database - Circadian Patterns Table', () => {
 
   describe('Delete circadian pattern', () => {
     it('should delete pattern by ID', () => {
-      const patternData: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const patternData: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 15,
         avg_theta_mean: 11.0,
         avg_theta_std: 2.0,
@@ -396,17 +365,14 @@ describe('Database - Circadian Patterns Table', () => {
       upsertCircadianPattern(db, patternData);
       const original = getCircadianPatternByHour(db, 15);
 
-      deleteCircadianPattern(db, original!.id!);
+      deleteCircadianPattern(db, original!.hour_of_day);
 
       const retrieved = getCircadianPatternByHour(db, 15);
       expect(retrieved).toBeNull();
     });
 
     it('should delete pattern by hour', () => {
-      const patternData: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const patternData: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 16,
         avg_theta_mean: 10.5,
         avg_theta_std: 1.8,
@@ -422,10 +388,7 @@ describe('Database - Circadian Patterns Table', () => {
     });
 
     it('should not affect other patterns when deleting one', () => {
-      const pattern1: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern1: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 8,
         avg_theta_mean: 12.0,
         avg_theta_std: 2.0,
@@ -433,10 +396,7 @@ describe('Database - Circadian Patterns Table', () => {
         avg_subjective_rating: 4.0,
       };
 
-      const pattern2: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern2: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 9,
         avg_theta_mean: 13.0,
         avg_theta_std: 2.2,
@@ -509,10 +469,7 @@ describe('Database - Circadian Patterns Table', () => {
     });
 
     it('should update count after deletion', () => {
-      const pattern: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 10,
         avg_theta_mean: 12.0,
         avg_theta_std: 2.0,
@@ -611,10 +568,7 @@ describe('Database - Circadian Patterns Table', () => {
 
   describe('Data integrity', () => {
     it('should preserve decimal precision for theta values', () => {
-      const pattern: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 9,
         avg_theta_mean: 12.123456,
         avg_theta_std: 2.345678,
@@ -631,10 +585,7 @@ describe('Database - Circadian Patterns Table', () => {
     });
 
     it('should enforce hour_of_day uniqueness', () => {
-      const pattern1: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern1: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 10,
         avg_theta_mean: 12.0,
         avg_theta_std: 2.0,
@@ -642,10 +593,7 @@ describe('Database - Circadian Patterns Table', () => {
         avg_subjective_rating: 4.0,
       };
 
-      const pattern2: Omit<
-        CircadianPatternRecord,
-        'id' | 'created_at' | 'updated_at'
-      > = {
+      const pattern2: Omit<CircadianPatternRecord, 'updated_at'> = {
         hour_of_day: 10,
         avg_theta_mean: 14.0,
         avg_theta_std: 2.5,

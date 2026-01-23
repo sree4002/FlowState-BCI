@@ -1,6 +1,12 @@
 import React, { useMemo, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  BorderRadius,
+  Typography,
+  Shadows,
+} from '../constants/theme';
 
 /**
  * Props for ThetaGaugeDisplay
@@ -130,7 +136,8 @@ export const ThetaGaugeDisplay: React.FC<ThetaGaugeDisplayProps> = ({
         color: Colors.status.red,
         startAngle:
           startAngle +
-          ((Math.max(minValue, minValue) - minValue) / totalRange) * totalArcDegrees,
+          ((Math.max(minValue, minValue) - minValue) / totalRange) *
+            totalArcDegrees,
         endAngle:
           startAngle +
           ((Math.min(0, maxValue) - minValue) / totalRange) * totalArcDegrees,
@@ -169,7 +176,8 @@ export const ThetaGaugeDisplay: React.FC<ThetaGaugeDisplayProps> = ({
           ((Math.max(1.5, minValue) - minValue) / totalRange) * totalArcDegrees,
         endAngle:
           startAngle +
-          ((Math.min(maxValue, maxValue) - minValue) / totalRange) * totalArcDegrees,
+          ((Math.min(maxValue, maxValue) - minValue) / totalRange) *
+            totalArcDegrees,
         minValue: Math.max(1.5, minValue),
         maxValue: maxValue,
       },
@@ -251,7 +259,9 @@ export const ThetaGaugeDisplay: React.FC<ThetaGaugeDisplayProps> = ({
     <View style={styles.container} testID={testID}>
       {showLabel && <Text style={styles.title}>{title}</Text>}
 
-      <View style={[styles.gaugeContainer, { width: gaugeSize, height: gaugeSize }]}>
+      <View
+        style={[styles.gaugeContainer, { width: gaugeSize, height: gaugeSize }]}
+      >
         {/* Background track */}
         <View
           style={[

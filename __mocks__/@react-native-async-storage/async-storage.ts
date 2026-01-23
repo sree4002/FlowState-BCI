@@ -28,9 +28,11 @@ const AsyncStorage = {
     }
   ),
 
-  multiSet: jest.fn(async (keyValuePairs: [string, string][]): Promise<void> => {
-    keyValuePairs.forEach(([key, value]) => mockStorage.set(key, value));
-  }),
+  multiSet: jest.fn(
+    async (keyValuePairs: [string, string][]): Promise<void> => {
+      keyValuePairs.forEach(([key, value]) => mockStorage.set(key, value));
+    }
+  ),
 
   getAllKeys: jest.fn(async (): Promise<readonly string[]> => {
     return Array.from(mockStorage.keys());

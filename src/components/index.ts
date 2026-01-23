@@ -83,7 +83,7 @@ export {
   formatDurationClock,
   getCompletionMessage,
   getThetaPerformanceLevel,
-  getSignalQualityLevel,
+  getSignalQualityLevel as getCompletionSignalQualityLevel,
   formatZScore as formatCompletionZScore,
   getSessionTypeLabel,
   getRatingAccessibilityLabel,
@@ -110,3 +110,32 @@ export {
 export { SessionListView } from './SessionListView';
 export type { SessionListViewProps } from './SessionListView';
 export { isSameDay } from './SessionListView';
+
+export { SessionFilterControls } from './SessionFilterControls';
+export type {
+  SessionFilterControlsProps,
+  DateRangePreset,
+  DateRangeFilter,
+  SessionTypeFilter,
+  SessionFilters,
+} from './SessionFilterControls';
+export {
+  DATE_RANGE_PRESET_LABELS,
+  ALL_SESSION_TYPES,
+  DEFAULT_FILTERS,
+  getPresetStartDate,
+  getPresetEndDate,
+  createDateRangeFromPreset,
+  formatFilterDate,
+  getDateRangeSummary,
+  getSessionTypeSummary,
+  isDefaultFilters,
+  filterSessions,
+  getActiveFilterCount,
+} from './SessionFilterControls';
+
+export { SimulatedModeDebugView } from './SimulatedModeDebugView';
+export type { SimulatedModeDebugViewProps } from './SimulatedModeDebugView';
+
+export { CalibrateButton } from './CalibrateButton';
+export type { CalibrateButtonProps } from './CalibrateButton';

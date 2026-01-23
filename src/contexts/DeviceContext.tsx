@@ -10,6 +10,8 @@ export interface DeviceContextState {
   latestEEGData: EEGDataPacket | null;
   isConnecting: boolean;
   connectionError: string | null;
+  /** Computed: whether the device is currently connected */
+  isConnected: boolean;
 }
 
 /**
@@ -70,6 +72,7 @@ export const DeviceProvider: React.FC<DeviceProviderProps> = ({ children }) => {
     latestEEGData,
     isConnecting,
     connectionError,
+    isConnected: deviceInfo?.is_connected ?? false,
     setDeviceInfo,
     setSignalQuality,
     setLatestEEGData,

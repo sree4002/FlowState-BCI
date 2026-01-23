@@ -68,15 +68,24 @@ export const CommonActions = {
   navigate: jest.fn((params: any) => ({ type: 'NAVIGATE', payload: params })),
   reset: jest.fn((params: any) => ({ type: 'RESET', payload: params })),
   goBack: jest.fn(() => ({ type: 'GO_BACK' })),
-  setParams: jest.fn((params: any) => ({ type: 'SET_PARAMS', payload: params })),
+  setParams: jest.fn((params: any) => ({
+    type: 'SET_PARAMS',
+    payload: params,
+  })),
 };
 
 // Mock StackActions
 export const StackActions = {
-  push: jest.fn((name: string, params?: any) => ({ type: 'PUSH', payload: { name, params } })),
+  push: jest.fn((name: string, params?: any) => ({
+    type: 'PUSH',
+    payload: { name, params },
+  })),
   pop: jest.fn((count?: number) => ({ type: 'POP', payload: { count } })),
   popToTop: jest.fn(() => ({ type: 'POP_TO_TOP' })),
-  replace: jest.fn((name: string, params?: any) => ({ type: 'REPLACE', payload: { name, params } })),
+  replace: jest.fn((name: string, params?: any) => ({
+    type: 'REPLACE',
+    payload: { name, params },
+  })),
 };
 
 // Export mock navigation for test access

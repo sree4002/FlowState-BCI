@@ -100,61 +100,61 @@
 
 - [x] Create SessionListView with scrollable list, newest first
 - [x] Create SessionListItem showing date, duration, avg theta, frequency, rating
-- [ ] Add filter controls for date range and session type
-- [ ] Add sort controls (date, duration, theta score)
-- [ ] Create SessionDetailScreen for individual session breakdown
-- [ ] Create CalendarHeatMap component with monthly grid view
-- [ ] Implement color intensity based on session outcome
-- [ ] Create ThetaTrendChart showing avg z-score over time (7d/30d/3mo/all)
-- [ ] Create FrequencyConvergenceChart showing ML frequency changes
-- [ ] Create CircadianPatternChart showing theta by time of day
-- [ ] Create SessionFrequencyChart (bar chart, sessions per week)
-- [ ] Create StatisticsDashboard with summary cards (this week, this month, all time)
-- [ ] Add streak tracking display (current streak, longest streak)
+- [x] Add filter controls for date range and session type
+- [x] Add sort controls (date, duration, theta score)
+- [x] Create SessionDetailScreen for individual session breakdown
+- [x] Create CalendarHeatMap component with monthly grid view
+- [x] Implement color intensity based on session outcome
+- [x] Create ThetaTrendChart showing avg z-score over time (7d/30d/3mo/all)
+- [x] Create FrequencyConvergenceChart showing ML frequency changes
+- [x] Create CircadianPatternChart showing theta by time of day
+- [x] Create SessionFrequencyChart (bar chart, sessions per week)
+- [x] Create StatisticsDashboard with summary cards (this week, this month, all time)
+- [x] Add streak tracking display (current streak, longest streak)
 
 ## Phase 10: Settings Screen
 
-- [ ] Create DeviceManagementSection with paired devices list and forget/re-pair options
-- [ ] Create NotificationPreferencesSection (enable/disable, style, frequency, quiet hours)
-- [ ] Create AudioSettingsSection (mixing behavior, default volume, mixing ratio)
-- [ ] Create EntrainmentSettingsSection (auto-boost, boost frequency, boost time)
-- [ ] Create ThetaThresholdSection (target z-score slider +0.5 to +2.0, closed-loop behavior picker)
-- [ ] Create ThemeAccessibilitySection (text size, reduce motion, haptic feedback)
-- [ ] Create DataManagementSection (export buttons, clear history, storage usage)
-- [ ] Create PrivacySettingsSection (anonymous analytics toggle, data policy link)
-- [ ] Create AboutSection with app version and firmware version display
+- [x] Create DeviceManagementSection with paired devices list and forget/re-pair options
+- [x] Create NotificationPreferencesSection (enable/disable, style, frequency, quiet hours)
+- [x] Create AudioSettingsSection (mixing behavior, default volume, mixing ratio)
+- [x] Create EntrainmentSettingsSection (auto-boost, boost frequency, boost time)
+- [x] Create ThetaThresholdSection (target z-score slider +0.5 to +2.0, closed-loop behavior picker)
+- [x] Create ThemeAccessibilitySection (text size, reduce motion, haptic feedback)
+- [x] Create DataManagementSection (export buttons, clear history, storage usage)
+- [x] Create PrivacySettingsSection (anonymous analytics toggle, data policy link)
+- [x] Create AboutSection with app version and firmware version display
 
 ## Phase 11: Closed-Loop Entrainment Logic
 
-- [ ] Implement theta monitoring service that computes z-score in real-time
-- [ ] Create threshold comparison logic (z-score > target for >10 seconds)
-- [ ] Implement "Reduce intensity" behavior (decrease volume by 10-20%)
-- [ ] Implement "Stop entrainment" behavior
-- [ ] Implement "Maintain level" behavior
-- [ ] Add hysteresis logic (trigger at threshold+0.2, resume at threshold-0.2)
-- [ ] Create closed-loop adjustment logger (timestamp, reason, parameters)
-- [ ] Implement user preference storage for closed-loop behavior
-- [ ] Add mid-session behavior change capability
+- [x] Implement theta monitoring service that computes z-score in real-time
+- [x] Create threshold comparison logic (z-score > target for >10 seconds)
+- [x] Implement "Reduce intensity" behavior (decrease volume by 10-20%)
+- [x] Implement "Stop entrainment" behavior
+- [x] Implement "Maintain level" behavior
+- [x] Add hysteresis logic (trigger at threshold+0.2, resume at threshold-0.2)
+- [x] Create closed-loop adjustment logger (timestamp, reason, parameters)
+- [x] Implement user preference storage for closed-loop behavior
+- [x] Add mid-session behavior change capability
 
 ## Phase 12: Session Management
 
-- [ ] Create session configuration screen with duration presets (5, 15, 30, 60 min, custom)
-- [ ] Implement session start flow with device connection check
-- [ ] Create session data logger saving theta values at 0.5 Hz
-- [ ] Implement entrainment parameter logging (frequency, volume over time)
-- [ ] Add manual adjustment tracking
-- [ ] Create post-session subjective rating prompt (1-5 scale)
-- [ ] Implement session save to SQLite on completion
-- [ ] Add session recovery after app restart (restore in-progress session)
+- [x] Create session configuration screen with duration presets (5, 15, 30, 60 min, custom)
+- [x] Implement session start flow with device connection check
+- [x] Create session data logger saving theta values at 0.5 Hz
+- [x] Implement entrainment parameter logging (frequency, volume over time)
+- [x] Add manual adjustment tracking
+- [x] Create post-session subjective rating prompt (1-5 scale)
+- [x] Implement session save to SQLite on completion
+- [x] Add session recovery after app restart (restore in-progress session)
 
 ## Phase 13: Onboarding Flow
 
-- [ ] Create WelcomeScreen with app introduction and skip option
-- [ ] Create TourScreen1: "Monitor your theta waves in real-time"
-- [ ] Create TourScreen2: "Personalized audio entrainment adapts to your brain"
-- [ ] Create TourScreen3: "Track your progress and optimize over time"
-- [ ] Create PermissionsScreen for Bluetooth, Notifications, Calendar requests
-- [ ] Create DevicePairingPrompt with "Pair now" or "Skip for later" options
+- [x] Create WelcomeScreen with app introduction and skip option
+- [x] Create TourScreen1: "Monitor your theta waves in real-time"
+- [x] Create TourScreen2: "Personalized audio entrainment adapts to your brain"
+- [x] Create TourScreen3: "Track your progress and optimize over time"
+- [x] Create PermissionsScreen for Bluetooth, Notifications, Calendar requests
+- [x] Create DevicePairingPrompt with "Pair now" or "Skip for later" options
 - [ ] Create FirstSessionSuggestion screen (Quick Boost vs Calibrate choice)
 - [ ] Implement onboarding completion flag in AsyncStorage
 - [ ] Add contextual tooltips system for first-time feature discovery

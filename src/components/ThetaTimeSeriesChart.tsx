@@ -1,5 +1,17 @@
-import React, { useMemo, useState, useEffect, useRef, useCallback } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import React, {
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+} from 'react-native';
 import {
   VictoryLine,
   VictoryChart,
@@ -8,7 +20,13 @@ import {
   VictoryScatter,
 } from 'victory-native';
 import { useSession } from '../contexts';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  BorderRadius,
+  Typography,
+  Shadows,
+} from '../constants/theme';
 
 /**
  * Data point for time series chart
@@ -101,7 +119,8 @@ export const ThetaTimeSeriesChart: React.FC<ThetaTimeSeriesChartProps> = ({
   const { currentThetaZScore, elapsedSeconds, sessionState } = useSession();
 
   // Internal state for time window selection
-  const [selectedWindow, setSelectedWindow] = useState<TimeWindowMinutes>(timeWindowMinutes);
+  const [selectedWindow, setSelectedWindow] =
+    useState<TimeWindowMinutes>(timeWindowMinutes);
 
   // Data buffer to store time series points
   const [dataPoints, setDataPoints] = useState<TimeSeriesDataPoint[]>([]);
@@ -119,10 +138,13 @@ export const ThetaTimeSeriesChart: React.FC<ThetaTimeSeriesChartProps> = ({
   const timeWindowSeconds = selectedWindow * 60;
 
   // Handle time window change
-  const handleTimeWindowChange = useCallback((minutes: TimeWindowMinutes) => {
-    setSelectedWindow(minutes);
-    onTimeWindowChange?.(minutes);
-  }, [onTimeWindowChange]);
+  const handleTimeWindowChange = useCallback(
+    (minutes: TimeWindowMinutes) => {
+      setSelectedWindow(minutes);
+      onTimeWindowChange?.(minutes);
+    },
+    [onTimeWindowChange]
+  );
 
   // Cleanup on unmount
   useEffect(() => {
@@ -211,15 +233,19 @@ export const ThetaTimeSeriesChart: React.FC<ThetaTimeSeriesChartProps> = ({
   }, [currentThetaZScore]);
 
   // Calculate chart dimensions
-  const chartWidth = Dimensions.get('window').width - Spacing.lg * 2 - Spacing.md * 2;
-  const chartHeight = height - (showTimeSelector ? 50 : 0) - (showCurrentValue ? 30 : 0);
+  const chartWidth =
+    Dimensions.get('window').width - Spacing.lg * 2 - Spacing.md * 2;
+  const chartHeight =
+    height - (showTimeSelector ? 50 : 0) - (showCurrentValue ? 30 : 0);
 
   // Generate X-axis tick values (show 5 ticks)
   const xTickValues = useMemo(() => {
     const [xMin, xMax] = domain.x;
     const tickCount = 5;
     const step = (xMax - xMin) / (tickCount - 1);
-    return Array.from({ length: tickCount }, (_, i) => Math.round(xMin + step * i));
+    return Array.from({ length: tickCount }, (_, i) =>
+      Math.round(xMin + step * i)
+    );
   }, [domain.x]);
 
   // Zone line data
@@ -278,7 +304,7 @@ export const ThetaTimeSeriesChart: React.FC<ThetaTimeSeriesChartProps> = ({
           {/* X Axis - Time */}
           <VictoryAxis
             tickValues={xTickValues}
-            tickFormat={(t) => formatTime(t)}
+            tickFormat={(t: number) => formatTime(t)}
             style={{
               axis: { stroke: Colors.chart.grid },
               ticks: { stroke: Colors.chart.grid, size: 5 },

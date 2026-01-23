@@ -22,7 +22,8 @@ describe('Database - Sessions Table', () => {
   let db: SQLite.SQLiteDatabase;
 
   beforeEach(() => {
-    db = initializeDatabase();
+    const result = initializeDatabase();
+    db = result.db;
     deleteAllSessions(db);
   });
 

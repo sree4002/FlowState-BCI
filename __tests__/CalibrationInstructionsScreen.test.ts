@@ -50,7 +50,9 @@ describe('CalibrationInstructionsScreen', () => {
     });
 
     it('should have default export', () => {
-      expect(screenContent).toMatch(/export\s+default\s+CalibrationInstructionsScreen/);
+      expect(screenContent).toMatch(
+        /export\s+default\s+CalibrationInstructionsScreen/
+      );
     });
 
     it('should export CalibrationStep interface', () => {
@@ -72,7 +74,9 @@ describe('CalibrationInstructionsScreen', () => {
       expect(screenContent).toMatch(/export\s+const\s+getImportanceLabel/);
       expect(screenContent).toMatch(/export\s+const\s+formatDurationOption/);
       expect(screenContent).toMatch(/export\s+const\s+getDurationDescription/);
-      expect(screenContent).toMatch(/export\s+const\s+isDeviceReadyForCalibration/);
+      expect(screenContent).toMatch(
+        /export\s+const\s+isDeviceReadyForCalibration/
+      );
       expect(screenContent).toMatch(/export\s+const\s+getSignalQualityStatus/);
     });
   });
@@ -152,7 +156,9 @@ describe('CalibrationInstructionsScreen', () => {
   // =============================================
   describe('CalibrationStep Interface', () => {
     it('should have id field', () => {
-      expect(screenContent).toMatch(/interface\s+CalibrationStep\s*\{[\s\S]*?id:\s*string/);
+      expect(screenContent).toMatch(
+        /interface\s+CalibrationStep\s*\{[\s\S]*?id:\s*string/
+      );
     });
 
     it('should have title field', () => {
@@ -191,7 +197,9 @@ describe('CalibrationInstructionsScreen', () => {
   // =============================================
   describe('CalibrationInstructionsScreenProps Interface', () => {
     it('should have optional onStartCalibration prop', () => {
-      expect(screenContent).toMatch(/onStartCalibration\??:\s*\(\)\s*=>\s*void/);
+      expect(screenContent).toMatch(
+        /onStartCalibration\??:\s*\(\)\s*=>\s*void/
+      );
     });
 
     it('should have optional onCancel prop', () => {
@@ -298,7 +306,9 @@ describe('CalibrationInstructionsScreen', () => {
   describe('Helper Functions', () => {
     describe('getImportanceColor', () => {
       it('should be defined', () => {
-        expect(screenContent).toMatch(/export\s+const\s+getImportanceColor\s*=/);
+        expect(screenContent).toMatch(
+          /export\s+const\s+getImportanceColor\s*=/
+        );
       });
 
       it('should accept importance parameter', () => {
@@ -308,7 +318,9 @@ describe('CalibrationInstructionsScreen', () => {
       });
 
       it('should return string', () => {
-        expect(screenContent).toMatch(/getImportanceColor[\s\S]*?:\s*string\s*=>/);
+        expect(screenContent).toMatch(
+          /getImportanceColor[\s\S]*?:\s*string\s*=>/
+        );
       });
 
       it('should handle required case', () => {
@@ -332,7 +344,9 @@ describe('CalibrationInstructionsScreen', () => {
 
     describe('getImportanceLabel', () => {
       it('should be defined', () => {
-        expect(screenContent).toMatch(/export\s+const\s+getImportanceLabel\s*=/);
+        expect(screenContent).toMatch(
+          /export\s+const\s+getImportanceLabel\s*=/
+        );
       });
 
       it('should handle required case', () => {
@@ -356,15 +370,21 @@ describe('CalibrationInstructionsScreen', () => {
 
     describe('formatDurationOption', () => {
       it('should be defined', () => {
-        expect(screenContent).toMatch(/export\s+const\s+formatDurationOption\s*=/);
+        expect(screenContent).toMatch(
+          /export\s+const\s+formatDurationOption\s*=/
+        );
       });
 
       it('should accept minutes parameter as number', () => {
-        expect(screenContent).toMatch(/formatDurationOption\s*=\s*\(\s*minutes:\s*number/);
+        expect(screenContent).toMatch(
+          /formatDurationOption\s*=\s*\(\s*minutes:\s*number/
+        );
       });
 
       it('should return formatted string', () => {
-        expect(screenContent).toMatch(/formatDurationOption[\s\S]*?:\s*string\s*=>/);
+        expect(screenContent).toMatch(
+          /formatDurationOption[\s\S]*?:\s*string\s*=>/
+        );
       });
 
       it('should use template literal for formatting', () => {
@@ -382,7 +402,9 @@ describe('CalibrationInstructionsScreen', () => {
 
     describe('getDurationDescription', () => {
       it('should be defined', () => {
-        expect(screenContent).toMatch(/export\s+const\s+getDurationDescription\s*=/);
+        expect(screenContent).toMatch(
+          /export\s+const\s+getDurationDescription\s*=/
+        );
       });
 
       it('should accept minutes parameter with 5 | 10 type', () => {
@@ -392,7 +414,9 @@ describe('CalibrationInstructionsScreen', () => {
       });
 
       it('should return string', () => {
-        expect(screenContent).toMatch(/getDurationDescription[\s\S]*?:\s*string\s*=>/);
+        expect(screenContent).toMatch(
+          /getDurationDescription[\s\S]*?:\s*string\s*=>/
+        );
       });
 
       it('should handle 5 minutes case', () => {
@@ -462,7 +486,9 @@ describe('CalibrationInstructionsScreen', () => {
 
     describe('getSignalQualityStatus', () => {
       it('should be defined', () => {
-        expect(screenContent).toMatch(/export\s+const\s+getSignalQualityStatus\s*=/);
+        expect(screenContent).toMatch(
+          /export\s+const\s+getSignalQualityStatus\s*=/
+        );
       });
 
       it('should accept score parameter as number | null', () => {
@@ -542,11 +568,15 @@ describe('CalibrationInstructionsScreen', () => {
     });
 
     it('should use useSession hook', () => {
-      expect(screenContent).toMatch(/const\s*\{[\s\S]*?\}\s*=\s*useSession\(\)/);
+      expect(screenContent).toMatch(
+        /const\s*\{[\s\S]*?\}\s*=\s*useSession\(\)/
+      );
     });
 
     it('should get deviceInfo from DeviceContext', () => {
-      expect(screenContent).toMatch(/const\s*\{[\s\S]*?deviceInfo[\s\S]*?\}\s*=\s*useDevice/);
+      expect(screenContent).toMatch(
+        /const\s*\{[\s\S]*?deviceInfo[\s\S]*?\}\s*=\s*useDevice/
+      );
     });
 
     it('should get signalQuality from DeviceContext', () => {
@@ -597,7 +627,9 @@ describe('CalibrationInstructionsScreen', () => {
     });
 
     it('should initialize selectedDuration with duration prop', () => {
-      expect(screenContent).toMatch(/useState<5\s*\|\s*10>\s*\(\s*duration\s*\)/);
+      expect(screenContent).toMatch(
+        /useState<5\s*\|\s*10>\s*\(\s*duration\s*\)/
+      );
     });
 
     it('should initialize currentStepIndex to 0', () => {
@@ -626,15 +658,21 @@ describe('CalibrationInstructionsScreen', () => {
     });
 
     it('should use useEffect for mount animation', () => {
-      expect(screenContent).toMatch(/useEffect\s*\(\s*\(\)\s*=>\s*\{[\s\S]*?Animated\.parallel/);
+      expect(screenContent).toMatch(
+        /useEffect\s*\(\s*\(\)\s*=>\s*\{[\s\S]*?Animated\.parallel/
+      );
     });
 
     it('should animate fadeAnim to 1', () => {
-      expect(screenContent).toMatch(/Animated\.timing\s*\(\s*fadeAnim[\s\S]*?toValue:\s*1/);
+      expect(screenContent).toMatch(
+        /Animated\.timing\s*\(\s*fadeAnim[\s\S]*?toValue:\s*1/
+      );
     });
 
     it('should animate slideAnim to 0', () => {
-      expect(screenContent).toMatch(/Animated\.timing\s*\(\s*slideAnim[\s\S]*?toValue:\s*0/);
+      expect(screenContent).toMatch(
+        /Animated\.timing\s*\(\s*slideAnim[\s\S]*?toValue:\s*0/
+      );
     });
 
     it('should use native driver for animations', () => {
@@ -647,7 +685,9 @@ describe('CalibrationInstructionsScreen', () => {
   // =============================================
   describe('Event Handlers', () => {
     it('should have toggleStepExpanded handler', () => {
-      expect(screenContent).toMatch(/const\s+toggleStepExpanded\s*=\s*useCallback/);
+      expect(screenContent).toMatch(
+        /const\s+toggleStepExpanded\s*=\s*useCallback/
+      );
     });
 
     it('should have handleNextStep handler', () => {
@@ -655,15 +695,21 @@ describe('CalibrationInstructionsScreen', () => {
     });
 
     it('should have handlePreviousStep handler', () => {
-      expect(screenContent).toMatch(/const\s+handlePreviousStep\s*=\s*useCallback/);
+      expect(screenContent).toMatch(
+        /const\s+handlePreviousStep\s*=\s*useCallback/
+      );
     });
 
     it('should have handleDurationSelect handler', () => {
-      expect(screenContent).toMatch(/const\s+handleDurationSelect\s*=\s*useCallback/);
+      expect(screenContent).toMatch(
+        /const\s+handleDurationSelect\s*=\s*useCallback/
+      );
     });
 
     it('should have handleStartCalibration handler', () => {
-      expect(screenContent).toMatch(/const\s+handleStartCalibration\s*=\s*useCallback/);
+      expect(screenContent).toMatch(
+        /const\s+handleStartCalibration\s*=\s*useCallback/
+      );
     });
 
     it('should have handleCancel handler', () => {
@@ -811,19 +857,27 @@ describe('CalibrationInstructionsScreen', () => {
     });
 
     it('should have accessibility label on cancel button', () => {
-      expect(screenContent).toMatch(/accessibilityLabel=["']Cancel calibration["']/);
+      expect(screenContent).toMatch(
+        /accessibilityLabel=["']Cancel calibration["']/
+      );
     });
 
     it('should have accessibility label on skip button', () => {
-      expect(screenContent).toMatch(/accessibilityLabel=["']Skip calibration["']/);
+      expect(screenContent).toMatch(
+        /accessibilityLabel=["']Skip calibration["']/
+      );
     });
 
     it('should have accessibility label on start button', () => {
-      expect(screenContent).toMatch(/accessibilityLabel=["']Begin calibration["']/);
+      expect(screenContent).toMatch(
+        /accessibilityLabel=["']Begin calibration["']/
+      );
     });
 
     it('should have accessibility hint on start button', () => {
-      expect(screenContent).toMatch(/accessibilityHint=\{[\s\S]*?deviceReadiness\.ready/);
+      expect(screenContent).toMatch(
+        /accessibilityHint=\{[\s\S]*?deviceReadiness\.ready/
+      );
     });
 
     it('should have accessibility state on start button', () => {
@@ -910,7 +964,9 @@ describe('CalibrationInstructionsScreen', () => {
     });
 
     it('should have header style', () => {
-      expect(screenContent).toMatch(/header:\s*\{[\s\S]*?flexDirection:\s*['"]row['"]/);
+      expect(screenContent).toMatch(
+        /header:\s*\{[\s\S]*?flexDirection:\s*['"]row['"]/
+      );
     });
 
     it('should have scrollView style', () => {
@@ -1049,20 +1105,22 @@ describe('CalibrationInstructionsScreen', () => {
       );
     });
 
-    it('should set session_type to calibration', () => {
+    it('should set type to calibration', () => {
       expect(screenContent).toMatch(
-        /setSessionConfig[\s\S]*?session_type:\s*['"]calibration['"]/
+        /setSessionConfig[\s\S]*?type:\s*['"]calibration['"]/
       );
     });
 
-    it('should calculate duration in seconds', () => {
+    it('should set duration_minutes from selectedDuration', () => {
       expect(screenContent).toMatch(
-        /setSessionConfig[\s\S]*?duration:\s*selectedDuration\s*\*\s*60/
+        /setSessionConfig[\s\S]*?duration_minutes:\s*selectedDuration/
       );
     });
 
     it('should set entrainment_freq to 6.0', () => {
-      expect(screenContent).toMatch(/setSessionConfig[\s\S]*?entrainment_freq:\s*6\.0/);
+      expect(screenContent).toMatch(
+        /setSessionConfig[\s\S]*?entrainment_freq:\s*6\.0/
+      );
     });
 
     it('should set volume to 0', () => {
@@ -1099,7 +1157,9 @@ describe('CalibrationInstructionsScreen', () => {
     });
 
     it('should have handler documentation', () => {
-      expect(screenContent).toMatch(/\/\*\*[\s\S]*?Handle start calibration[\s\S]*?\*\//);
+      expect(screenContent).toMatch(
+        /\/\*\*[\s\S]*?Handle start calibration[\s\S]*?\*\//
+      );
     });
   });
 });
@@ -1110,7 +1170,9 @@ describe('CalibrationInstructionsScreen', () => {
 describe('CalibrationInstructionsScreen Functional Tests', () => {
   describe('getImportanceColor function', () => {
     // Import the function for functional testing
-    const { getImportanceColor } = require('../src/screens/CalibrationInstructionsScreen');
+    const {
+      getImportanceColor,
+    } = require('../src/screens/CalibrationInstructionsScreen');
 
     it('should return error color for required', () => {
       const result = getImportanceColor('required');
@@ -1129,7 +1191,9 @@ describe('CalibrationInstructionsScreen Functional Tests', () => {
   });
 
   describe('getImportanceLabel function', () => {
-    const { getImportanceLabel } = require('../src/screens/CalibrationInstructionsScreen');
+    const {
+      getImportanceLabel,
+    } = require('../src/screens/CalibrationInstructionsScreen');
 
     it('should return Required for required', () => {
       expect(getImportanceLabel('required')).toBe('Required');
@@ -1145,7 +1209,9 @@ describe('CalibrationInstructionsScreen Functional Tests', () => {
   });
 
   describe('formatDurationOption function', () => {
-    const { formatDurationOption } = require('../src/screens/CalibrationInstructionsScreen');
+    const {
+      formatDurationOption,
+    } = require('../src/screens/CalibrationInstructionsScreen');
 
     it('should format 1 minute correctly', () => {
       expect(formatDurationOption(1)).toBe('1 minute');
@@ -1161,7 +1227,9 @@ describe('CalibrationInstructionsScreen Functional Tests', () => {
   });
 
   describe('getDurationDescription function', () => {
-    const { getDurationDescription } = require('../src/screens/CalibrationInstructionsScreen');
+    const {
+      getDurationDescription,
+    } = require('../src/screens/CalibrationInstructionsScreen');
 
     it('should return quick description for 5 minutes', () => {
       expect(getDurationDescription(5)).toContain('Quick calibration');
@@ -1208,7 +1276,9 @@ describe('CalibrationInstructionsScreen Functional Tests', () => {
   });
 
   describe('getSignalQualityStatus function', () => {
-    const { getSignalQualityStatus } = require('../src/screens/CalibrationInstructionsScreen');
+    const {
+      getSignalQualityStatus,
+    } = require('../src/screens/CalibrationInstructionsScreen');
 
     it('should return Unknown for null score', () => {
       const result = getSignalQualityStatus(null);
@@ -1250,7 +1320,9 @@ describe('CalibrationInstructionsScreen Functional Tests', () => {
   });
 
   describe('CALIBRATION_STEPS constant', () => {
-    const { CALIBRATION_STEPS } = require('../src/screens/CalibrationInstructionsScreen');
+    const {
+      CALIBRATION_STEPS,
+    } = require('../src/screens/CalibrationInstructionsScreen');
 
     it('should have exactly 4 steps', () => {
       expect(CALIBRATION_STEPS).toHaveLength(4);

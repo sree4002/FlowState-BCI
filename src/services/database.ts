@@ -134,15 +134,14 @@ export interface BaselineRecord {
 /**
  * Circadian pattern record interface matching database schema
  * Stores aggregated theta statistics by hour of day
+ * Note: hour_of_day is the primary key (0-23), no id column
  */
 export interface CircadianPatternRecord {
-  id?: number;
   hour_of_day: number;
   avg_theta_mean: number;
   avg_theta_std: number;
   session_count: number;
   avg_subjective_rating: number | null;
-  created_at?: number;
   updated_at?: number;
 }
 
@@ -576,35 +575,20 @@ export const getSessionStats = (
 // ============================================================================
 
 /**
- * Circadian pattern record interface matching database schema
- */
-export interface CircadianPatternRecord {
-  id?: number;
-  hour_of_day: number;
-  avg_theta_mean: number;
-  avg_theta_std: number;
-  session_count: number;
-  avg_subjective_rating: number | null;
-  created_at?: number;
-  updated_at?: number;
-}
-
-/**
  * Creates the circadian_patterns table if it doesn't exist
  * Stores aggregated session performance by hour of day
+ * Note: hour_of_day is the primary key (0-23)
  */
 export const createCircadianPatternsTable = (
   db: SQLite.SQLiteDatabase
 ): void => {
   db.execSync(`
     CREATE TABLE IF NOT EXISTS circadian_patterns (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      hour_of_day INTEGER NOT NULL UNIQUE CHECK(hour_of_day >= 0 AND hour_of_day <= 23),
+      hour_of_day INTEGER PRIMARY KEY CHECK(hour_of_day >= 0 AND hour_of_day <= 23),
       avg_theta_mean REAL NOT NULL,
       avg_theta_std REAL NOT NULL,
-      session_count INTEGER NOT NULL,
+      session_count INTEGER NOT NULL DEFAULT 0,
       avg_subjective_rating REAL,
-      created_at INTEGER DEFAULT (strftime('%s', 'now')),
       updated_at INTEGER DEFAULT (strftime('%s', 'now'))
     );
   `);
@@ -613,11 +597,11 @@ export const createCircadianPatternsTable = (
 /**
  * Inserts or updates a circadian pattern for a specific hour
  * Uses upsert logic - inserts if not exists, updates if exists
- * @returns The ID of the inserted/updated record
+ * @returns The hour_of_day of the inserted/updated record (which is the primary key)
  */
 export const upsertCircadianPattern = (
   db: SQLite.SQLiteDatabase,
-  pattern: Omit<CircadianPatternRecord, 'id' | 'created_at' | 'updated_at'>
+  pattern: Omit<CircadianPatternRecord, 'updated_at'>
 ): number => {
   // Check if pattern for this hour already exists
   const existing = getCircadianPatternByHour(db, pattern.hour_of_day);
@@ -636,10 +620,9 @@ export const upsertCircadianPattern = (
         pattern.hour_of_day,
       ]
     );
-    return existing.id!;
   } else {
     // Insert new pattern
-    const result = db.runSync(
+    db.runSync(
       `INSERT INTO circadian_patterns
        (hour_of_day, avg_theta_mean, avg_theta_std, session_count, avg_subjective_rating)
        VALUES (?, ?, ?, ?, ?)`,
@@ -651,8 +634,9 @@ export const upsertCircadianPattern = (
         pattern.avg_subjective_rating,
       ]
     );
-    return result.lastInsertRowId;
   }
+  // Return the hour_of_day as the identifier (it's the primary key)
+  return pattern.hour_of_day;
 };
 
 /**
@@ -670,17 +654,15 @@ export const getCircadianPatternByHour = (
 };
 
 /**
- * Retrieves a circadian pattern by ID
+ * Retrieves a circadian pattern by hour (alias for getCircadianPatternByHour)
+ * @deprecated Use getCircadianPatternByHour instead - hour_of_day is the primary key
+ * @param hourOfDay - The hour to look up (0-23), which is the primary key
  */
 export const getCircadianPatternById = (
   db: SQLite.SQLiteDatabase,
-  id: number
+  hourOfDay: number
 ): CircadianPatternRecord | null => {
-  const result = db.getFirstSync<CircadianPatternRecord>(
-    'SELECT * FROM circadian_patterns WHERE id = ?',
-    [id]
-  );
-  return result || null;
+  return getCircadianPatternByHour(db, hourOfDay);
 };
 
 /**
@@ -695,22 +677,17 @@ export const getAllCircadianPatterns = (
 };
 
 /**
- * Updates an existing circadian pattern
+ * Updates an existing circadian pattern by hour_of_day (the primary key)
+ * @param hourOfDay - The hour to update (0-23), which is the primary key
  */
 export const updateCircadianPattern = (
   db: SQLite.SQLiteDatabase,
-  id: number,
-  pattern: Partial<
-    Omit<CircadianPatternRecord, 'id' | 'created_at' | 'updated_at'>
-  >
+  hourOfDay: number,
+  pattern: Partial<Omit<CircadianPatternRecord, 'hour_of_day' | 'updated_at'>>
 ): void => {
   const fields: string[] = [];
   const values: (number | null)[] = [];
 
-  if (pattern.hour_of_day !== undefined) {
-    fields.push('hour_of_day = ?');
-    values.push(pattern.hour_of_day);
-  }
   if (pattern.avg_theta_mean !== undefined) {
     fields.push('avg_theta_mean = ?');
     values.push(pattern.avg_theta_mean);
@@ -733,21 +710,22 @@ export const updateCircadianPattern = (
   }
 
   fields.push("updated_at = strftime('%s', 'now')");
-  values.push(id);
+  values.push(hourOfDay);
   db.runSync(
-    `UPDATE circadian_patterns SET ${fields.join(', ')} WHERE id = ?`,
+    `UPDATE circadian_patterns SET ${fields.join(', ')} WHERE hour_of_day = ?`,
     values
   );
 };
 
 /**
- * Deletes a circadian pattern by ID
+ * Deletes a circadian pattern by hour_of_day (the primary key)
+ * @param hourOfDay - The hour to delete (0-23), which is the primary key
  */
 export const deleteCircadianPattern = (
   db: SQLite.SQLiteDatabase,
-  id: number
+  hourOfDay: number
 ): void => {
-  db.runSync('DELETE FROM circadian_patterns WHERE id = ?', [id]);
+  db.runSync('DELETE FROM circadian_patterns WHERE hour_of_day = ?', [hourOfDay]);
 };
 
 /**
@@ -765,9 +743,7 @@ export const deleteCircadianPatternByHour = (
 /**
  * Deletes all circadian patterns (use with caution)
  */
-export const deleteAllCircadianPatterns = (
-  db: SQLite.SQLiteDatabase
-): void => {
+export const deleteAllCircadianPatterns = (db: SQLite.SQLiteDatabase): void => {
   db.runSync('DELETE FROM circadian_patterns');
 };
 
@@ -791,6 +767,48 @@ export const getBestCircadianHour = (
 ): CircadianPatternRecord | null => {
   const result = db.getFirstSync<CircadianPatternRecord>(
     'SELECT * FROM circadian_patterns WHERE session_count >= 3 ORDER BY avg_theta_mean DESC LIMIT 1'
+  );
+  return result || null;
+};
+
+/**
+ * Gets circadian patterns with at least the specified minimum number of sessions
+ */
+export const getCircadianPatternsWithMinSessions = (
+  db: SQLite.SQLiteDatabase,
+  minSessions: number
+): CircadianPatternRecord[] => {
+  return db.getAllSync<CircadianPatternRecord>(
+    'SELECT * FROM circadian_patterns WHERE session_count >= ? ORDER BY hour_of_day ASC',
+    [minSessions]
+  );
+};
+
+/**
+ * Gets circadian patterns within an hour range (inclusive)
+ * @param startHour - Start hour (0-23)
+ * @param endHour - End hour (0-23)
+ */
+export const getCircadianPatternsByHourRange = (
+  db: SQLite.SQLiteDatabase,
+  startHour: number,
+  endHour: number
+): CircadianPatternRecord[] => {
+  return db.getAllSync<CircadianPatternRecord>(
+    'SELECT * FROM circadian_patterns WHERE hour_of_day >= ? AND hour_of_day <= ? ORDER BY hour_of_day ASC',
+    [startHour, endHour]
+  );
+};
+
+/**
+ * Gets the hour with the highest average theta mean (peak performance hour)
+ * Alias for getBestCircadianHour but returns the single best hour without session threshold
+ */
+export const getPeakThetaHour = (
+  db: SQLite.SQLiteDatabase
+): CircadianPatternRecord | null => {
+  const result = db.getFirstSync<CircadianPatternRecord>(
+    'SELECT * FROM circadian_patterns ORDER BY avg_theta_mean DESC LIMIT 1'
   );
   return result || null;
 };
@@ -833,7 +851,8 @@ export const recalculateCircadianPatterns = (
     };
 
     existing.theta_sum += session.avg_theta_zscore;
-    existing.theta_sq_sum += session.avg_theta_zscore * session.avg_theta_zscore;
+    existing.theta_sq_sum +=
+      session.avg_theta_zscore * session.avg_theta_zscore;
     existing.count += 1;
 
     if (session.subjective_rating !== null) {

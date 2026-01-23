@@ -12,7 +12,11 @@ import {
   CalibrationState,
   VisualizationMode,
 } from '../types';
-import { openDatabase, getAllSessions, SessionRecord } from '../services/database';
+import {
+  openDatabase,
+  getAllSessions,
+  SessionRecord,
+} from '../services/database';
 
 /**
  * Session context state interface
@@ -113,7 +117,9 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
       const db = openDatabase();
       const sessions = getAllSessions(db);
       // Convert SessionRecord[] to Session[] and keep last 10
-      const convertedSessions = sessions.slice(0, 10).map(sessionRecordToSession);
+      const convertedSessions = sessions
+        .slice(0, 10)
+        .map(sessionRecordToSession);
       setRecentSessions(convertedSessions);
     } catch (error) {
       // Log error but don't throw - dashboard should remain functional

@@ -18,7 +18,9 @@ import { SessionConfig } from '../src/types';
  * Test helper: Creates a quick boost session configuration
  * This mirrors the logic in QuickBoostButton component
  */
-function createQuickBoostConfig(settings: typeof defaultSettings): SessionConfig {
+function createQuickBoostConfig(
+  settings: typeof defaultSettings
+): SessionConfig {
   return {
     type: 'quick_boost',
     duration_minutes: settings.boost_time,
@@ -238,7 +240,8 @@ describe('QuickBoostButton Logic', () => {
 
       const { result } = renderHook(() => useDevice(), { wrapper });
 
-      const isDeviceConnected = result.current.deviceInfo?.is_connected ?? false;
+      const isDeviceConnected =
+        result.current.deviceInfo?.is_connected ?? false;
 
       expect(isDeviceConnected).toBe(false);
     });
@@ -264,7 +267,8 @@ describe('QuickBoostButton Logic', () => {
         });
       });
 
-      const isDeviceConnected = result.current.deviceInfo?.is_connected ?? false;
+      const isDeviceConnected =
+        result.current.deviceInfo?.is_connected ?? false;
 
       expect(isDeviceConnected).toBe(true);
     });
@@ -443,7 +447,11 @@ describe('QuickBoostButton Logic', () => {
     });
 
     it('should show custom settings in subtext', () => {
-      const settings = { ...defaultSettings, boost_time: 10, boost_frequency: 7.5 };
+      const settings = {
+        ...defaultSettings,
+        boost_time: 10,
+        boost_frequency: 7.5,
+      };
       const isConnecting = false;
       const isSessionActive = false;
 

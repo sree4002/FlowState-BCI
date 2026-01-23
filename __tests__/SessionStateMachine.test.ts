@@ -67,11 +67,15 @@ describe('SessionStateMachine', () => {
 
   describe('Required Imports', () => {
     it('should import SessionState from types', () => {
-      expect(sourceCode).toMatch(/import.*SessionState.*from.*['"]\.\.\/types['"]/);
+      expect(sourceCode).toMatch(
+        /import.*SessionState.*from.*['"]\.\.\/types['"]/
+      );
     });
 
     it('should import SessionConfig from types', () => {
-      expect(sourceCode).toMatch(/import.*SessionConfig.*from.*['"]\.\.\/types['"]/);
+      expect(sourceCode).toMatch(
+        /import.*SessionConfig.*from.*['"]\.\.\/types['"]/
+      );
     });
 
     it('should import Session from types', () => {
@@ -163,15 +167,21 @@ describe('SessionStateMachine', () => {
     });
 
     it('should allow PAUSE from running', () => {
-      expect(sourceCode).toMatch(/running:\s*\{[\s\S]*?PAUSE:\s*['"]paused['"]/);
+      expect(sourceCode).toMatch(
+        /running:\s*\{[\s\S]*?PAUSE:\s*['"]paused['"]/
+      );
     });
 
     it('should allow STOP from running', () => {
-      expect(sourceCode).toMatch(/running:\s*\{[\s\S]*?STOP:\s*['"]stopped['"]/);
+      expect(sourceCode).toMatch(
+        /running:\s*\{[\s\S]*?STOP:\s*['"]stopped['"]/
+      );
     });
 
     it('should allow RESUME from paused', () => {
-      expect(sourceCode).toMatch(/paused:\s*\{[\s\S]*?RESUME:\s*['"]running['"]/);
+      expect(sourceCode).toMatch(
+        /paused:\s*\{[\s\S]*?RESUME:\s*['"]running['"]/
+      );
     });
 
     it('should allow STOP from paused', () => {
@@ -272,7 +282,9 @@ describe('SessionStateMachine', () => {
     });
 
     it('should return SessionState or null', () => {
-      expect(sourceCode).toMatch(/getNextState[\s\S]*?:\s*SessionState\s*\|\s*null/);
+      expect(sourceCode).toMatch(
+        /getNextState[\s\S]*?:\s*SessionState\s*\|\s*null/
+      );
     });
   });
 
@@ -284,13 +296,17 @@ describe('SessionStateMachine', () => {
     });
 
     it('should return SessionEvent array', () => {
-      expect(sourceCode).toMatch(/getAvailableEvents[\s\S]*?:\s*SessionEvent\[\]/);
+      expect(sourceCode).toMatch(
+        /getAvailableEvents[\s\S]*?:\s*SessionEvent\[\]/
+      );
     });
   });
 
   describe('canStart Function', () => {
     it('should take currentState parameter', () => {
-      expect(sourceCode).toMatch(/canStart\s*=\s*\(\s*currentState:\s*SessionState\s*\)/);
+      expect(sourceCode).toMatch(
+        /canStart\s*=\s*\(\s*currentState:\s*SessionState\s*\)/
+      );
     });
 
     it('should return boolean', () => {
@@ -298,14 +314,18 @@ describe('SessionStateMachine', () => {
     });
 
     it('should use isValidTransition with START event', () => {
-      const functionMatch = sourceCode.match(/export const canStart[\s\S]*?(?=export const)/);
+      const functionMatch = sourceCode.match(
+        /export const canStart[\s\S]*?(?=export const)/
+      );
       expect(functionMatch?.[0]).toContain("'START'");
     });
   });
 
   describe('canPause Function', () => {
     it('should take currentState parameter', () => {
-      expect(sourceCode).toMatch(/canPause\s*=\s*\(\s*currentState:\s*SessionState\s*\)/);
+      expect(sourceCode).toMatch(
+        /canPause\s*=\s*\(\s*currentState:\s*SessionState\s*\)/
+      );
     });
 
     it('should return boolean', () => {
@@ -313,14 +333,18 @@ describe('SessionStateMachine', () => {
     });
 
     it('should use isValidTransition with PAUSE event', () => {
-      const functionMatch = sourceCode.match(/export const canPause[\s\S]*?(?=export const)/);
+      const functionMatch = sourceCode.match(
+        /export const canPause[\s\S]*?(?=export const)/
+      );
       expect(functionMatch?.[0]).toContain("'PAUSE'");
     });
   });
 
   describe('canResume Function', () => {
     it('should take currentState parameter', () => {
-      expect(sourceCode).toMatch(/canResume\s*=\s*\(\s*currentState:\s*SessionState\s*\)/);
+      expect(sourceCode).toMatch(
+        /canResume\s*=\s*\(\s*currentState:\s*SessionState\s*\)/
+      );
     });
 
     it('should return boolean', () => {
@@ -328,14 +352,18 @@ describe('SessionStateMachine', () => {
     });
 
     it('should use isValidTransition with RESUME event', () => {
-      const functionMatch = sourceCode.match(/export const canResume[\s\S]*?(?=export const)/);
+      const functionMatch = sourceCode.match(
+        /export const canResume[\s\S]*?(?=export const)/
+      );
       expect(functionMatch?.[0]).toContain("'RESUME'");
     });
   });
 
   describe('canStop Function', () => {
     it('should take currentState parameter', () => {
-      expect(sourceCode).toMatch(/canStop\s*=\s*\(\s*currentState:\s*SessionState\s*\)/);
+      expect(sourceCode).toMatch(
+        /canStop\s*=\s*\(\s*currentState:\s*SessionState\s*\)/
+      );
     });
 
     it('should return boolean', () => {
@@ -343,14 +371,18 @@ describe('SessionStateMachine', () => {
     });
 
     it('should use isValidTransition with STOP event', () => {
-      const functionMatch = sourceCode.match(/export const canStop[\s\S]*?(?=export const)/);
+      const functionMatch = sourceCode.match(
+        /export const canStop[\s\S]*?(?=export const)/
+      );
       expect(functionMatch?.[0]).toContain("'STOP'");
     });
   });
 
   describe('canReset Function', () => {
     it('should take currentState parameter', () => {
-      expect(sourceCode).toMatch(/canReset\s*=\s*\(\s*currentState:\s*SessionState\s*\)/);
+      expect(sourceCode).toMatch(
+        /canReset\s*=\s*\(\s*currentState:\s*SessionState\s*\)/
+      );
     });
 
     it('should return boolean', () => {
@@ -358,7 +390,9 @@ describe('SessionStateMachine', () => {
     });
 
     it('should use isValidTransition with RESET event', () => {
-      const functionMatch = sourceCode.match(/export const canReset[\s\S]*?(?=export const)/);
+      const functionMatch = sourceCode.match(
+        /export const canReset[\s\S]*?(?=export const)/
+      );
       expect(functionMatch?.[0]).toContain("'RESET'");
     });
   });
@@ -451,7 +485,9 @@ describe('SessionStateMachine', () => {
 
   describe('formatTime Function', () => {
     it('should take seconds parameter', () => {
-      expect(sourceCode).toMatch(/formatTime\s*=\s*\(\s*seconds:\s*number\s*\)/);
+      expect(sourceCode).toMatch(
+        /formatTime\s*=\s*\(\s*seconds:\s*number\s*\)/
+      );
     });
 
     it('should return string', () => {
@@ -475,7 +511,9 @@ describe('SessionStateMachine', () => {
 
   describe('formatTimeLong Function', () => {
     it('should take seconds parameter', () => {
-      expect(sourceCode).toMatch(/formatTimeLong\s*=\s*\(\s*seconds:\s*number\s*\)/);
+      expect(sourceCode).toMatch(
+        /formatTimeLong\s*=\s*\(\s*seconds:\s*number\s*\)/
+      );
     });
 
     it('should return string', () => {
@@ -496,7 +534,9 @@ describe('SessionStateMachine', () => {
     });
 
     it('should have private config property', () => {
-      expect(sourceCode).toMatch(/private\s+config:\s*SessionConfig\s*\|\s*null/);
+      expect(sourceCode).toMatch(
+        /private\s+config:\s*SessionConfig\s*\|\s*null/
+      );
     });
 
     it('should have private timerState property', () => {
@@ -526,7 +566,9 @@ describe('SessionStateMachine', () => {
     });
 
     it('should call reset in constructor', () => {
-      const constructorMatch = sourceCode.match(/constructor\s*\(\s*\)\s*\{[\s\S]*?\}/);
+      const constructorMatch = sourceCode.match(
+        /constructor\s*\(\s*\)\s*\{[\s\S]*?\}/
+      );
       expect(constructorMatch?.[0]).toContain('reset');
     });
   });
@@ -549,19 +591,27 @@ describe('SessionStateMachine', () => {
     });
 
     it('should have addStateListener method', () => {
-      expect(sourceCode).toContain('addStateListener(listener: SessionStateListener)');
+      expect(sourceCode).toContain(
+        'addStateListener(listener: SessionStateListener)'
+      );
     });
 
     it('should have addTimerListener method', () => {
-      expect(sourceCode).toContain('addTimerListener(listener: SessionTimerListener)');
+      expect(sourceCode).toContain(
+        'addTimerListener(listener: SessionTimerListener)'
+      );
     });
 
     it('should have addCompletionListener method', () => {
-      expect(sourceCode).toContain('addCompletionListener(listener: SessionCompletionListener)');
+      expect(sourceCode).toContain(
+        'addCompletionListener(listener: SessionCompletionListener)'
+      );
     });
 
     it('should have transition method', () => {
-      expect(sourceCode).toContain('transition(event: SessionEvent): TransitionResult');
+      expect(sourceCode).toContain(
+        'transition(event: SessionEvent): TransitionResult'
+      );
     });
 
     it('should have start method', () => {
@@ -641,24 +691,32 @@ describe('SessionStateMachine', () => {
     });
 
     it('should check current state', () => {
-      const methodMatch = sourceCode.match(/setConfig[\s\S]*?(?=addStateListener)/);
+      const methodMatch = sourceCode.match(
+        /setConfig[\s\S]*?(?=addStateListener)/
+      );
       expect(methodMatch?.[0]).toContain("this.currentState !== 'idle'");
     });
 
     it('should set remaining seconds from config duration', () => {
-      const methodMatch = sourceCode.match(/setConfig[\s\S]*?(?=addStateListener)/);
+      const methodMatch = sourceCode.match(
+        /setConfig[\s\S]*?(?=addStateListener)/
+      );
       expect(methodMatch?.[0]).toContain('duration_minutes');
     });
   });
 
   describe('Listener Methods Return Unsubscribe Function', () => {
     it('addStateListener should return function', () => {
-      const methodMatch = sourceCode.match(/addStateListener[\s\S]*?(?=addTimerListener)/);
+      const methodMatch = sourceCode.match(
+        /addStateListener[\s\S]*?(?=addTimerListener)/
+      );
       expect(methodMatch?.[0]).toContain('return () =>');
     });
 
     it('addTimerListener should return function', () => {
-      const methodMatch = sourceCode.match(/addTimerListener[\s\S]*?(?=addCompletionListener)/);
+      const methodMatch = sourceCode.match(
+        /addTimerListener[\s\S]*?(?=addCompletionListener)/
+      );
       expect(methodMatch?.[0]).toContain('return () =>');
     });
 
@@ -672,22 +730,30 @@ describe('SessionStateMachine', () => {
 
   describe('transition Method', () => {
     it('should use getNextState for validation', () => {
-      const methodMatch = sourceCode.match(/transition\(event[\s\S]*?(?=private handleTransitionSideEffects)/);
+      const methodMatch = sourceCode.match(
+        /transition\(event[\s\S]*?(?=private handleTransitionSideEffects)/
+      );
       expect(methodMatch?.[0]).toContain('getNextState');
     });
 
     it('should return success false for invalid transitions', () => {
-      const methodMatch = sourceCode.match(/transition\(event[\s\S]*?(?=private handleTransitionSideEffects)/);
+      const methodMatch = sourceCode.match(
+        /transition\(event[\s\S]*?(?=private handleTransitionSideEffects)/
+      );
       expect(methodMatch?.[0]).toContain('success: false');
     });
 
     it('should call handleTransitionSideEffects', () => {
-      const methodMatch = sourceCode.match(/transition\(event[\s\S]*?(?=private handleTransitionSideEffects)/);
+      const methodMatch = sourceCode.match(
+        /transition\(event[\s\S]*?(?=private handleTransitionSideEffects)/
+      );
       expect(methodMatch?.[0]).toContain('handleTransitionSideEffects');
     });
 
     it('should call notifyStateListeners', () => {
-      const methodMatch = sourceCode.match(/transition\(event[\s\S]*?(?=private handleTransitionSideEffects)/);
+      const methodMatch = sourceCode.match(
+        /transition\(event[\s\S]*?(?=private handleTransitionSideEffects)/
+      );
       expect(methodMatch?.[0]).toContain('notifyStateListeners');
     });
   });
@@ -738,67 +804,93 @@ describe('SessionStateMachine', () => {
 
   describe('Timer Methods', () => {
     it('startTimer should set startTimestamp', () => {
-      const methodMatch = sourceCode.match(/private startTimer[\s\S]*?(?=private startTimerInterval)/);
+      const methodMatch = sourceCode.match(
+        /private startTimer[\s\S]*?(?=private startTimerInterval)/
+      );
       expect(methodMatch?.[0]).toContain('startTimestamp');
     });
 
     it('startTimer should reset elapsedSeconds to 0', () => {
-      const methodMatch = sourceCode.match(/private startTimer[\s\S]*?(?=private startTimerInterval)/);
+      const methodMatch = sourceCode.match(
+        /private startTimer[\s\S]*?(?=private startTimerInterval)/
+      );
       expect(methodMatch?.[0]).toContain('elapsedSeconds = 0');
     });
 
     it('startTimerInterval should use setInterval', () => {
-      const methodMatch = sourceCode.match(/private startTimerInterval[\s\S]*?(?=private tick)/);
+      const methodMatch = sourceCode.match(
+        /private startTimerInterval[\s\S]*?(?=private tick)/
+      );
       expect(methodMatch?.[0]).toContain('setInterval');
     });
 
     it('startTimerInterval should call tick every 1000ms', () => {
-      const methodMatch = sourceCode.match(/private startTimerInterval[\s\S]*?(?=private tick)/);
+      const methodMatch = sourceCode.match(
+        /private startTimerInterval[\s\S]*?(?=private tick)/
+      );
       expect(methodMatch?.[0]).toContain('1000');
     });
 
     it('tick should increment elapsedSeconds', () => {
-      const methodMatch = sourceCode.match(/private tick[\s\S]*?(?=private pauseTimer)/);
+      const methodMatch = sourceCode.match(
+        /private tick[\s\S]*?(?=private pauseTimer)/
+      );
       expect(methodMatch?.[0]).toContain('elapsedSeconds += 1');
     });
 
     it('tick should decrement remainingSeconds', () => {
-      const methodMatch = sourceCode.match(/private tick[\s\S]*?(?=private pauseTimer)/);
+      const methodMatch = sourceCode.match(
+        /private tick[\s\S]*?(?=private pauseTimer)/
+      );
       expect(methodMatch?.[0]).toContain('remainingSeconds -= 1');
     });
 
     it('tick should check for completion', () => {
-      const methodMatch = sourceCode.match(/private tick[\s\S]*?(?=private pauseTimer)/);
+      const methodMatch = sourceCode.match(
+        /private tick[\s\S]*?(?=private pauseTimer)/
+      );
       expect(methodMatch?.[0]).toContain('isComplete');
     });
 
     it('tick should auto-stop when complete', () => {
-      const methodMatch = sourceCode.match(/private tick[\s\S]*?(?=private pauseTimer)/);
+      const methodMatch = sourceCode.match(
+        /private tick[\s\S]*?(?=private pauseTimer)/
+      );
       expect(methodMatch?.[0]).toContain("transition('STOP')");
     });
 
     it('pauseTimer should clear interval', () => {
-      const methodMatch = sourceCode.match(/private pauseTimer[\s\S]*?(?=private resumeTimer)/);
+      const methodMatch = sourceCode.match(
+        /private pauseTimer[\s\S]*?(?=private resumeTimer)/
+      );
       expect(methodMatch?.[0]).toContain('clearInterval');
     });
 
     it('pauseTimer should set pausedAt', () => {
-      const methodMatch = sourceCode.match(/private pauseTimer[\s\S]*?(?=private resumeTimer)/);
+      const methodMatch = sourceCode.match(
+        /private pauseTimer[\s\S]*?(?=private resumeTimer)/
+      );
       expect(methodMatch?.[0]).toContain('pausedAt');
     });
 
     it('resumeTimer should calculate paused duration', () => {
-      const methodMatch = sourceCode.match(/private resumeTimer[\s\S]*?(?=private stopTimer)/);
+      const methodMatch = sourceCode.match(
+        /private resumeTimer[\s\S]*?(?=private stopTimer)/
+      );
       expect(methodMatch?.[0]).toContain('totalPausedDuration');
     });
 
     it('stopTimer should clear interval', () => {
-      const methodMatch = sourceCode.match(/private stopTimer[\s\S]*?(?=private resetTimer)/);
+      const methodMatch = sourceCode.match(
+        /private stopTimer[\s\S]*?(?=private resetTimer)/
+      );
       expect(methodMatch?.[0]).toContain('clearInterval');
     });
 
     it('resetTimer should reset all timer state', () => {
-      const methodMatch = sourceCode.match(/private resetTimer[\s\S]*?(?=start\(\))/);
+      const methodMatch = sourceCode.match(
+        /private resetTimer[\s\S]*?(?=start\(\))/
+      );
       expect(methodMatch?.[0]).toContain('elapsedSeconds: 0');
     });
   });
@@ -820,7 +912,9 @@ describe('SessionStateMachine', () => {
     });
 
     it("stop method should call transition with 'STOP'", () => {
-      const methodMatch = sourceCode.match(/stop\(\):\s*TransitionResult[\s\S]*?(?=reset\(\))/);
+      const methodMatch = sourceCode.match(
+        /stop\(\):\s*TransitionResult[\s\S]*?(?=reset\(\))/
+      );
       expect(methodMatch?.[0]).toContain("transition('STOP')");
     });
   });
@@ -929,7 +1023,9 @@ describe('SessionStateMachine', () => {
 
   describe('Documentation', () => {
     it('should have module-level documentation', () => {
-      expect(sourceCode).toContain('SessionStateMachine - Manages the session state lifecycle');
+      expect(sourceCode).toContain(
+        'SessionStateMachine - Manages the session state lifecycle'
+      );
     });
 
     it('should document state transitions', () => {

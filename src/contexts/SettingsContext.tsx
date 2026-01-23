@@ -63,6 +63,12 @@ export const defaultSettings: AppSettings = {
 
   // A/B testing
   ab_testing_enabled: false,
+
+  // Developer settings
+  simulated_mode_enabled: false,
+  // NOTE: For physical devices, use your computer's LAN IP (e.g., ws://192.168.x.x:8765)
+  // localhost only works on iOS Simulator; Android emulator needs 10.0.2.2
+  simulated_mode_server_url: 'ws://10.5.29.185:8765',
 };
 
 /**

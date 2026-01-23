@@ -67,7 +67,9 @@ describe('Navigation Types', () => {
 
     it('should define History tab with nested navigator', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain('History: NavigatorScreenParams<HistoryTabParamList>');
+      expect(content).toContain(
+        'History: NavigatorScreenParams<HistoryTabParamList>'
+      );
     });
 
     it('should define Settings tab', () => {
@@ -108,7 +110,7 @@ describe('Navigation Types', () => {
     it('should define Calendar screen with selectedMonth param', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
       expect(content).toContain('Calendar:');
-      expect(content).toContain("selectedMonth?: string; // Format: YYYY-MM");
+      expect(content).toContain('selectedMonth?: string; // Format: YYYY-MM');
     });
 
     it('should define Trends screen with timeRange param', () => {
@@ -240,32 +242,44 @@ describe('Navigation Types', () => {
   describe('Screen Props Types', () => {
     it('should export RootStackScreenProps', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain('export type RootStackScreenProps<T extends keyof RootStackParamList>');
+      expect(content).toContain(
+        'export type RootStackScreenProps<T extends keyof RootStackParamList>'
+      );
     });
 
     it('should export MainTabScreenProps', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain('export type MainTabScreenProps<T extends keyof MainTabParamList>');
+      expect(content).toContain(
+        'export type MainTabScreenProps<T extends keyof MainTabParamList>'
+      );
     });
 
     it('should export HistoryTabScreenProps', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain('export type HistoryTabScreenProps<T extends keyof HistoryTabParamList>');
+      expect(content).toContain(
+        'export type HistoryTabScreenProps<T extends keyof HistoryTabParamList>'
+      );
     });
 
     it('should export OnboardingScreenProps', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain('export type OnboardingScreenProps<T extends keyof OnboardingStackParamList>');
+      expect(content).toContain(
+        'export type OnboardingScreenProps<T extends keyof OnboardingStackParamList>'
+      );
     });
 
     it('should export CalibrationScreenProps', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain('export type CalibrationScreenProps<T extends keyof CalibrationStackParamList>');
+      expect(content).toContain(
+        'export type CalibrationScreenProps<T extends keyof CalibrationStackParamList>'
+      );
     });
 
     it('should export SettingsScreenProps', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain('export type SettingsScreenProps<T extends keyof SettingsStackParamList>');
+      expect(content).toContain(
+        'export type SettingsScreenProps<T extends keyof SettingsStackParamList>'
+      );
     });
   });
 
@@ -277,34 +291,46 @@ describe('Navigation Types', () => {
 
     it('should export RouteParams type', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain('export type RouteParams<T extends AllScreenNames>');
+      expect(content).toContain(
+        'export type RouteParams<T extends AllScreenNames>'
+      );
     });
   });
 
   describe('Type imports', () => {
     it('should import NavigatorScreenParams from @react-navigation/native', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain("import type { NavigatorScreenParams } from '@react-navigation/native'");
+      expect(content).toContain(
+        "import type { NavigatorScreenParams } from '@react-navigation/native'"
+      );
     });
 
     it('should import BottomTabScreenProps from @react-navigation/bottom-tabs', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain("import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs'");
+      expect(content).toContain(
+        "import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs'"
+      );
     });
 
     it('should import NativeStackScreenProps from @react-navigation/native-stack', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain("import type { NativeStackScreenProps } from '@react-navigation/native-stack'");
+      expect(content).toContain(
+        "import type { NativeStackScreenProps } from '@react-navigation/native-stack'"
+      );
     });
 
     it('should import CompositeScreenProps from @react-navigation/native', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain("import type { CompositeScreenProps } from '@react-navigation/native'");
+      expect(content).toContain(
+        "import type { CompositeScreenProps } from '@react-navigation/native'"
+      );
     });
 
     it('should import Session and SessionConfig types', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
-      expect(content).toContain("import type { Session, SessionConfig, BaselineProfile } from './index'");
+      expect(content).toContain(
+        "import type { Session, SessionConfig, BaselineProfile } from './index'"
+      );
     });
   });
 
@@ -313,7 +339,9 @@ describe('Navigation Types', () => {
       const content = fs.readFileSync(navigationTypesPath, 'utf-8');
       expect(content).toContain('declare global');
       expect(content).toContain('namespace ReactNavigation');
-      expect(content).toContain('interface RootParamList extends RootStackParamList');
+      expect(content).toContain(
+        'interface RootParamList extends RootStackParamList'
+      );
     });
   });
 

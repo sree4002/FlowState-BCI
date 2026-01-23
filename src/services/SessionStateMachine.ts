@@ -120,7 +120,9 @@ export const getNextState = (
 /**
  * Gets available events for the current state
  */
-export const getAvailableEvents = (currentState: SessionState): SessionEvent[] => {
+export const getAvailableEvents = (
+  currentState: SessionState
+): SessionEvent[] => {
   const validEvents = VALID_TRANSITIONS[currentState];
   if (!validEvents) {
     return [];

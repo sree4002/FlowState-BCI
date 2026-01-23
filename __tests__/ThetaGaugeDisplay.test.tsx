@@ -16,7 +16,9 @@ describe('ThetaGaugeDisplay', () => {
     });
 
     it('should render with custom testID', () => {
-      const { getByTestId } = render(<ThetaGaugeDisplay testID="custom-gauge" />);
+      const { getByTestId } = render(
+        <ThetaGaugeDisplay testID="custom-gauge" />
+      );
       expect(getByTestId('custom-gauge')).toBeTruthy();
     });
 
@@ -65,7 +67,9 @@ describe('ThetaGaugeDisplay', () => {
     });
 
     it('should render zone labels when showZoneLabels is true', () => {
-      const { getByTestId } = render(<ThetaGaugeDisplay showZoneLabels={true} />);
+      const { getByTestId } = render(
+        <ThetaGaugeDisplay showZoneLabels={true} />
+      );
       expect(getByTestId('theta-gauge-display-label-red')).toBeTruthy();
       expect(getByTestId('theta-gauge-display-label-yellow')).toBeTruthy();
       expect(getByTestId('theta-gauge-display-label-green')).toBeTruthy();
@@ -73,7 +77,9 @@ describe('ThetaGaugeDisplay', () => {
     });
 
     it('should not render zone labels when showZoneLabels is false', () => {
-      const { queryByTestId } = render(<ThetaGaugeDisplay showZoneLabels={false} />);
+      const { queryByTestId } = render(
+        <ThetaGaugeDisplay showZoneLabels={false} />
+      );
       expect(queryByTestId('theta-gauge-display-label-red')).toBeNull();
       expect(queryByTestId('theta-gauge-display-label-yellow')).toBeNull();
       expect(queryByTestId('theta-gauge-display-label-green')).toBeNull();
@@ -92,7 +98,9 @@ describe('ThetaGaugeDisplay', () => {
   describe('Value Display', () => {
     it('should display "--" when value is null', () => {
       const { getByTestId } = render(<ThetaGaugeDisplay value={null} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('--');
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '--'
+      );
     });
 
     it('should display "No Data" zone label when value is null', () => {
@@ -104,7 +112,9 @@ describe('ThetaGaugeDisplay', () => {
 
     it('should display formatted value with 2 decimal places', () => {
       const { getByTestId } = render(<ThetaGaugeDisplay value={1.234} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('1.23');
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '1.23'
+      );
     });
 
     it('should display "Below Target" for negative values', () => {
@@ -149,7 +159,9 @@ describe('ThetaGaugeDisplay', () => {
       const { getByTestId } = render(<ThetaGaugeDisplay value={-0.5} />);
       const valueElement = getByTestId('theta-gauge-display-value');
       expect(valueElement.props.style).toEqual(
-        expect.arrayContaining([expect.objectContaining({ color: Colors.status.red })])
+        expect.arrayContaining([
+          expect.objectContaining({ color: Colors.status.red }),
+        ])
       );
     });
 
@@ -167,7 +179,9 @@ describe('ThetaGaugeDisplay', () => {
       const { getByTestId } = render(<ThetaGaugeDisplay value={1.0} />);
       const valueElement = getByTestId('theta-gauge-display-value');
       expect(valueElement.props.style).toEqual(
-        expect.arrayContaining([expect.objectContaining({ color: Colors.status.green })])
+        expect.arrayContaining([
+          expect.objectContaining({ color: Colors.status.green }),
+        ])
       );
     });
 
@@ -175,7 +189,9 @@ describe('ThetaGaugeDisplay', () => {
       const { getByTestId } = render(<ThetaGaugeDisplay value={2.0} />);
       const valueElement = getByTestId('theta-gauge-display-value');
       expect(valueElement.props.style).toEqual(
-        expect.arrayContaining([expect.objectContaining({ color: Colors.status.blue })])
+        expect.arrayContaining([
+          expect.objectContaining({ color: Colors.status.blue }),
+        ])
       );
     });
 
@@ -265,13 +281,21 @@ describe('ThetaGaugeDisplay', () => {
 
   describe('Min/Max Value Configuration', () => {
     it('should accept custom minValue', () => {
-      const { getByTestId } = render(<ThetaGaugeDisplay minValue={-2} value={-1.5} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('-1.50');
+      const { getByTestId } = render(
+        <ThetaGaugeDisplay minValue={-2} value={-1.5} />
+      );
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '-1.50'
+      );
     });
 
     it('should accept custom maxValue', () => {
-      const { getByTestId } = render(<ThetaGaugeDisplay maxValue={3} value={2.5} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('2.50');
+      const { getByTestId } = render(
+        <ThetaGaugeDisplay maxValue={3} value={2.5} />
+      );
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '2.50'
+      );
     });
 
     it('should use default minValue of -1', () => {
@@ -299,7 +323,9 @@ describe('ThetaGaugeDisplay', () => {
     });
 
     it('should work with animation disabled', () => {
-      const { getByTestId } = render(<ThetaGaugeDisplay animated={false} value={1.0} />);
+      const { getByTestId } = render(
+        <ThetaGaugeDisplay animated={false} value={1.0} />
+      );
       expect(getByTestId('theta-gauge-display')).toBeTruthy();
     });
   });
@@ -321,7 +347,9 @@ describe('ThetaGaugeDisplay', () => {
   describe('Edge Cases', () => {
     it('should handle very large positive values', () => {
       const { getByTestId } = render(<ThetaGaugeDisplay value={10} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('10.00');
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '10.00'
+      );
       expect(getByTestId('theta-gauge-display-zone-label').props.children).toBe(
         'High Theta'
       );
@@ -329,7 +357,9 @@ describe('ThetaGaugeDisplay', () => {
 
     it('should handle very large negative values', () => {
       const { getByTestId } = render(<ThetaGaugeDisplay value={-10} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('-10.00');
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '-10.00'
+      );
       expect(getByTestId('theta-gauge-display-zone-label').props.children).toBe(
         'Below Target'
       );
@@ -337,37 +367,59 @@ describe('ThetaGaugeDisplay', () => {
 
     it('should handle zero value', () => {
       const { getByTestId } = render(<ThetaGaugeDisplay value={0} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('0.00');
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '0.00'
+      );
     });
 
     it('should handle value updates', () => {
-      const { getByTestId, rerender } = render(<ThetaGaugeDisplay value={0.5} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('0.50');
+      const { getByTestId, rerender } = render(
+        <ThetaGaugeDisplay value={0.5} />
+      );
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '0.50'
+      );
 
       rerender(<ThetaGaugeDisplay value={1.5} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('1.50');
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '1.50'
+      );
     });
 
     it('should handle transition from null to value', () => {
-      const { getByTestId, rerender } = render(<ThetaGaugeDisplay value={null} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('--');
+      const { getByTestId, rerender } = render(
+        <ThetaGaugeDisplay value={null} />
+      );
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '--'
+      );
 
       rerender(<ThetaGaugeDisplay value={1.0} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('1.00');
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '1.00'
+      );
     });
 
     it('should handle transition from value to null', () => {
-      const { getByTestId, rerender } = render(<ThetaGaugeDisplay value={1.0} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('1.00');
+      const { getByTestId, rerender } = render(
+        <ThetaGaugeDisplay value={1.0} />
+      );
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '1.00'
+      );
 
       rerender(<ThetaGaugeDisplay value={null} />);
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('--');
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '--'
+      );
     });
   });
 
   describe('Accessibility', () => {
     it('should have testID on main container', () => {
-      const { getByTestId } = render(<ThetaGaugeDisplay testID="accessible-gauge" />);
+      const { getByTestId } = render(
+        <ThetaGaugeDisplay testID="accessible-gauge" />
+      );
       expect(getByTestId('accessible-gauge')).toBeTruthy();
     });
 
@@ -409,7 +461,9 @@ describe('ThetaGaugeDisplay', () => {
     it('should work with only value prop', () => {
       const { getByTestId } = render(<ThetaGaugeDisplay value={0.75} />);
       expect(getByTestId('theta-gauge-display')).toBeTruthy();
-      expect(getByTestId('theta-gauge-display-value').props.children).toBe('0.75');
+      expect(getByTestId('theta-gauge-display-value').props.children).toBe(
+        '0.75'
+      );
     });
   });
 });

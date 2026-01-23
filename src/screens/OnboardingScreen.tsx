@@ -148,7 +148,7 @@ export function OnboardingScreen({
   const keyExtractor = useCallback((item: OnboardingSlide) => item.id, []);
 
   const getItemLayout = useCallback(
-    (_: OnboardingSlide[] | null | undefined, index: number) => ({
+    (_: ArrayLike<OnboardingSlide> | null | undefined, index: number) => ({
       length: SCREEN_WIDTH,
       offset: SCREEN_WIDTH * index,
       index,

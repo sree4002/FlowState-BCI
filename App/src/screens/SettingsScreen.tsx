@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { Colors, Spacing, Typography, BorderRadius } from '../../../src/constants/theme';
+import { SimulatedModeDebugView } from '../../../src/components';
 
 interface SettingsSectionProps {
   title: string;
@@ -70,6 +71,13 @@ const SettingsScreen: React.FC = () => {
           <SettingsRow label="Version" value="1.0.0" />
           <SettingsRow label="Privacy Policy" onPress={() => {}} />
           <SettingsRow label="Terms of Service" onPress={() => {}} />
+        </SettingsSection>
+
+        {/* Developer Tools - Simulated Mode */}
+        <SettingsSection title="Developer">
+          <View style={styles.debugViewContainer}>
+            <SimulatedModeDebugView testID="simulated-mode-debug" />
+          </View>
         </SettingsSection>
       </ScrollView>
     </SafeAreaView>
@@ -131,6 +139,9 @@ const styles = StyleSheet.create({
   rowValue: {
     fontSize: Typography.fontSize.md,
     color: Colors.text.tertiary,
+  },
+  debugViewContainer: {
+    padding: Spacing.sm,
   },
 });
 

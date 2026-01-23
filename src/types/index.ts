@@ -140,6 +140,10 @@ export interface AppSettings {
 
   // A/B testing
   ab_testing_enabled: boolean;
+
+  // Developer settings
+  simulated_mode_enabled: boolean;
+  simulated_mode_server_url: string;
 }
 
 /**

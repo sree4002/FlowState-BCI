@@ -46,7 +46,9 @@ const mockState = {
   currentState: 'PoweredOn',
   isScanning: false,
   connectedDevices: new Map<string, MockDevice>(),
-  scanCallback: null as ((error: Error | null, device: MockDevice | null) => void) | null,
+  scanCallback: null as
+    | ((error: Error | null, device: MockDevice | null) => void)
+    | null,
 };
 
 // Mock Device class
@@ -56,9 +58,15 @@ class MockDevice {
   localName: string | null;
   rssi: number | null;
   manufacturerData: string | null;
-  private disconnectCallback: ((error: Error | null, device: MockDevice) => void) | null = null;
+  private disconnectCallback:
+    | ((error: Error | null, device: MockDevice) => void)
+    | null = null;
 
-  constructor(data: { id: string; name?: string | null; rssi?: number | null }) {
+  constructor(data: {
+    id: string;
+    name?: string | null;
+    rssi?: number | null;
+  }) {
     this.id = data.id;
     this.name = data.name ?? 'Mock Device';
     this.localName = null;
@@ -93,8 +101,16 @@ class MockDevice {
 
 // Mock devices
 const mockDevices = [
-  new MockDevice({ id: 'flowstate-headband-001', name: 'FlowState Headband', rssi: -45 }),
-  new MockDevice({ id: 'flowstate-earpiece-001', name: 'FlowState Earpiece', rssi: -55 }),
+  new MockDevice({
+    id: 'flowstate-headband-001',
+    name: 'FlowState Headband',
+    rssi: -45,
+  }),
+  new MockDevice({
+    id: 'flowstate-earpiece-001',
+    name: 'FlowState Earpiece',
+    rssi: -55,
+  }),
   new MockDevice({ id: 'other-device-001', name: 'Other Device', rssi: -70 }),
 ];
 
@@ -110,34 +126,46 @@ jest.mock('react-native-ble-plx', () => {
       PoweredOn: 'PoweredOn',
     },
     BleManager: jest.fn().mockImplementation(() => ({
-      state: jest.fn().mockImplementation(() => Promise.resolve(mockState.currentState)),
+      state: jest
+        .fn()
+        .mockImplementation(() => Promise.resolve(mockState.currentState)),
       onStateChange: jest.fn().mockImplementation((callback, emitCurrent) => {
         if (emitCurrent) {
           callback(mockState.currentState);
         }
         return { remove: jest.fn() };
       }),
-      startDeviceScan: jest.fn().mockImplementation((uuids, options, callback) => {
-        mockState.isScanning = true;
-        mockState.scanCallback = callback;
+      startDeviceScan: jest
+        .fn()
+        .mockImplementation((uuids, options, callback) => {
+          mockState.isScanning = true;
+          mockState.scanCallback = callback;
 
-        // Simulate device discovery
-        mockDevices.forEach((device, index) => {
-          setTimeout(() => {
-            if (mockState.isScanning && mockState.scanCallback) {
-              mockState.scanCallback(null, device);
-            }
-          }, (index + 1) * 50);
-        });
+          // Simulate device discovery
+          mockDevices.forEach((device, index) => {
+            setTimeout(
+              () => {
+                if (mockState.isScanning && mockState.scanCallback) {
+                  mockState.scanCallback(null, device);
+                }
+              },
+              (index + 1) * 50
+            );
+          });
 
-        return { remove: () => { mockState.isScanning = false; } };
-      }),
+          return {
+            remove: () => {
+              mockState.isScanning = false;
+            },
+          };
+        }),
       stopDeviceScan: jest.fn().mockImplementation(() => {
         mockState.isScanning = false;
         mockState.scanCallback = null;
       }),
       connectToDevice: jest.fn().mockImplementation((deviceId, options) => {
-        const device = mockDevices.find(d => d.id === deviceId) ||
+        const device =
+          mockDevices.find((d) => d.id === deviceId) ||
           new MockDevice({ id: deviceId, name: 'Unknown Device' });
         mockState.connectedDevices.set(deviceId, device);
         return Promise.resolve(device);
@@ -293,9 +321,9 @@ describe('BLEService', () => {
 
       // Should find FlowState devices
       expect(discoveredDevices.length).toBeGreaterThan(0);
-      expect(
-        discoveredDevices.some((d) => d.name?.includes('FlowState'))
-      ).toBe(true);
+      expect(discoveredDevices.some((d) => d.name?.includes('FlowState'))).toBe(
+        true
+      );
     });
 
     it('should stop scanning after timeout', async () => {

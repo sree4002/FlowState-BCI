@@ -73,7 +73,9 @@ describe('OnboardingScreen Module', () => {
     });
 
     it('should have 3 slides defined in the SLIDES array', () => {
-      const slidesMatch = fileContent.match(/const SLIDES: OnboardingSlide\[\] = \[[\s\S]*?\];/);
+      const slidesMatch = fileContent.match(
+        /const SLIDES: OnboardingSlide\[\] = \[[\s\S]*?\];/
+      );
       expect(slidesMatch).toBeTruthy();
       if (slidesMatch) {
         const slidesContent = slidesMatch[0];
@@ -123,12 +125,12 @@ describe('OnboardingScreen Module', () => {
     });
 
     it('should have a skip button', () => {
-      expect(fileContent).toContain("testID=\"onboarding-skip-button\"");
+      expect(fileContent).toContain('testID="onboarding-skip-button"');
       expect(fileContent).toContain('Skip');
     });
 
     it('should have a next button', () => {
-      expect(fileContent).toContain("testID=\"onboarding-next-button\"");
+      expect(fileContent).toContain('testID="onboarding-next-button"');
       expect(fileContent).toContain('Next');
     });
 
@@ -137,12 +139,14 @@ describe('OnboardingScreen Module', () => {
     });
 
     it('should have pagination dots', () => {
-      expect(fileContent).toContain("testID=\"onboarding-pagination\"");
+      expect(fileContent).toContain('testID="onboarding-pagination"');
       expect(fileContent).toContain('pagination-dot-');
     });
 
     it('should use FlatList for swipeable slides', () => {
-      expect(fileContent).toMatch(/import[\s\S]*FlatList[\s\S]*from 'react-native'/);
+      expect(fileContent).toMatch(
+        /import[\s\S]*FlatList[\s\S]*from 'react-native'/
+      );
       expect(fileContent).toContain('<FlatList');
       expect(fileContent).toContain('pagingEnabled');
     });
@@ -156,15 +160,17 @@ describe('OnboardingScreen Module', () => {
     });
 
     it('should have accessibility label on skip button', () => {
-      expect(fileContent).toContain("accessibilityLabel=\"Skip onboarding\"");
+      expect(fileContent).toContain('accessibilityLabel="Skip onboarding"');
     });
 
     it('should have accessibility role on skip button', () => {
-      expect(fileContent).toContain("accessibilityRole=\"button\"");
+      expect(fileContent).toContain('accessibilityRole="button"');
     });
 
     it('should have accessibility labels on pagination dots', () => {
-      expect(fileContent).toContain('accessibilityLabel={`Go to slide ${index + 1}`}');
+      expect(fileContent).toContain(
+        'accessibilityLabel={`Go to slide ${index + 1}`}'
+      );
     });
   });
 

@@ -172,9 +172,7 @@ describe('CSV Export Functions', () => {
     });
 
     it('should escape notes containing commas', () => {
-      const sessions = [
-        createMockSession({ notes: 'Good, but tired' }),
-      ];
+      const sessions = [createMockSession({ notes: 'Good, but tired' })];
       const csv = exportSessionsToCSV(sessions);
 
       expect(csv).toContain('"Good, but tired"');
@@ -263,7 +261,9 @@ describe('CSV Export Functions', () => {
       ];
       const csv = exportEEGDataToCSV(packets);
 
-      expect(csv).toContain('timestamp,sequence_number,sample_0,sample_1,sample_2');
+      expect(csv).toContain(
+        'timestamp,sequence_number,sample_0,sample_1,sample_2'
+      );
       expect(csv).toContain('1705800000000');
       expect(csv).toContain('10.500000');
     });
@@ -557,8 +557,9 @@ describe('EDF Export Functions', () => {
       const packets = Array.from({ length: 10 }, (_, i) =>
         createMockEEGPacket({
           timestamp: 1705800000000 + i * 2,
-          samples: Array.from({ length: 500 }, (_, j) =>
-            Math.sin((i * 500 + j) * 0.01) * 100
+          samples: Array.from(
+            { length: 500 },
+            (_, j) => Math.sin((i * 500 + j) * 0.01) * 100
           ),
           sequence_number: i,
         })
@@ -639,7 +640,10 @@ describe('EDF Export Functions', () => {
     it('should contain values within 16-bit signed integer range', () => {
       const packets = Array.from({ length: 5 }, () =>
         createMockEEGPacket({
-          samples: Array.from({ length: 500 }, () => Math.random() * 2000 - 1000),
+          samples: Array.from(
+            { length: 500 },
+            () => Math.random() * 2000 - 1000
+          ),
         })
       );
       const device = createMockDeviceInfo({ sampling_rate: 500 });
@@ -670,12 +674,16 @@ describe('Utility Functions', () => {
     it('should generate filename with timestamp', () => {
       const filename = generateExportFilename('baselines', 'json');
       // Should match pattern like flowstate_baselines_2024-01-21T12-30-45.json
-      expect(filename).toMatch(/flowstate_baselines_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.json/);
+      expect(filename).toMatch(
+        /flowstate_baselines_\d{4}-\d{2}-\d{2}T\d{2}-\d{2}-\d{2}\.json/
+      );
     });
 
     it('should support all data types', () => {
       expect(generateExportFilename('sessions', 'csv')).toContain('sessions');
-      expect(generateExportFilename('baselines', 'json')).toContain('baselines');
+      expect(generateExportFilename('baselines', 'json')).toContain(
+        'baselines'
+      );
       expect(generateExportFilename('userdata', 'json')).toContain('userdata');
       expect(generateExportFilename('eeg', 'edf')).toContain('eeg');
     });
@@ -734,7 +742,9 @@ describe('Utility Functions', () => {
     });
 
     it('should detect missing ID', () => {
-      const sessions = [createMockSession({ id: undefined as unknown as number })];
+      const sessions = [
+        createMockSession({ id: undefined as unknown as number }),
+      ];
       const result = validateSessionsForExport(sessions);
 
       expect(result.valid).toBe(false);
@@ -761,9 +771,9 @@ describe('Utility Functions', () => {
       const result = validateSessionsForExport(sessions);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('start_time after end_time'))).toBe(
-        true
-      );
+      expect(
+        result.errors.some((e) => e.includes('start_time after end_time'))
+      ).toBe(true);
     });
 
     it('should detect negative duration', () => {
@@ -771,7 +781,9 @@ describe('Utility Functions', () => {
       const result = validateSessionsForExport(sessions);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('negative duration'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('negative duration'))).toBe(
+        true
+      );
     });
 
     it('should detect signal quality outside valid range', () => {
@@ -779,7 +791,9 @@ describe('Utility Functions', () => {
       const result = validateSessionsForExport(sessions);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('signal_quality_avg'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('signal_quality_avg'))).toBe(
+        true
+      );
     });
 
     it('should return multiple errors when multiple issues exist', () => {
@@ -811,7 +825,9 @@ describe('Utility Functions', () => {
       const result = validateBaselinesForExport(baselines);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('negative theta_std'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('negative theta_std'))).toBe(
+        true
+      );
     });
 
     it('should detect quality_score outside range', () => {
@@ -827,7 +843,9 @@ describe('Utility Functions', () => {
       const result = validateBaselinesForExport(baselines);
 
       expect(result.valid).toBe(false);
-      expect(result.errors.some((e) => e.includes('peak_theta_freq'))).toBe(true);
+      expect(result.errors.some((e) => e.includes('peak_theta_freq'))).toBe(
+        true
+      );
     });
 
     it('should accept peak_theta_freq within theta band', () => {

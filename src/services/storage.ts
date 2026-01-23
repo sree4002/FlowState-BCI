@@ -8,8 +8,10 @@ import { defaultSettings } from '../contexts/SettingsContext';
 export const STORAGE_KEYS = {
   USER_SETTINGS: '@flowstate/user_settings',
   PAIRED_DEVICES: '@flowstate/paired_devices',
+  PAIRED_DEVICE: '@flowstate/paired_device', // Single device key for backward compatibility
   LAST_PAIRED_DEVICE: '@flowstate/last_paired_device',
   ONBOARDING_COMPLETED: '@flowstate/onboarding_completed',
+  SESSIONS: '@flowstate/sessions',
 } as const;
 
 /**
@@ -24,6 +26,127 @@ export interface StoredDeviceInfo {
   paired_at: number;
   last_connected: number | null;
 }
+
+/**
+ * Paired device data for single device storage (backward compatibility)
+ */
+export interface PairedDeviceData {
+  id: string;
+  name: string;
+  type: 'headband' | 'earpiece';
+  paired_at: number;
+  last_connected: number | null;
+}
+
+/**
+ * Converts DeviceInfo to PairedDeviceData
+ * @param device - DeviceInfo object
+ * @returns PairedDeviceData with only essential pairing fields
+ */
+export const deviceInfoToPairedData = (device: DeviceInfo): PairedDeviceData => ({
+  id: device.id,
+  name: device.name,
+  type: device.type,
+  paired_at: Date.now(),
+  last_connected: device.last_connected,
+});
+
+/**
+ * Saves a single paired device to storage
+ * @param device - PairedDeviceData to save
+ * @returns Promise resolving to true on success, false on failure
+ */
+export const savePairedDevice = async (device: PairedDeviceData): Promise<boolean> => {
+  try {
+    await AsyncStorage.setItem(STORAGE_KEYS.PAIRED_DEVICE, JSON.stringify(device));
+    return true;
+  } catch (error) {
+    console.error('Failed to save paired device:', error);
+    return false;
+  }
+};
+
+/**
+ * Retrieves the paired device from storage
+ * @returns Promise resolving to PairedDeviceData or null if not found
+ */
+export const getPairedDevice = async (): Promise<PairedDeviceData | null> => {
+  try {
+    const json = await AsyncStorage.getItem(STORAGE_KEYS.PAIRED_DEVICE);
+    if (json === null) {
+      return null;
+    }
+    return JSON.parse(json) as PairedDeviceData;
+  } catch (error) {
+    console.error('Failed to get paired device:', error);
+    return null;
+  }
+};
+
+/**
+ * Removes the paired device from storage
+ * @returns Promise resolving to true on success, false on failure
+ */
+export const removePairedDevice = async (): Promise<boolean> => {
+  try {
+    await AsyncStorage.removeItem(STORAGE_KEYS.PAIRED_DEVICE);
+    return true;
+  } catch (error) {
+    console.error('Failed to remove paired device:', error);
+    return false;
+  }
+};
+
+/**
+ * Updates the last_connected timestamp for the paired device
+ * @returns Promise resolving to true on success, false on failure
+ */
+export const updatePairedDeviceLastConnected = async (): Promise<boolean> => {
+  try {
+    const device = await getPairedDevice();
+    if (!device) {
+      return false;
+    }
+    device.last_connected = Date.now();
+    return savePairedDevice(device);
+  } catch (error) {
+    console.error('Failed to update last connected:', error);
+    return false;
+  }
+};
+
+/**
+ * Checks if a device is paired
+ * @returns Promise resolving to true if a device is paired, false otherwise
+ */
+export const hasPairedDevice = async (): Promise<boolean> => {
+  const device = await getPairedDevice();
+  return device !== null;
+};
+
+/**
+ * Gets the ID of the paired device
+ * @returns Promise resolving to device ID or null if no device paired
+ */
+export const getPairedDeviceId = async (): Promise<string | null> => {
+  const device = await getPairedDevice();
+  return device?.id ?? null;
+};
+
+/**
+ * Clears all storage (alias for clearAllAppData)
+ * @returns Promise resolving to true on success, false on failure
+ */
+export const clearAllStorage = async (): Promise<boolean> => {
+  try {
+    const keys = Object.values(STORAGE_KEYS);
+    await AsyncStorage.multiRemove(keys);
+    return true;
+  } catch (error) {
+    console.error('Failed to clear all storage:', error);
+    return false;
+  }
+};
 
 /**
  * User settings storage service

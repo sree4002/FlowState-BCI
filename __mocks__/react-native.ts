@@ -35,7 +35,12 @@ export const Platform = {
 };
 
 // Mock TouchableOpacity component with testID support
-export const TouchableOpacity = ({ children, style, testID, ...props }: any) => {
+export const TouchableOpacity = ({
+  children,
+  style,
+  testID,
+  ...props
+}: any) => {
   return React.createElement(
     'View',
     { style, 'data-testid': testID, testID, ...props },
@@ -43,7 +48,14 @@ export const TouchableOpacity = ({ children, style, testID, ...props }: any) => 
   );
 };
 
-export const ScrollView = ({ children, style, testID, contentContainerStyle, refreshControl, ...props }: any) => {
+export const ScrollView = ({
+  children,
+  style,
+  testID,
+  contentContainerStyle,
+  refreshControl,
+  ...props
+}: any) => {
   return React.createElement(
     'scrollview',
     { style, 'data-testid': testID, testID, ...props },
@@ -67,7 +79,11 @@ export const Pressable = ({ children, style, testID, ...props }: any) => {
 };
 
 export const RefreshControl = ({ refreshing, onRefresh, ...props }: any) => {
-  return React.createElement('refreshcontrol', { refreshing, onRefresh, ...props });
+  return React.createElement('refreshcontrol', {
+    refreshing,
+    onRefresh,
+    ...props,
+  });
 };
 export const Modal = ({ children, style, testID, visible, ...props }: any) => {
   return React.createElement(

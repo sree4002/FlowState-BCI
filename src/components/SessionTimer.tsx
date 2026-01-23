@@ -33,10 +33,7 @@ export const formatTime = (seconds: number): string => {
 /**
  * Calculates progress percentage (0-100)
  */
-export const calculateProgress = (
-  elapsed: number,
-  total: number
-): number => {
+export const calculateProgress = (elapsed: number, total: number): number => {
   if (total <= 0) return 0;
   return Math.min(100, Math.max(0, (elapsed / total) * 100));
 };
@@ -97,7 +94,9 @@ export const SessionTimer: React.FC<SessionTimerProps> = ({
       accessibilityLabel={`Session timer: ${formatTime(elapsedSeconds)} elapsed of ${formatTime(totalSeconds)} total`}
     >
       {/* Progress Bar */}
-      <View style={[styles.progressBar, isCompact && styles.progressBarCompact]}>
+      <View
+        style={[styles.progressBar, isCompact && styles.progressBarCompact]}
+      >
         <View
           style={[
             styles.progressFill,
@@ -112,10 +111,7 @@ export const SessionTimer: React.FC<SessionTimerProps> = ({
         {/* Elapsed Time */}
         <View style={styles.timeBlock}>
           <Text
-            style={[
-              styles.timeLabel,
-              isCompact && styles.timeLabelCompact,
-            ]}
+            style={[styles.timeLabel, isCompact && styles.timeLabelCompact]}
           >
             Elapsed
           </Text>
@@ -137,10 +133,7 @@ export const SessionTimer: React.FC<SessionTimerProps> = ({
         {/* Total or Remaining Time */}
         <View style={styles.timeBlock}>
           <Text
-            style={[
-              styles.timeLabel,
-              isCompact && styles.timeLabelCompact,
-            ]}
+            style={[styles.timeLabel, isCompact && styles.timeLabelCompact]}
           >
             {showRemaining ? 'Remaining' : 'Total'}
           </Text>
@@ -152,7 +145,9 @@ export const SessionTimer: React.FC<SessionTimerProps> = ({
             ]}
             testID={`${testID}-total`}
           >
-            {showRemaining ? formatTime(remainingSeconds) : formatTime(totalSeconds)}
+            {showRemaining
+              ? formatTime(remainingSeconds)
+              : formatTime(totalSeconds)}
           </Text>
         </View>
       </View>

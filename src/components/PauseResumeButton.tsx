@@ -282,7 +282,10 @@ export const PauseResumeButton: React.FC<PauseResumeButtonProps> = ({
 
         {/* State indicator ring */}
         {sessionState === 'running' && !disabled && (
-          <View style={styles.runningIndicatorRing} testID={`${testID}-running-indicator`} />
+          <View
+            style={styles.runningIndicatorRing}
+            testID={`${testID}-running-indicator`}
+          />
         )}
       </TouchableOpacity>
 

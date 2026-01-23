@@ -188,7 +188,11 @@ describe('BLE Packet Parser', () => {
   describe('Channel Sample Parsing', () => {
     it('should parse headband samples correctly', () => {
       const mockPacket = createMockPacket('headband', 1, 10);
-      const channelData = parseChannelSamples(mockPacket, HEADBAND_CHANNELS, 10);
+      const channelData = parseChannelSamples(
+        mockPacket,
+        HEADBAND_CHANNELS,
+        10
+      );
 
       expect(channelData).not.toBeNull();
       expect(channelData?.length).toBe(HEADBAND_CHANNELS);
@@ -199,7 +203,11 @@ describe('BLE Packet Parser', () => {
 
     it('should parse earpiece samples correctly', () => {
       const mockPacket = createMockPacket('earpiece', 1, 20);
-      const channelData = parseChannelSamples(mockPacket, EARPIECE_CHANNELS, 20);
+      const channelData = parseChannelSamples(
+        mockPacket,
+        EARPIECE_CHANNELS,
+        20
+      );
 
       expect(channelData).not.toBeNull();
       expect(channelData?.length).toBe(EARPIECE_CHANNELS);
@@ -545,7 +553,11 @@ describe('BLE Packet Parser', () => {
         samplingRate: 500,
       };
 
-      const deviceInfo = getDeviceInfoFromMetadata(metadata, 'device-123', 'FlowState Headband');
+      const deviceInfo = getDeviceInfoFromMetadata(
+        metadata,
+        'device-123',
+        'FlowState Headband'
+      );
 
       expect(deviceInfo.id).toBe('device-123');
       expect(deviceInfo.name).toBe('FlowState Headband');
@@ -563,7 +575,11 @@ describe('BLE Packet Parser', () => {
         samplingRate: 250,
       };
 
-      const deviceInfo = getDeviceInfoFromMetadata(metadata, 'device-456', 'FlowState Earpiece');
+      const deviceInfo = getDeviceInfoFromMetadata(
+        metadata,
+        'device-456',
+        'FlowState Earpiece'
+      );
 
       expect(deviceInfo.type).toBe('earpiece');
       expect(deviceInfo.sampling_rate).toBe(250);
@@ -670,7 +686,9 @@ describe('BLE Packet Parser', () => {
       expect(result.success).toBe(true);
       expect(result.metadata?.samplingRate).toBe(500);
       // 10 samples at 500Hz = 20ms of data
-      const durationMs = (result.metadata!.samplesPerChannel / result.metadata!.samplingRate) * 1000;
+      const durationMs =
+        (result.metadata!.samplesPerChannel / result.metadata!.samplingRate) *
+        1000;
       expect(durationMs).toBe(20);
     });
 
@@ -682,7 +700,9 @@ describe('BLE Packet Parser', () => {
       expect(result.success).toBe(true);
       expect(result.metadata?.samplingRate).toBe(250);
       // 10 samples at 250Hz = 40ms of data
-      const durationMs = (result.metadata!.samplesPerChannel / result.metadata!.samplingRate) * 1000;
+      const durationMs =
+        (result.metadata!.samplesPerChannel / result.metadata!.samplingRate) *
+        1000;
       expect(durationMs).toBe(40);
     });
   });

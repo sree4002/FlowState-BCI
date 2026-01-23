@@ -103,7 +103,9 @@ export class EEGDataHandler implements CharacteristicHandler {
         EEG_DATA_CHARACTERISTIC_UUID,
         (error, characteristic) => {
           if (error) {
-            this.handleError(new Error(`EEG monitoring error: ${error.message}`));
+            this.handleError(
+              new Error(`EEG monitoring error: ${error.message}`)
+            );
             return;
           }
 

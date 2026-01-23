@@ -38,7 +38,10 @@ function uint8ArrayToBase64(bytes: Uint8Array): string {
  * - Byte 0: Command opcode
  * - Bytes 1+: Payload (varies by command)
  */
-function createCommandPacket(command: EntrainmentCommand, payload?: Uint8Array): Uint8Array {
+function createCommandPacket(
+  command: EntrainmentCommand,
+  payload?: Uint8Array
+): Uint8Array {
   const payloadLength = payload?.length ?? 0;
   const packet = new Uint8Array(1 + payloadLength);
   packet[0] = command;
@@ -132,7 +135,9 @@ export class EntrainmentControlHandler implements CharacteristicHandler {
   /**
    * Sends a command to start entrainment with the given configuration
    */
-  async startEntrainment(config: EntrainmentConfig): Promise<EntrainmentWriteResult> {
+  async startEntrainment(
+    config: EntrainmentConfig
+  ): Promise<EntrainmentWriteResult> {
     this.currentConfig = config;
 
     // Set waveform first
@@ -176,7 +181,10 @@ export class EntrainmentControlHandler implements CharacteristicHandler {
    */
   async setFrequency(frequency: number): Promise<EntrainmentWriteResult> {
     const payload = createFrequencyPayload(frequency);
-    const result = await this.writeCommand(EntrainmentCommand.SET_FREQUENCY, payload);
+    const result = await this.writeCommand(
+      EntrainmentCommand.SET_FREQUENCY,
+      payload
+    );
 
     if (result.success && this.currentConfig) {
       this.currentConfig.frequency = frequency;
@@ -190,7 +198,10 @@ export class EntrainmentControlHandler implements CharacteristicHandler {
    */
   async setVolume(volume: number): Promise<EntrainmentWriteResult> {
     const payload = createVolumePayload(volume);
-    const result = await this.writeCommand(EntrainmentCommand.SET_VOLUME, payload);
+    const result = await this.writeCommand(
+      EntrainmentCommand.SET_VOLUME,
+      payload
+    );
 
     if (result.success && this.currentConfig) {
       this.currentConfig.volume = volume;
@@ -204,7 +215,10 @@ export class EntrainmentControlHandler implements CharacteristicHandler {
    */
   async setWaveform(waveform: WaveformType): Promise<EntrainmentWriteResult> {
     const payload = createWaveformPayload(waveform);
-    const result = await this.writeCommand(EntrainmentCommand.SET_WAVEFORM, payload);
+    const result = await this.writeCommand(
+      EntrainmentCommand.SET_WAVEFORM,
+      payload
+    );
 
     if (result.success && this.currentConfig) {
       this.currentConfig.waveform = waveform;

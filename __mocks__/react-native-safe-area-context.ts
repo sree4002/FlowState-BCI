@@ -5,15 +5,17 @@
 import React from 'react';
 
 // Mock SafeAreaProvider
-export const SafeAreaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const SafeAreaProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   return React.createElement('SafeAreaProvider', null, children);
 };
 
 // Mock SafeAreaView
-export const SafeAreaView: React.FC<{ children?: React.ReactNode; style?: any }> = ({
-  children,
-  style,
-}) => {
+export const SafeAreaView: React.FC<{
+  children?: React.ReactNode;
+  style?: any;
+}> = ({ children, style }) => {
   return React.createElement('SafeAreaView', { style }, children);
 };
 

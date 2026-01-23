@@ -69,7 +69,9 @@ describe('NextSessionWidget', () => {
       );
 
       expect(
-        getByText('Start your first session to build personalized recommendations')
+        getByText(
+          'Start your first session to build personalized recommendations'
+        )
       ).toBeTruthy();
     });
 

@@ -38,7 +38,9 @@ describe('Project Folder Structure', () => {
       const content = fs.readFileSync(indexPath, 'utf-8');
       // Check that file contains valid export statements or placeholder
       const hasExport =
-        content.includes('export') || content.includes('// ') || content.trim().length === 0;
+        content.includes('export') ||
+        content.includes('// ') ||
+        content.trim().length === 0;
       expect(hasExport).toBe(true);
     });
   });

@@ -37,9 +37,7 @@ describe('DevicePairingScreen Module', () => {
 
   describe('Component Exports', () => {
     it('exports DevicePairingScreen as named export', () => {
-      expect(componentSource).toContain(
-        'export const DevicePairingScreen'
-      );
+      expect(componentSource).toContain('export const DevicePairingScreen');
     });
 
     it('exports DevicePairingScreen as default export', () => {
@@ -277,9 +275,7 @@ describe('DevicePairingScreen Module', () => {
     });
 
     it('includes proximity tip', () => {
-      expect(componentSource).toContain(
-        'Place the BCI device within 2 meters'
-      );
+      expect(componentSource).toContain('Place the BCI device within 2 meters');
     });
 
     it('displays scanning message', () => {
@@ -467,6 +463,6 @@ describe('Screen Exports', () => {
   it('is exported from screens index', () => {
     const indexPath = path.join(__dirname, '../src/screens/index.ts');
     const indexSource = fs.readFileSync(indexPath, 'utf8');
-    expect(indexSource).toContain("export { DevicePairingScreen }");
+    expect(indexSource).toContain('export { DevicePairingScreen }');
   });
 });

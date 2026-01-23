@@ -1304,38 +1304,38 @@ describe('CalibrationCountdownScreen Functional Tests', () => {
       expect(result.isGood).toBe(false);
     });
 
-    it('should return Unknown for undefined overall_score', () => {
+    it('should return Unknown for undefined score', () => {
       const result = getCountdownSignalStatus({});
       expect(result.label).toBe('Unknown');
       expect(result.isGood).toBe(false);
     });
 
     it('should return Excellent for score >= 80', () => {
-      const result = getCountdownSignalStatus({ overall_score: 85 });
+      const result = getCountdownSignalStatus({ score: 85 });
       expect(result.label).toBe('Excellent');
       expect(result.isGood).toBe(true);
     });
 
     it('should return Good for score 60-79', () => {
-      const result = getCountdownSignalStatus({ overall_score: 70 });
+      const result = getCountdownSignalStatus({ score: 70 });
       expect(result.label).toBe('Good');
       expect(result.isGood).toBe(true);
     });
 
     it('should return Fair for score 40-59', () => {
-      const result = getCountdownSignalStatus({ overall_score: 50 });
+      const result = getCountdownSignalStatus({ score: 50 });
       expect(result.label).toBe('Fair');
       expect(result.isGood).toBe(true);
     });
 
     it('should return Poor for score 20-39', () => {
-      const result = getCountdownSignalStatus({ overall_score: 25 });
+      const result = getCountdownSignalStatus({ score: 25 });
       expect(result.label).toBe('Poor');
       expect(result.isGood).toBe(false);
     });
 
     it('should return Critical for score < 20', () => {
-      const result = getCountdownSignalStatus({ overall_score: 10 });
+      const result = getCountdownSignalStatus({ score: 10 });
       expect(result.label).toBe('Critical');
       expect(result.isGood).toBe(false);
     });

@@ -57,8 +57,12 @@ describe('Butterworth Bandpass Filter', () => {
       const coefficients = designButterworthBandpass(config);
 
       // Bandpass filter of order N produces 2N+1 coefficients
-      expect(coefficients.b.length).toBeGreaterThanOrEqual(2 * config.order + 1);
-      expect(coefficients.a.length).toBeGreaterThanOrEqual(2 * config.order + 1);
+      expect(coefficients.b.length).toBeGreaterThanOrEqual(
+        2 * config.order + 1
+      );
+      expect(coefficients.a.length).toBeGreaterThanOrEqual(
+        2 * config.order + 1
+      );
     });
 
     it('should throw error for invalid cutoff frequencies', () => {
@@ -160,7 +164,10 @@ describe('Butterworth Bandpass Filter', () => {
       const coefficients = designButterworthBandpass(DEFAULT_CONFIG);
       const state = createFilterState(coefficients);
 
-      const expectedLen = Math.max(coefficients.b.length, coefficients.a.length);
+      const expectedLen = Math.max(
+        coefficients.b.length,
+        coefficients.a.length
+      );
       expect(state.x.length).toBe(expectedLen);
       expect(state.y.length).toBe(expectedLen);
     });
@@ -188,7 +195,8 @@ describe('Butterworth Bandpass Filter', () => {
       applyFilter(chunk1, coefficients, state);
 
       // State should be non-zero after processing
-      const hasNonZero = state.x.some((val) => val !== 0) || state.y.some((val) => val !== 0);
+      const hasNonZero =
+        state.x.some((val) => val !== 0) || state.y.some((val) => val !== 0);
       expect(hasNonZero).toBe(true);
 
       // Processing second chunk should continue from state
@@ -206,7 +214,8 @@ describe('Butterworth Bandpass Filter', () => {
 
       // After settling, output should be near zero for DC
       const lastValues = output.slice(-100);
-      const avgLastValues = lastValues.reduce((a, b) => a + b, 0) / lastValues.length;
+      const avgLastValues =
+        lastValues.reduce((a, b) => a + b, 0) / lastValues.length;
 
       expect(Math.abs(avgLastValues)).toBeLessThan(1); // Should be close to 0
     });
@@ -405,7 +414,8 @@ describe('Butterworth Bandpass Filter', () => {
       // Use correlation with 100 Hz sine
       let correlation = 0;
       for (let i = 500; i < 1000; i++) {
-        correlation += output[i] * Math.sin((2 * Math.PI * 100 * i) / SAMPLE_RATE);
+        correlation +=
+          output[i] * Math.sin((2 * Math.PI * 100 * i) / SAMPLE_RATE);
       }
       correlation = Math.abs(correlation) / 500;
 

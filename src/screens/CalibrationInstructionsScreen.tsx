@@ -244,7 +244,7 @@ export const CalibrationInstructionsScreen: React.FC<
 
   // Check device readiness
   const isConnected = deviceInfo?.is_connected ?? false;
-  const signalScore = signalQuality?.overall_score ?? null;
+  const signalScore = signalQuality?.score ?? null;
   const deviceReadiness = isDeviceReadyForCalibration(isConnected, signalScore);
   const signalStatus = getSignalQualityStatus(signalScore);
 
@@ -314,10 +314,12 @@ export const CalibrationInstructionsScreen: React.FC<
 
     // Set session config with selected duration
     setSessionConfig({
-      duration: selectedDuration * 60,
-      session_type: 'calibration',
+      type: 'calibration',
+      duration_minutes: selectedDuration,
       entrainment_freq: 6.0,
       volume: 0,
+      target_zscore: 1.0,
+      closed_loop_behavior: 'maintain_level',
     });
 
     // Transition to countdown state
@@ -473,7 +475,11 @@ export const CalibrationInstructionsScreen: React.FC<
             <Text
               style={[
                 styles.statusValue,
-                { color: isConnected ? Colors.text.primary : Colors.accent.error },
+                {
+                  color: isConnected
+                    ? Colors.text.primary
+                    : Colors.accent.error,
+                },
               ]}
             >
               {isConnected ? 'Connected' : 'Not Connected'}
@@ -498,7 +504,9 @@ export const CalibrationInstructionsScreen: React.FC<
                     { backgroundColor: signalStatus.color },
                   ]}
                 />
-                <Text style={[styles.statusValue, { color: signalStatus.color }]}>
+                <Text
+                  style={[styles.statusValue, { color: signalStatus.color }]}
+                >
                   {signalStatus.label}
                   {signalScore !== null && ` (${signalScore}%)`}
                 </Text>
@@ -668,7 +676,9 @@ export const CalibrationInstructionsScreen: React.FC<
           {/* Setup Steps */}
           <View style={styles.stepsContainer} testID="setup-steps">
             <Text style={styles.sectionTitle}>Setup Checklist</Text>
-            {CALIBRATION_STEPS.map((step, index) => renderStepCard(step, index))}
+            {CALIBRATION_STEPS.map((step, index) =>
+              renderStepCard(step, index)
+            )}
           </View>
 
           {/* Step Navigation */}

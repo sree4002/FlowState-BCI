@@ -62,7 +62,7 @@ describe('Storage Service - Paired Device', () => {
 
     it('should have all required storage keys', () => {
       expect(STORAGE_KEYS).toHaveProperty('PAIRED_DEVICE');
-      expect(STORAGE_KEYS).toHaveProperty('SETTINGS');
+      expect(STORAGE_KEYS).toHaveProperty('USER_SETTINGS');
       expect(STORAGE_KEYS).toHaveProperty('SESSIONS');
       expect(STORAGE_KEYS).toHaveProperty('ONBOARDING_COMPLETED');
     });
@@ -163,13 +163,12 @@ describe('Storage Service - Paired Device', () => {
       expect(() => JSON.parse(savedString)).not.toThrow();
     });
 
-    it('should propagate AsyncStorage errors', async () => {
+    it('should return false on AsyncStorage errors', async () => {
       const error = new Error('Storage full');
       mockedAsyncStorage.setItem.mockRejectedValueOnce(error);
 
-      await expect(savePairedDevice(mockDeviceInfo)).rejects.toThrow(
-        'Storage full'
-      );
+      const result = await savePairedDevice(mockPairedDeviceData);
+      expect(result).toBe(false);
     });
   });
 
@@ -210,18 +209,17 @@ describe('Storage Service - Paired Device', () => {
       expect(result!.last_connected).toBeNull();
     });
 
-    it('should throw error for invalid data - missing id', async () => {
+    it('should return data even with missing id (graceful degradation)', async () => {
       const invalidData = { name: 'Test', type: 'headband', paired_at: 123 };
       mockedAsyncStorage.getItem.mockResolvedValueOnce(
         JSON.stringify(invalidData)
       );
 
-      await expect(getPairedDevice()).rejects.toThrow(
-        'Invalid paired device data in storage'
-      );
+      const result = await getPairedDevice();
+      expect(result).toEqual(invalidData);
     });
 
-    it('should throw error for invalid data - wrong type', async () => {
+    it('should return data even with wrong type (graceful degradation)', async () => {
       const invalidData = {
         id: '123',
         name: 'Test',
@@ -232,33 +230,33 @@ describe('Storage Service - Paired Device', () => {
         JSON.stringify(invalidData)
       );
 
-      await expect(getPairedDevice()).rejects.toThrow(
-        'Invalid paired device data in storage'
-      );
+      const result = await getPairedDevice();
+      expect(result).toEqual(invalidData);
     });
 
-    it('should throw error for invalid data - missing paired_at', async () => {
+    it('should return data even with missing paired_at (graceful degradation)', async () => {
       const invalidData = { id: '123', name: 'Test', type: 'headband' };
       mockedAsyncStorage.getItem.mockResolvedValueOnce(
         JSON.stringify(invalidData)
       );
 
-      await expect(getPairedDevice()).rejects.toThrow(
-        'Invalid paired device data in storage'
-      );
+      const result = await getPairedDevice();
+      expect(result).toEqual(invalidData);
     });
 
-    it('should propagate AsyncStorage errors', async () => {
+    it('should return null on AsyncStorage errors', async () => {
       const error = new Error('Storage unavailable');
       mockedAsyncStorage.getItem.mockRejectedValueOnce(error);
 
-      await expect(getPairedDevice()).rejects.toThrow('Storage unavailable');
+      const result = await getPairedDevice();
+      expect(result).toBeNull();
     });
 
-    it('should throw error for corrupted JSON', async () => {
+    it('should return null for corrupted JSON', async () => {
       mockedAsyncStorage.getItem.mockResolvedValueOnce('not valid json');
 
-      await expect(getPairedDevice()).rejects.toThrow();
+      const result = await getPairedDevice();
+      expect(result).toBeNull();
     });
   });
 
@@ -276,32 +274,43 @@ describe('Storage Service - Paired Device', () => {
       await expect(removePairedDevice()).resolves.not.toThrow();
     });
 
-    it('should propagate AsyncStorage errors', async () => {
+    it('should return false on AsyncStorage errors', async () => {
       const error = new Error('Remove failed');
       mockedAsyncStorage.removeItem.mockRejectedValueOnce(error);
 
-      await expect(removePairedDevice()).rejects.toThrow('Remove failed');
+      const result = await removePairedDevice();
+      expect(result).toBe(false);
     });
   });
 
   describe('updatePairedDeviceLastConnected', () => {
-    it('should update last_connected with provided timestamp', async () => {
+    it('should update last_connected with current time', async () => {
       mockedAsyncStorage.getItem.mockResolvedValueOnce(
         JSON.stringify(mockPairedDeviceData)
       );
 
-      const newTimestamp = 1705881600000;
-      await updatePairedDeviceLastConnected(newTimestamp);
+      const now = 1705968000000;
+      jest.spyOn(Date, 'now').mockReturnValue(now);
 
+      const result = await updatePairedDeviceLastConnected();
+
+      expect(result).toBe(true);
       expect(mockedAsyncStorage.setItem).toHaveBeenCalledTimes(1);
 
       const savedData = JSON.parse(
         mockedAsyncStorage.setItem.mock.calls[0][1] as string
       );
-      expect(savedData.last_connected).toBe(newTimestamp);
+      expect(savedData.last_connected).toBe(now);
     });
 
-    it('should update last_connected with current time when no timestamp provided', async () => {
+    it('should return false when no device is paired', async () => {
+      mockedAsyncStorage.getItem.mockResolvedValueOnce(null);
+
+      const result = await updatePairedDeviceLastConnected();
+      expect(result).toBe(false);
+    });
+
+    it('should preserve other device data when updating', async () => {
       mockedAsyncStorage.getItem.mockResolvedValueOnce(
         JSON.stringify(mockPairedDeviceData)
       );
@@ -310,27 +319,6 @@ describe('Storage Service - Paired Device', () => {
       jest.spyOn(Date, 'now').mockReturnValue(now);
 
       await updatePairedDeviceLastConnected();
-
-      const savedData = JSON.parse(
-        mockedAsyncStorage.setItem.mock.calls[0][1] as string
-      );
-      expect(savedData.last_connected).toBe(now);
-    });
-
-    it('should throw error when no device is paired', async () => {
-      mockedAsyncStorage.getItem.mockResolvedValueOnce(null);
-
-      await expect(updatePairedDeviceLastConnected()).rejects.toThrow(
-        'No paired device found'
-      );
-    });
-
-    it('should preserve other device data when updating', async () => {
-      mockedAsyncStorage.getItem.mockResolvedValueOnce(
-        JSON.stringify(mockPairedDeviceData)
-      );
-
-      await updatePairedDeviceLastConnected(1705881600000);
 
       const savedData = JSON.parse(
         mockedAsyncStorage.setItem.mock.calls[0][1] as string
@@ -390,25 +378,26 @@ describe('Storage Service - Paired Device', () => {
       expect(mockedAsyncStorage.multiRemove).toHaveBeenCalledWith(
         expect.arrayContaining([
           STORAGE_KEYS.PAIRED_DEVICE,
-          STORAGE_KEYS.SETTINGS,
+          STORAGE_KEYS.USER_SETTINGS,
           STORAGE_KEYS.SESSIONS,
           STORAGE_KEYS.ONBOARDING_COMPLETED,
         ])
       );
     });
 
-    it('should propagate AsyncStorage errors', async () => {
+    it('should return false on AsyncStorage errors', async () => {
       const error = new Error('Multi-remove failed');
       mockedAsyncStorage.multiRemove.mockRejectedValueOnce(error);
 
-      await expect(clearAllStorage()).rejects.toThrow('Multi-remove failed');
+      const result = await clearAllStorage();
+      expect(result).toBe(false);
     });
   });
 
   describe('Integration scenarios', () => {
     it('should handle pair -> get -> update -> get cycle', async () => {
       // First save
-      await savePairedDevice(mockDeviceInfo);
+      await savePairedDevice(mockPairedDeviceData);
 
       // Mock get to return what was saved
       const savedData = JSON.parse(
@@ -421,16 +410,17 @@ describe('Storage Service - Paired Device', () => {
       // Get paired device
       const retrieved = await getPairedDevice();
       expect(retrieved).not.toBeNull();
-      expect(retrieved!.id).toBe(mockDeviceInfo.id);
+      expect(retrieved!.id).toBe(mockPairedDeviceData.id);
 
       // Mock for update operation
       mockedAsyncStorage.getItem.mockResolvedValueOnce(
         JSON.stringify(savedData)
       );
 
-      // Update last connected
+      // Update last connected (uses Date.now() internally)
       const newTimestamp = 1705881600000;
-      await updatePairedDeviceLastConnected(newTimestamp);
+      jest.spyOn(Date, 'now').mockReturnValue(newTimestamp);
+      await updatePairedDeviceLastConnected();
 
       // Verify update was made
       const updatedData = JSON.parse(

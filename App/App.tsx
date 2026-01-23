@@ -12,6 +12,7 @@ import { StatusBar, Text } from 'react-native';
 
 // Context
 import { AppContext } from './src/context/AppContext';
+import { SettingsProvider, SimulatedModeProvider } from '../src/contexts';
 
 // Screens
 import DashboardScreen from './src/screens/DashboardScreen';
@@ -88,9 +89,11 @@ export default function App(): React.JSX.Element {
   };
 
   return (
-    <AppContext.Provider value={contextValue}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
-      <NavigationContainer
+    <SettingsProvider>
+      <SimulatedModeProvider>
+        <AppContext.Provider value={contextValue}>
+          <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
+          <NavigationContainer
         theme={{
           ...DarkTheme,
           colors: {
@@ -159,7 +162,9 @@ export default function App(): React.JSX.Element {
             }}
           />
         </Tab.Navigator>
-      </NavigationContainer>
-    </AppContext.Provider>
+          </NavigationContainer>
+        </AppContext.Provider>
+      </SimulatedModeProvider>
+    </SettingsProvider>
   );
 }

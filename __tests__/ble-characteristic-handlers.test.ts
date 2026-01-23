@@ -252,7 +252,11 @@ describe('EntrainmentControlHandler', () => {
   let device: Device;
   let handler: EntrainmentControlHandler;
   let receivedErrors: Error[];
-  let writtenCommands: { serviceUUID: string; characteristicUUID: string; value: string }[];
+  let writtenCommands: {
+    serviceUUID: string;
+    characteristicUUID: string;
+    value: string;
+  }[];
 
   beforeEach(() => {
     device = new Device('test-device-001', 'FlowState BCI');

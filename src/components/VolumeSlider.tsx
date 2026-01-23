@@ -1,11 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import Slider from '@react-native-community/slider';
-import {
-  Colors,
-  Spacing,
-  Typography,
-} from '../constants/theme';
+import { Colors, Spacing, Typography } from '../constants/theme';
 
 /**
  * Minimum volume value (0%)

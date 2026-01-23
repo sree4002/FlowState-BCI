@@ -86,10 +86,18 @@ describe('React Navigation Setup', () => {
         path.join(appPath, 'App.tsx'),
         'utf-8'
       );
-      expect(appContent).toContain("import DashboardScreen from './src/screens/DashboardScreen'");
-      expect(appContent).toContain("import SessionScreen from './src/screens/SessionScreen'");
-      expect(appContent).toContain("import HistoryScreen from './src/screens/HistoryScreen'");
-      expect(appContent).toContain("import SettingsScreen from './src/screens/SettingsScreen'");
+      expect(appContent).toContain(
+        "import DashboardScreen from './src/screens/DashboardScreen'"
+      );
+      expect(appContent).toContain(
+        "import SessionScreen from './src/screens/SessionScreen'"
+      );
+      expect(appContent).toContain(
+        "import HistoryScreen from './src/screens/HistoryScreen'"
+      );
+      expect(appContent).toContain(
+        "import SettingsScreen from './src/screens/SettingsScreen'"
+      );
     });
 
     it('should use createBottomTabNavigator', () => {
@@ -119,7 +127,9 @@ describe('React Navigation Setup', () => {
         'utf-8'
       );
       expect(appContent).toContain('RootTabParamList');
-      expect(appContent).toContain('createBottomTabNavigator<RootTabParamList>');
+      expect(appContent).toContain(
+        'createBottomTabNavigator<RootTabParamList>'
+      );
     });
 
     it('should use NavigationContainer', () => {
@@ -167,14 +177,18 @@ describe('React Navigation Setup', () => {
       const packageJson = JSON.parse(
         fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8')
       );
-      expect(packageJson.dependencies['@react-navigation/native']).toBeDefined();
+      expect(
+        packageJson.dependencies['@react-navigation/native']
+      ).toBeDefined();
     });
 
     it('should have @react-navigation/bottom-tabs installed', () => {
       const packageJson = JSON.parse(
         fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8')
       );
-      expect(packageJson.dependencies['@react-navigation/bottom-tabs']).toBeDefined();
+      expect(
+        packageJson.dependencies['@react-navigation/bottom-tabs']
+      ).toBeDefined();
     });
 
     it('should have react-native-screens installed', () => {
@@ -188,7 +202,9 @@ describe('React Navigation Setup', () => {
       const packageJson = JSON.parse(
         fs.readFileSync(path.join(__dirname, '..', 'package.json'), 'utf-8')
       );
-      expect(packageJson.dependencies['react-native-safe-area-context']).toBeDefined();
+      expect(
+        packageJson.dependencies['react-native-safe-area-context']
+      ).toBeDefined();
     });
   });
 });

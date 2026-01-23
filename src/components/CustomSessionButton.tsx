@@ -8,7 +8,13 @@ import {
   Pressable,
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  BorderRadius,
+  Typography,
+  Shadows,
+} from '../constants/theme';
 import { useSession } from '../contexts/SessionContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { SessionConfig } from '../types';
@@ -115,10 +121,7 @@ export const CustomSessionButton: React.FC<CustomSessionButtonProps> = ({
   return (
     <>
       <TouchableOpacity
-        style={[
-          styles.button,
-          isDisabled && styles.buttonDisabled,
-        ]}
+        style={[styles.button, isDisabled && styles.buttonDisabled]}
         onPress={handlePress}
         disabled={isDisabled}
         activeOpacity={0.7}
@@ -133,10 +136,14 @@ export const CustomSessionButton: React.FC<CustomSessionButtonProps> = ({
             ⚙️
           </Text>
           <View style={styles.buttonTextContainer}>
-            <Text style={[styles.buttonTitle, isDisabled && styles.textDisabled]}>
+            <Text
+              style={[styles.buttonTitle, isDisabled && styles.textDisabled]}
+            >
               Custom Session
             </Text>
-            <Text style={[styles.buttonSubtitle, isDisabled && styles.textDisabled]}>
+            <Text
+              style={[styles.buttonSubtitle, isDisabled && styles.textDisabled]}
+            >
               Configure duration & settings
             </Text>
           </View>
@@ -158,7 +165,9 @@ export const CustomSessionButton: React.FC<CustomSessionButtonProps> = ({
             <View style={styles.sliderContainer}>
               <View style={styles.sliderHeader}>
                 <Text style={styles.sliderLabel}>Duration</Text>
-                <Text style={styles.sliderValue}>{formatDuration(duration)}</Text>
+                <Text style={styles.sliderValue}>
+                  {formatDuration(duration)}
+                </Text>
               </View>
               <Slider
                 style={styles.slider}
@@ -180,8 +189,12 @@ export const CustomSessionButton: React.FC<CustomSessionButtonProps> = ({
                 }}
               />
               <View style={styles.sliderRange}>
-                <Text style={styles.sliderRangeText}>{MIN_DURATION_MINUTES} min</Text>
-                <Text style={styles.sliderRangeText}>{MAX_DURATION_MINUTES} min</Text>
+                <Text style={styles.sliderRangeText}>
+                  {MIN_DURATION_MINUTES} min
+                </Text>
+                <Text style={styles.sliderRangeText}>
+                  {MAX_DURATION_MINUTES} min
+                </Text>
               </View>
             </View>
 
@@ -189,7 +202,9 @@ export const CustomSessionButton: React.FC<CustomSessionButtonProps> = ({
             <View style={styles.sliderContainer}>
               <View style={styles.sliderHeader}>
                 <Text style={styles.sliderLabel}>Frequency</Text>
-                <Text style={styles.sliderValue}>{frequency.toFixed(1)} Hz</Text>
+                <Text style={styles.sliderValue}>
+                  {frequency.toFixed(1)} Hz
+                </Text>
               </View>
               <Slider
                 style={styles.slider}
@@ -211,8 +226,12 @@ export const CustomSessionButton: React.FC<CustomSessionButtonProps> = ({
                 }}
               />
               <View style={styles.sliderRange}>
-                <Text style={styles.sliderRangeText}>{MIN_FREQUENCY_HZ} Hz (Theta)</Text>
-                <Text style={styles.sliderRangeText}>{MAX_FREQUENCY_HZ} Hz (Alpha)</Text>
+                <Text style={styles.sliderRangeText}>
+                  {MIN_FREQUENCY_HZ} Hz (Theta)
+                </Text>
+                <Text style={styles.sliderRangeText}>
+                  {MAX_FREQUENCY_HZ} Hz (Alpha)
+                </Text>
               </View>
             </View>
 

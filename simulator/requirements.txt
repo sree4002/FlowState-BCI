@@ -1,0 +1,2 @@
+# FlowState BCI Simulator Dependencies
+websockets>=10.0

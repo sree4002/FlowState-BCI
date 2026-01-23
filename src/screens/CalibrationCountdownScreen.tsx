@@ -85,10 +85,10 @@ export const getCountdownProgress = (
 export const getCountdownSignalStatus = (
   quality: SignalQuality | null
 ): { label: string; color: string; isGood: boolean } => {
-  if (!quality || quality.overall_score === undefined) {
+  if (!quality || quality.score === undefined) {
     return { label: 'Unknown', color: Colors.text.disabled, isGood: false };
   }
-  const score = quality.overall_score;
+  const score = quality.score;
   if (score >= 80) {
     return { label: 'Excellent', color: Colors.signal.excellent, isGood: true };
   }

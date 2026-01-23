@@ -7,7 +7,13 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useSession } from '../contexts';
-import { Colors, Spacing, Typography, BorderRadius, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  Typography,
+  BorderRadius,
+  Shadows,
+} from '../constants/theme';
 import type { CalibrationState } from '../types';
 
 /**
@@ -58,12 +64,19 @@ const CalibrationScreen: React.FC<CalibrationScreenProps> = ({
           <View style={styles.stateContainer}>
             <Text style={styles.stateTitle}>Calibration Setup</Text>
             <Text style={styles.stateDescription}>
-              We'll record your baseline brain activity to personalize your experience.
+              We'll record your baseline brain activity to personalize your
+              experience.
             </Text>
             <View style={styles.instructionsList}>
-              <Text style={styles.instructionItem}>1. Find a quiet, comfortable space</Text>
-              <Text style={styles.instructionItem}>2. Ensure your headband is properly positioned</Text>
-              <Text style={styles.instructionItem}>3. Close your eyes and relax during recording</Text>
+              <Text style={styles.instructionItem}>
+                1. Find a quiet, comfortable space
+              </Text>
+              <Text style={styles.instructionItem}>
+                2. Ensure your headband is properly positioned
+              </Text>
+              <Text style={styles.instructionItem}>
+                3. Close your eyes and relax during recording
+              </Text>
             </View>
             <TouchableOpacity
               style={styles.primaryButton}
@@ -120,10 +133,7 @@ const CalibrationScreen: React.FC<CalibrationScreenProps> = ({
               <Text style={styles.resultLabel}>Quality Score</Text>
               <Text style={styles.resultValue}>85%</Text>
             </View>
-            <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={onComplete}
-            >
+            <TouchableOpacity style={styles.primaryButton} onPress={onComplete}>
               <Text style={styles.primaryButtonText}>Continue</Text>
             </TouchableOpacity>
           </View>
@@ -151,9 +161,7 @@ const CalibrationScreen: React.FC<CalibrationScreenProps> = ({
         <View style={styles.headerSpacer} />
       </View>
 
-      <View style={styles.content}>
-        {renderStateContent(calibrationState)}
-      </View>
+      <View style={styles.content}>{renderStateContent(calibrationState)}</View>
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>

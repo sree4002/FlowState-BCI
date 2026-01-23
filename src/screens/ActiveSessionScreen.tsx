@@ -6,7 +6,13 @@ import {
   ScrollView,
   TouchableOpacity,
 } from 'react-native';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  BorderRadius,
+  Typography,
+  Shadows,
+} from '../constants/theme';
 import { useSession } from '../contexts/SessionContext';
 import { useDevice } from '../contexts/DeviceContext';
 import { VisualizationModeToggle } from '../components/VisualizationModeToggle';
@@ -71,7 +77,11 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
           <View
             style={[
               styles.statusIndicator,
-              { backgroundColor: deviceInfo?.is_connected ? Colors.accent.success : Colors.accent.error },
+              {
+                backgroundColor: deviceInfo?.is_connected
+                  ? Colors.accent.success
+                  : Colors.accent.error,
+              },
             ]}
           />
           <Text style={styles.statusText}>
@@ -136,7 +146,9 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
         <View style={styles.signalDetails}>
           <View style={styles.signalRow}>
             <Text style={styles.signalLabel}>Overall Score</Text>
-            <Text style={[styles.signalValue, { color: getSignalQualityColor() }]}>
+            <Text
+              style={[styles.signalValue, { color: getSignalQualityColor() }]}
+            >
               {signalQuality?.score ?? '--'}%
             </Text>
           </View>
@@ -156,7 +168,9 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
             styles.controlButton,
             sessionState === 'running' && styles.pauseButton,
           ]}
-          accessibilityLabel={sessionState === 'running' ? 'Pause session' : 'Start session'}
+          accessibilityLabel={
+            sessionState === 'running' ? 'Pause session' : 'Start session'
+          }
           accessibilityRole="button"
         >
           <Text style={styles.controlButtonText}>

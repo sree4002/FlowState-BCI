@@ -127,7 +127,9 @@ describe('HistoryScreen', () => {
 
   describe('Styling', () => {
     it('should define styles using StyleSheet.create', () => {
-      expect(historyScreenContent).toMatch(/const\s+styles\s*=\s*StyleSheet\.create/);
+      expect(historyScreenContent).toMatch(
+        /const\s+styles\s*=\s*StyleSheet\.create/
+      );
     });
 
     it('should have tab bar styles', () => {
@@ -159,7 +161,7 @@ describe('HistoryScreen', () => {
 
   describe('Required Imports', () => {
     it('should import React and useState', () => {
-      expect(historyScreenContent).toContain("import React");
+      expect(historyScreenContent).toContain('import React');
       expect(historyScreenContent).toContain('useState');
     });
 

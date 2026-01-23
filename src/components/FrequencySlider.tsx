@@ -101,9 +101,13 @@ export const FrequencySlider: React.FC<FrequencySliderProps> = ({
         value={value}
         onValueChange={handleValueChange}
         onSlidingComplete={handleSlidingComplete}
-        minimumTrackTintColor={disabled ? Colors.interactive.disabled : Colors.secondary.main}
+        minimumTrackTintColor={
+          disabled ? Colors.interactive.disabled : Colors.secondary.main
+        }
         maximumTrackTintColor={Colors.border.primary}
-        thumbTintColor={disabled ? Colors.interactive.disabled : Colors.secondary.light}
+        thumbTintColor={
+          disabled ? Colors.interactive.disabled : Colors.secondary.light
+        }
         disabled={disabled}
         testID={testID ? `${testID}-slider` : undefined}
         accessibilityLabel={`${label}: ${formatFrequency(value)}`}
@@ -117,10 +121,14 @@ export const FrequencySlider: React.FC<FrequencySliderProps> = ({
 
       {showRangeLabels && (
         <View style={styles.rangeLabels}>
-          <Text style={[styles.rangeText, disabled && styles.rangeTextDisabled]}>
+          <Text
+            style={[styles.rangeText, disabled && styles.rangeTextDisabled]}
+          >
             {MIN_FREQUENCY_HZ} Hz (Low Theta)
           </Text>
-          <Text style={[styles.rangeText, disabled && styles.rangeTextDisabled]}>
+          <Text
+            style={[styles.rangeText, disabled && styles.rangeTextDisabled]}
+          >
             {MAX_FREQUENCY_HZ} Hz (High Theta)
           </Text>
         </View>

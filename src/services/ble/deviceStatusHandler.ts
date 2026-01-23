@@ -67,7 +67,8 @@ function parseStatusPacket(rawData: Uint8Array): DeviceStatusData {
   // Parse status flags
   const isConnected = (flags & DeviceStatusFlag.CONNECTED) !== 0;
   const isStreaming = (flags & DeviceStatusFlag.STREAMING) !== 0;
-  const isEntrainmentActive = (flags & DeviceStatusFlag.ENTRAINMENT_ACTIVE) !== 0;
+  const isEntrainmentActive =
+    (flags & DeviceStatusFlag.ENTRAINMENT_ACTIVE) !== 0;
   const isLowBattery = (flags & DeviceStatusFlag.LOW_BATTERY) !== 0;
   const isCharging = (flags & DeviceStatusFlag.CHARGING) !== 0;
   const hasError = (flags & DeviceStatusFlag.ERROR) !== 0;
@@ -86,7 +87,8 @@ function parseStatusPacket(rawData: Uint8Array): DeviceStatusData {
   };
 
   return {
-    batteryLevel: isLowBattery && batteryLevel > 20 ? batteryLevel : batteryLevel,
+    batteryLevel:
+      isLowBattery && batteryLevel > 20 ? batteryLevel : batteryLevel,
     isCharging,
     isStreaming,
     isEntrainmentActive,
@@ -136,7 +138,9 @@ export class DeviceStatusHandler implements CharacteristicHandler {
         DEVICE_STATUS_CHARACTERISTIC_UUID,
         (error, characteristic) => {
           if (error) {
-            this.handleError(new Error(`Status monitoring error: ${error.message}`));
+            this.handleError(
+              new Error(`Status monitoring error: ${error.message}`)
+            );
             return;
           }
 

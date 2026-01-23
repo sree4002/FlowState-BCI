@@ -118,7 +118,11 @@ function generateCRC16Table(): Uint16Array {
 /**
  * Calculate CRC-16/CCITT-FALSE checksum
  */
-export function calculateCRC16(data: Uint8Array, start = 0, length?: number): number {
+export function calculateCRC16(
+  data: Uint8Array,
+  start = 0,
+  length?: number
+): number {
   let crc = 0xffff;
   const end = length !== undefined ? start + length : data.length;
 
@@ -168,8 +172,10 @@ export function parseMetadata(data: Uint8Array): PacketMetadata | null {
 
   const deviceTypeByte = data[HEADER_LENGTH];
   const channelCount = data[HEADER_LENGTH + 1];
-  const sequenceNumber = data[HEADER_LENGTH + 2] | (data[HEADER_LENGTH + 3] << 8);
-  const samplesPerChannel = data[HEADER_LENGTH + 4] | (data[HEADER_LENGTH + 5] << 8);
+  const sequenceNumber =
+    data[HEADER_LENGTH + 2] | (data[HEADER_LENGTH + 3] << 8);
+  const samplesPerChannel =
+    data[HEADER_LENGTH + 4] | (data[HEADER_LENGTH + 5] << 8);
 
   let deviceType: 'headband' | 'earpiece';
   let samplingRate: number;
@@ -203,7 +209,8 @@ export function parseChannelSamples(
 ): number[][] | null {
   const dataStartOffset = HEADER_LENGTH + META_LENGTH;
   const expectedSampleBytes = channelCount * samplesPerChannel * 2; // 2 bytes per sample (int16)
-  const expectedPacketLength = dataStartOffset + expectedSampleBytes + CRC_LENGTH;
+  const expectedPacketLength =
+    dataStartOffset + expectedSampleBytes + CRC_LENGTH;
 
   if (data.length !== expectedPacketLength) {
     return null;
@@ -348,7 +355,8 @@ export function updateParserState(
         droppedPackets = metadata.sequenceNumber - state.lastSequenceNumber - 1;
       } else {
         // Wrap-around case
-        droppedPackets = 0xffff - state.lastSequenceNumber + metadata.sequenceNumber;
+        droppedPackets =
+          0xffff - state.lastSequenceNumber + metadata.sequenceNumber;
       }
       state.packetsDropped += droppedPackets;
     }
@@ -411,8 +419,10 @@ export function calculateSignalQuality(channelData: number[][]): SignalQuality {
 
   // Calculate percentages
   const amplitudeArtifactPct = (amplitudeArtifacts / totalSamples) * 100;
-  const gradientArtifactPct = (gradientArtifacts / Math.max(totalSamples - channelData.length, 1)) * 100;
-  const flatlinePct = (flatlineCount / Math.max(totalSamples - channelData.length, 1)) * 100;
+  const gradientArtifactPct =
+    (gradientArtifacts / Math.max(totalSamples - channelData.length, 1)) * 100;
+  const flatlinePct =
+    (flatlineCount / Math.max(totalSamples - channelData.length, 1)) * 100;
 
   // Determine if specific artifact types are present (> 5% threshold)
   const hasAmplitudeArtifact = amplitudeArtifactPct > 5;
@@ -445,8 +455,10 @@ export function createMockPacket(
   sequenceNumber: number,
   samplesPerChannel: number
 ): Uint8Array {
-  const channelCount = deviceType === 'headband' ? HEADBAND_CHANNELS : EARPIECE_CHANNELS;
-  const deviceTypeByte = deviceType === 'headband' ? DEVICE_TYPE_HEADBAND : DEVICE_TYPE_EARPIECE;
+  const channelCount =
+    deviceType === 'headband' ? HEADBAND_CHANNELS : EARPIECE_CHANNELS;
+  const deviceTypeByte =
+    deviceType === 'headband' ? DEVICE_TYPE_HEADBAND : DEVICE_TYPE_EARPIECE;
 
   // Calculate total packet size
   const sampleBytes = channelCount * samplesPerChannel * 2;
@@ -467,7 +479,8 @@ export function createMockPacket(
 
   // Write sample data (simulated EEG - mix of theta-like oscillations)
   let offset = HEADER_LENGTH + META_LENGTH;
-  const samplingRate = deviceType === 'headband' ? HEADBAND_SAMPLING_RATE : EARPIECE_SAMPLING_RATE;
+  const samplingRate =
+    deviceType === 'headband' ? HEADBAND_SAMPLING_RATE : EARPIECE_SAMPLING_RATE;
 
   for (let sample = 0; sample < samplesPerChannel; sample++) {
     const t = sample / samplingRate;
@@ -515,7 +528,10 @@ export function getDeviceInfoFromMetadata(
  */
 export class BlePacketParser {
   private state: ParserState;
-  private onPacketParsed?: (packet: EEGDataPacket, metadata: PacketMetadata) => void;
+  private onPacketParsed?: (
+    packet: EEGDataPacket,
+    metadata: PacketMetadata
+  ) => void;
   private onPacketError?: (error: string) => void;
   private onSignalQuality?: (quality: SignalQuality) => void;
 
@@ -526,7 +542,9 @@ export class BlePacketParser {
   /**
    * Set callback for successfully parsed packets
    */
-  setOnPacketParsed(callback: (packet: EEGDataPacket, metadata: PacketMetadata) => void): void {
+  setOnPacketParsed(
+    callback: (packet: EEGDataPacket, metadata: PacketMetadata) => void
+  ): void {
     this.onPacketParsed = callback;
   }
 

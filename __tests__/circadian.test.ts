@@ -317,7 +317,9 @@ describe('Circadian Utilities', () => {
       expect(getNextPeriodStartTime('afternoon', currentTime).getHours()).toBe(
         12
       );
-      expect(getNextPeriodStartTime('evening', currentTime).getHours()).toBe(17);
+      expect(getNextPeriodStartTime('evening', currentTime).getHours()).toBe(
+        17
+      );
       expect(getNextPeriodStartTime('night', currentTime).getHours()).toBe(21);
     });
   });

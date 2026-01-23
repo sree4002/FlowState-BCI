@@ -206,8 +206,12 @@ describe('CustomSessionButton', () => {
 
     it('should have valid duration range', () => {
       expect(MIN_DURATION_MINUTES).toBeLessThan(MAX_DURATION_MINUTES);
-      expect(DEFAULT_DURATION_MINUTES).toBeGreaterThanOrEqual(MIN_DURATION_MINUTES);
-      expect(DEFAULT_DURATION_MINUTES).toBeLessThanOrEqual(MAX_DURATION_MINUTES);
+      expect(DEFAULT_DURATION_MINUTES).toBeGreaterThanOrEqual(
+        MIN_DURATION_MINUTES
+      );
+      expect(DEFAULT_DURATION_MINUTES).toBeLessThanOrEqual(
+        MAX_DURATION_MINUTES
+      );
     });
 
     it('should have valid frequency range (theta to alpha)', () => {
@@ -231,5 +235,4 @@ describe('CustomSessionButton', () => {
       expect(VOLUME_STEP).toBeGreaterThan(0);
     });
   });
-
 });

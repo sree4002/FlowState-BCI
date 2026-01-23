@@ -32,7 +32,11 @@ describe('FrequencySlider', () => {
 
     it('should allow all incremental values from 4.0 to 8.0 Hz', () => {
       const possibleValues: number[] = [];
-      for (let freq = MIN_FREQUENCY_HZ; freq <= MAX_FREQUENCY_HZ; freq += FREQUENCY_STEP) {
+      for (
+        let freq = MIN_FREQUENCY_HZ;
+        freq <= MAX_FREQUENCY_HZ;
+        freq += FREQUENCY_STEP
+      ) {
         possibleValues.push(Math.round(freq * 10) / 10);
       }
 
@@ -287,7 +291,8 @@ describe('FrequencySlider', () => {
     it('should not call callbacks if they are not provided', () => {
       // Simulate component behavior with undefined callbacks
       const onValueChange: ((value: number) => void) | undefined = undefined;
-      const onSlidingComplete: ((value: number) => void) | undefined = undefined;
+      const onSlidingComplete: ((value: number) => void) | undefined =
+        undefined;
 
       const handleValueChange = (newValue: number) => {
         const roundedValue = Math.round(newValue * 10) / 10;

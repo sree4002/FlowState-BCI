@@ -191,17 +191,39 @@ describe('ThetaNumericDisplay', () => {
   describe('Color Coding Consistency', () => {
     it('should have consistent colors and labels for all zones', () => {
       const testCases = [
-        { zscore: -1.0, expectedColor: Colors.status.red, expectedLabel: 'Low', expectedZone: 'low' },
-        { zscore: 0.0, expectedColor: Colors.status.yellow, expectedLabel: 'Baseline', expectedZone: 'baseline' },
-        { zscore: 1.0, expectedColor: Colors.status.green, expectedLabel: 'Elevated', expectedZone: 'elevated' },
-        { zscore: 2.0, expectedColor: Colors.status.blue, expectedLabel: 'Optimal', expectedZone: 'high' },
+        {
+          zscore: -1.0,
+          expectedColor: Colors.status.red,
+          expectedLabel: 'Low',
+          expectedZone: 'low',
+        },
+        {
+          zscore: 0.0,
+          expectedColor: Colors.status.yellow,
+          expectedLabel: 'Baseline',
+          expectedZone: 'baseline',
+        },
+        {
+          zscore: 1.0,
+          expectedColor: Colors.status.green,
+          expectedLabel: 'Elevated',
+          expectedZone: 'elevated',
+        },
+        {
+          zscore: 2.0,
+          expectedColor: Colors.status.blue,
+          expectedLabel: 'Optimal',
+          expectedZone: 'high',
+        },
       ];
 
-      testCases.forEach(({ zscore, expectedColor, expectedLabel, expectedZone }) => {
-        expect(getThetaZoneColor(zscore)).toBe(expectedColor);
-        expect(getThetaZoneLabel(zscore)).toBe(expectedLabel);
-        expect(categorizeZScoreZone(zscore)).toBe(expectedZone);
-      });
+      testCases.forEach(
+        ({ zscore, expectedColor, expectedLabel, expectedZone }) => {
+          expect(getThetaZoneColor(zscore)).toBe(expectedColor);
+          expect(getThetaZoneLabel(zscore)).toBe(expectedLabel);
+          expect(categorizeZScoreZone(zscore)).toBe(expectedZone);
+        }
+      );
     });
 
     it('should handle extreme values', () => {
@@ -248,7 +270,9 @@ describe('ThetaNumericDisplay', () => {
 
   describe('Props Interface', () => {
     it('should have correct default prop values', () => {
-      const defaultProps: Required<Pick<ThetaNumericDisplayProps, 'size' | 'showLabel' | 'showZone'>> = {
+      const defaultProps: Required<
+        Pick<ThetaNumericDisplayProps, 'size' | 'showLabel' | 'showZone'>
+      > = {
         size: 'medium',
         showLabel: true,
         showZone: true,
@@ -261,9 +285,13 @@ describe('ThetaNumericDisplay', () => {
     });
 
     it('should accept all size variants', () => {
-      const sizes: Array<'small' | 'medium' | 'large'> = ['small', 'medium', 'large'];
+      const sizes: Array<'small' | 'medium' | 'large'> = [
+        'small',
+        'medium',
+        'large',
+      ];
 
-      sizes.forEach(size => {
+      sizes.forEach((size) => {
         const props: ThetaNumericDisplayProps = { size, value: 1.0 };
         expect(props.size).toBe(size);
       });

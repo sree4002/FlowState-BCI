@@ -10,7 +10,13 @@ import { useSession } from '../contexts/SessionContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useDevice } from '../contexts/DeviceContext';
 import { SessionConfig } from '../types';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  BorderRadius,
+  Typography,
+  Shadows,
+} from '../constants/theme';
 
 /**
  * Props for QuickBoostButton component
@@ -33,11 +39,13 @@ export const QuickBoostButton: React.FC<QuickBoostButtonProps> = ({
   disabled = false,
   testID = 'quick-boost-button',
 }) => {
-  const { sessionState, setSessionConfig, setSessionState, setElapsedSeconds } = useSession();
+  const { sessionState, setSessionConfig, setSessionState, setElapsedSeconds } =
+    useSession();
   const { settings } = useSettings();
   const { deviceInfo, isConnecting } = useDevice();
 
-  const isSessionActive = sessionState === 'running' || sessionState === 'paused';
+  const isSessionActive =
+    sessionState === 'running' || sessionState === 'paused';
   const isDeviceConnected = deviceInfo?.is_connected ?? false;
   const isButtonDisabled = disabled || isSessionActive || isConnecting;
 
@@ -112,7 +120,9 @@ export const QuickBoostButton: React.FC<QuickBoostButtonProps> = ({
           {getButtonText()}
         </Text>
         {getSubText() ? (
-          <Text style={[styles.subText, isButtonDisabled && styles.textDisabled]}>
+          <Text
+            style={[styles.subText, isButtonDisabled && styles.textDisabled]}
+          >
             {getSubText()}
           </Text>
         ) : null}

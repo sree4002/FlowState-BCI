@@ -1,7 +1,13 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSession } from '../contexts';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  BorderRadius,
+  Typography,
+  Shadows,
+} from '../constants/theme';
 import type { Session } from '../types';
 
 /**
@@ -78,8 +84,10 @@ const calculateTodayStats = (sessions: Session[]): TodayStats => {
 
   const averageTheta =
     sessionCount > 0
-      ? todaySessions.reduce((sum, session) => sum + session.avg_theta_zscore, 0) /
-        sessionCount
+      ? todaySessions.reduce(
+          (sum, session) => sum + session.avg_theta_zscore,
+          0
+        ) / sessionCount
       : null;
 
   return {
@@ -138,7 +146,12 @@ export const TodaySummaryWidget: React.FC<TodaySummaryWidgetProps> = ({
         </View>
 
         <View style={[styles.statItem, styles.statItemFullWidth]}>
-          <Text style={[styles.statValue, { color: getThetaColor(stats.averageTheta) }]}>
+          <Text
+            style={[
+              styles.statValue,
+              { color: getThetaColor(stats.averageTheta) },
+            ]}
+          >
             {formatTheta(stats.averageTheta)}
           </Text>
           <Text style={styles.statLabel}>Avg Theta</Text>

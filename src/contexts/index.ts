@@ -23,3 +23,11 @@ export {
   type SettingsContextActions,
   type SettingsContextType,
 } from './SettingsContext';
+
+export {
+  SimulatedModeProvider,
+  useSimulatedMode,
+  type SimulatedModeContextState,
+  type SimulatedModeContextActions,
+  type SimulatedModeContextType,
+} from './SimulatedModeContext';

@@ -33,11 +33,7 @@ interface DashboardScreenProps {
 
 export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { isConnected } = useDevice();
-  const {
-    sessionState,
-    isRefreshing,
-    refreshRecentSessions,
-  } = useSession();
+  const { sessionState, isRefreshing, refreshRecentSessions } = useSession();
 
   const handleRefresh = useCallback(() => {
     refreshRecentSessions();
@@ -53,7 +49,8 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
     navigation?.navigate('Session');
   }, [navigation]);
 
-  const isSessionActive = sessionState === 'running' || sessionState === 'paused';
+  const isSessionActive =
+    sessionState === 'running' || sessionState === 'paused';
 
   return (
     <ScrollView

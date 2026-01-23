@@ -94,7 +94,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should track samples correctly', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       for (let i = 0; i < 5; i++) {
         buffer.addSample(i * 10, 1000 + i * 100);
       }
@@ -102,7 +105,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should store correct sample values', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       buffer.addSample(42.5, 1000);
       buffer.addSample(73.2, 1100);
 
@@ -111,7 +117,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should return samples in chronological order', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       buffer.addSample(1, 1000);
       buffer.addSample(2, 1100);
       buffer.addSample(3, 1200);
@@ -123,7 +132,10 @@ describe('SlidingBufferManager', () => {
 
   describe('Adding Packets', () => {
     it('should add samples from a packet', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 100, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 100,
+        windowDuration: 1,
+      });
       const packet: EEGDataPacket = {
         timestamp: 1000,
         samples: [10, 20, 30, 40, 50],
@@ -135,7 +147,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should preserve packet sample values', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 100, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 100,
+        windowDuration: 1,
+      });
       const packet: EEGDataPacket = {
         timestamp: 1000,
         samples: [10.5, 20.5, 30.5],
@@ -148,7 +163,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should add multiple packets', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 100, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 100,
+        windowDuration: 1,
+      });
       const packets: EEGDataPacket[] = [
         { timestamp: 1000, samples: [1, 2, 3], sequence_number: 1 },
         { timestamp: 1030, samples: [4, 5, 6], sequence_number: 2 },
@@ -176,7 +194,10 @@ describe('SlidingBufferManager', () => {
 
   describe('Circular Buffer Behavior', () => {
     it('should wrap around when buffer is full', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 5, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 5,
+        windowDuration: 1,
+      });
       // Capacity is 5 samples
 
       for (let i = 0; i < 10; i++) {
@@ -188,7 +209,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should contain most recent samples after overflow', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 5, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 5,
+        windowDuration: 1,
+      });
       // Capacity is 5 samples
 
       for (let i = 0; i < 10; i++) {
@@ -200,7 +224,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should maintain chronological order after wrap', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 3, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 3,
+        windowDuration: 1,
+      });
       // Capacity is 3 samples
 
       buffer.addSample(100, 1000);
@@ -225,7 +252,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should return correct timestamps', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       buffer.addSample(10, 1000);
       buffer.addSample(20, 1100);
       buffer.addSample(30, 1200);
@@ -236,7 +266,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should calculate duration correctly', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       buffer.addSample(10, 1000);
       buffer.addSample(20, 1500);
       buffer.addSample(30, 2000);
@@ -246,7 +279,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should indicate when buffer is full', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 5, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 5,
+        windowDuration: 1,
+      });
 
       for (let i = 0; i < 3; i++) {
         buffer.addSample(i, 1000 + i * 200);
@@ -264,7 +300,10 @@ describe('SlidingBufferManager', () => {
     let buffer: SlidingBufferManager;
 
     beforeEach(() => {
-      buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 2 });
+      buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 2,
+      });
       // Capacity is 20 samples
       // Add 20 samples
       for (let i = 0; i < 20; i++) {
@@ -288,7 +327,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should handle window larger than buffer', () => {
-      buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       for (let i = 0; i < 5; i++) {
         buffer.addSample(i, 1000 + i * 100);
       }
@@ -308,7 +350,10 @@ describe('SlidingBufferManager', () => {
 
   describe('Recent Samples', () => {
     it('should get most recent N samples', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       for (let i = 0; i < 10; i++) {
         buffer.addSample(i, 1000 + i * 100);
       }
@@ -317,7 +362,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should handle request larger than buffer size', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       buffer.addSample(1, 1000);
       buffer.addSample(2, 1100);
 
@@ -361,7 +409,10 @@ describe('SlidingBufferManager', () => {
 
   describe('Buffer Statistics', () => {
     it('should provide complete stats', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 100, windowDuration: 2 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 100,
+        windowDuration: 2,
+      });
       buffer.addSample(10, 1000);
       buffer.addSample(20, 1010);
 
@@ -375,7 +426,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should track total samples processed including overflow', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 5, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 5,
+        windowDuration: 1,
+      });
 
       for (let i = 0; i < 10; i++) {
         buffer.addSample(i, 1000 + i * 200);
@@ -387,7 +441,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should track oldest and latest timestamps', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 5, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 5,
+        windowDuration: 1,
+      });
       buffer.addSample(10, 1000);
       buffer.addSample(20, 1200);
       buffer.addSample(30, 1400);
@@ -412,7 +469,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should return true when buffer is full', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 5, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 5,
+        windowDuration: 1,
+      });
       for (let i = 0; i < 5; i++) {
         buffer.addSample(i, 1000 + i * 200);
       }
@@ -420,7 +480,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should check against custom minimum', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       buffer.addSample(1, 1000);
       buffer.addSample(2, 1100);
       buffer.addSample(3, 1200);
@@ -455,7 +518,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should preserve configuration after clear', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 250, windowDuration: 3 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 250,
+        windowDuration: 3,
+      });
       buffer.addSample(10, 1000);
 
       buffer.clear();
@@ -482,7 +548,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should recalculate capacity', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 500, windowDuration: 2 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 500,
+        windowDuration: 2,
+      });
       expect(buffer.getCapacity()).toBe(1000);
 
       buffer.reconfigure({ samplingRate: 250, windowDuration: 4 });
@@ -537,7 +606,10 @@ describe('SlidingBufferManager', () => {
 
   describe('Raw Buffer Access', () => {
     it('should provide access to underlying buffer', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 10, windowDuration: 1 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 10,
+        windowDuration: 1,
+      });
       buffer.addSample(42, 1000);
 
       const raw = buffer.getRawBuffer();
@@ -598,7 +670,10 @@ describe('SlidingBufferManager', () => {
     });
 
     it('should handle packet bursts', () => {
-      const buffer = new SlidingBufferManager({ samplingRate: 500, windowDuration: 2 });
+      const buffer = new SlidingBufferManager({
+        samplingRate: 500,
+        windowDuration: 2,
+      });
 
       // Simulate BLE packets arriving in bursts (typical for BLE is ~20ms intervals)
       for (let burst = 0; burst < 100; burst++) {

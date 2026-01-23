@@ -57,7 +57,10 @@ export class Device {
   monitorCharacteristicForService(
     serviceUUID: string,
     characteristicUUID: string,
-    callback: (error: Error | null, characteristic: Characteristic | null) => void
+    callback: (
+      error: Error | null,
+      characteristic: Characteristic | null
+    ) => void
   ): Subscription {
     const key = `${serviceUUID}:${characteristicUUID}`;
     this.monitorCallbacks.set(key, callback);

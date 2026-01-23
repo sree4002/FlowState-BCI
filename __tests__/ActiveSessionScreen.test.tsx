@@ -97,7 +97,9 @@ describe('ActiveSessionScreen', () => {
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('Target: 1.5+ for optimal focus state')).toBeTruthy();
+      expect(
+        screen.getByText('Target: 1.5+ for optimal focus state')
+      ).toBeTruthy();
     });
 
     it('should display placeholder theta value when no data', () => {
@@ -133,7 +135,8 @@ describe('ActiveSessionScreen', () => {
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('numeric')).toBeTruthy();
+      // The label is capitalized 'Numeric' in the VisualizationModeToggle component
+      expect(screen.getByText('Numeric')).toBeTruthy();
     });
   });
 

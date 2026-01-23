@@ -5,11 +5,7 @@
  * realistic EEG data patterns for development and testing purposes.
  */
 
-import {
-  DeviceInfo,
-  EEGDataPacket,
-  SignalQuality,
-} from '../types';
+import { DeviceInfo, EEGDataPacket, SignalQuality } from '../types';
 
 /**
  * EEG data with theta power metrics (extends basic packet)
@@ -187,7 +183,11 @@ export class MockBleService {
     if (scenario === 'custom') {
       return { ...DEFAULT_CONFIG, ...customConfig };
     }
-    return { ...DEFAULT_CONFIG, ...SCENARIO_CONFIGS[scenario], ...customConfig };
+    return {
+      ...DEFAULT_CONFIG,
+      ...SCENARIO_CONFIGS[scenario],
+      ...customConfig,
+    };
   }
 
   /**
@@ -384,8 +384,7 @@ export class MockBleService {
       (thetaPower - this.baselineThetaMean) / this.baselineThetaStd;
 
     // Generate sample array based on device type
-    const samplingRate =
-      this.config.deviceType === 'headband' ? 500 : 250;
+    const samplingRate = this.config.deviceType === 'headband' ? 500 : 250;
     const samplesPerPacket = Math.floor(
       (samplingRate * this.config.dataIntervalMs) / 1000
     );
@@ -447,7 +446,10 @@ export class MockBleService {
         break;
     }
 
-    return Math.max(0, baseTheta + noise + slowOscillation + scenarioModulation);
+    return Math.max(
+      0,
+      baseTheta + noise + slowOscillation + scenarioModulation
+    );
   }
 
   /**
@@ -507,8 +509,7 @@ export class MockBleService {
       // Generate sinusoidal sample at theta frequency with noise
       const t = (i / count) * 2 * Math.PI * this.entrainmentStatus.frequency;
       const sample =
-        Math.sin(t) * thetaPower +
-        (Math.random() - 0.5) * thetaPower * 0.1;
+        Math.sin(t) * thetaPower + (Math.random() - 0.5) * thetaPower * 0.1;
       samples.push(sample);
     }
     return samples;
@@ -523,11 +524,14 @@ export class MockBleService {
     const score = Math.max(0, Math.min(100, baseQuality + noise));
 
     // Determine artifact flags based on quality and probability
-    const hasArtifact = score < 70 || Math.random() < this.config.artifactProbability;
+    const hasArtifact =
+      score < 70 || Math.random() < this.config.artifactProbability;
 
     return {
       score,
-      artifact_percentage: hasArtifact ? 20 + Math.random() * 30 : Math.random() * 10,
+      artifact_percentage: hasArtifact
+        ? 20 + Math.random() * 30
+        : Math.random() * 10,
       has_amplitude_artifact: hasArtifact && Math.random() < 0.4,
       has_gradient_artifact: hasArtifact && Math.random() < 0.3,
       has_frequency_artifact: hasArtifact && Math.random() < 0.2,
@@ -644,9 +648,8 @@ export class MockBleService {
    * Remove connection change listener
    */
   removeConnectionListener(callback: ConnectionListener): void {
-    this.listeners.onConnectionChange = this.listeners.onConnectionChange.filter(
-      (cb) => cb !== callback
-    );
+    this.listeners.onConnectionChange =
+      this.listeners.onConnectionChange.filter((cb) => cb !== callback);
   }
 
   /**

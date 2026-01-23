@@ -197,7 +197,9 @@ describe('ThetaTimeSeriesChart Accessibility', () => {
 
   test('displays subtext in empty state', () => {
     renderWithProviders(<ThetaTimeSeriesChart />);
-    const subtext = screen.getByText('Start a session to see real-time theta data');
+    const subtext = screen.getByText(
+      'Start a session to see real-time theta data'
+    );
     expect(subtext).toBeTruthy();
   });
 });

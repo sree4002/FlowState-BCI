@@ -1,7 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useSession } from '../contexts/SessionContext';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  BorderRadius,
+  Typography,
+  Shadows,
+} from '../constants/theme';
 
 /**
  * Size variants for the ThetaNumericDisplay component
@@ -69,7 +75,9 @@ export const getThetaZoneLabel = (zscore: number | null): string => {
 /**
  * Returns the zone classification for the theta z-score value
  */
-export const categorizeZScoreZone = (zscore: number | null): ThetaZone | null => {
+export const categorizeZScoreZone = (
+  zscore: number | null
+): ThetaZone | null => {
   if (zscore === null) return null;
   if (zscore >= 1.5) return 'high';
   if (zscore >= 0.5) return 'elevated';
@@ -137,9 +145,7 @@ export const ThetaNumericDisplay: React.FC<ThetaNumericDisplayProps> = ({
 
   return (
     <View style={containerStyle} testID={testID}>
-      {showLabel && (
-        <Text style={styles.label}>Theta Z-Score</Text>
-      )}
+      {showLabel && <Text style={styles.label}>Theta Z-Score</Text>}
 
       <View style={styles.valueContainer}>
         <Text

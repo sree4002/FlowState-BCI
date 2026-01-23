@@ -1,8 +1,19 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { VictoryLine, VictoryChart, VictoryAxis, VictoryArea } from 'victory-native';
+import {
+  VictoryLine,
+  VictoryChart,
+  VictoryAxis,
+  VictoryArea,
+} from 'victory-native';
 import { useSession } from '../contexts';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  BorderRadius,
+  Typography,
+  Shadows,
+} from '../constants/theme';
 import { Session } from '../types';
 
 /**
@@ -151,7 +162,8 @@ export const ThetaTrendWidget: React.FC<ThetaTrendWidgetProps> = ({
     return Colors.chart.line1;
   }, [stats]);
 
-  const chartWidth = Dimensions.get('window').width - Spacing.lg * 2 - Spacing.md * 2;
+  const chartWidth =
+    Dimensions.get('window').width - Spacing.lg * 2 - Spacing.md * 2;
   const chartHeight = showStats ? height - 40 : height;
 
   // Empty state
@@ -175,7 +187,9 @@ export const ThetaTrendWidget: React.FC<ThetaTrendWidgetProps> = ({
         <Text style={styles.title}>{title}</Text>
         {stats && (
           <View style={styles.trendBadge}>
-            <Text style={[styles.trendText, { color: getTrendColor(stats.trend) }]}>
+            <Text
+              style={[styles.trendText, { color: getTrendColor(stats.trend) }]}
+            >
               {getTrendIndicator(stats.trend)}
             </Text>
           </View>
@@ -236,26 +250,37 @@ export const ThetaTrendWidget: React.FC<ThetaTrendWidgetProps> = ({
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Min</Text>
-            <Text style={[styles.statValue, { color: getZScoreColor(stats.min) }]}>
+            <Text
+              style={[styles.statValue, { color: getZScoreColor(stats.min) }]}
+            >
               {stats.min.toFixed(2)}
             </Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Avg</Text>
-            <Text style={[styles.statValue, { color: getZScoreColor(stats.avg) }]}>
+            <Text
+              style={[styles.statValue, { color: getZScoreColor(stats.avg) }]}
+            >
               {stats.avg.toFixed(2)}
             </Text>
           </View>
           <View style={styles.statItem}>
             <Text style={styles.statLabel}>Max</Text>
-            <Text style={[styles.statValue, { color: getZScoreColor(stats.max) }]}>
+            <Text
+              style={[styles.statValue, { color: getZScoreColor(stats.max) }]}
+            >
               {stats.max.toFixed(2)}
             </Text>
           </View>
           {stats.latest !== null && (
             <View style={styles.statItem}>
               <Text style={styles.statLabel}>Latest</Text>
-              <Text style={[styles.statValue, { color: getZScoreColor(stats.latest) }]}>
+              <Text
+                style={[
+                  styles.statValue,
+                  { color: getZScoreColor(stats.latest) },
+                ]}
+              >
                 {stats.latest.toFixed(2)}
               </Text>
             </View>

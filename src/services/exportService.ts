@@ -119,7 +119,9 @@ const objectsToCSV = <T extends Record<string, unknown>>(
   const rows: string[] = [];
 
   if (includeHeaders) {
-    rows.push(keys.map((key) => escapeCSVValue(key, delimiter)).join(delimiter));
+    rows.push(
+      keys.map((key) => escapeCSVValue(key, delimiter)).join(delimiter)
+    );
   }
 
   for (const item of data) {
@@ -182,7 +184,9 @@ export const exportBaselinesToCSV = (
     beta_mean: baseline.beta_mean.toFixed(6),
     peak_theta_freq: baseline.peak_theta_freq.toFixed(4),
     optimal_freq: baseline.optimal_freq.toFixed(4),
-    calibration_timestamp: new Date(baseline.calibration_timestamp).toISOString(),
+    calibration_timestamp: new Date(
+      baseline.calibration_timestamp
+    ).toISOString(),
     quality_score: baseline.quality_score.toFixed(2),
   }));
 
@@ -675,8 +679,7 @@ export const estimateExportSize = (
   if (data.length === 0) return 0;
 
   // Rough estimates based on typical data sizes
-  const baseSize =
-    format === 'json' ? 200 : format === 'csv' ? 150 : 2; // bytes per record
+  const baseSize = format === 'json' ? 200 : format === 'csv' ? 150 : 2; // bytes per record
 
   if ('samples' in data[0]) {
     // EEG packets
@@ -716,10 +719,7 @@ export const validateSessionsForExport = (
       errors.push(`Session ${session.id} has negative duration`);
     }
 
-    if (
-      session.signal_quality_avg < 0 ||
-      session.signal_quality_avg > 100
-    ) {
+    if (session.signal_quality_avg < 0 || session.signal_quality_avg > 100) {
       errors.push(
         `Session ${session.id} has signal_quality_avg outside valid range (0-100)`
       );

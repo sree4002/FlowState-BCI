@@ -32,9 +32,7 @@ describe('Signal Processing - Gradient Artifact Detection', () => {
       });
 
       it('should handle null/undefined input', () => {
-        const result = detectGradientArtifacts(
-          null as unknown as number[]
-        );
+        const result = detectGradientArtifacts(null as unknown as number[]);
 
         expect(result.hasGradientArtifact).toBe(false);
         expect(result.artifactPercentage).toBe(0);
@@ -200,7 +198,9 @@ describe('Signal Processing - Gradient Artifact Detection', () => {
         const amplitude = 10; // 20 µV peak-to-peak
 
         for (let i = 0; i < samplesPerCycle * 2; i++) {
-          samples.push(amplitude * Math.sin((2 * Math.PI * i) / samplesPerCycle));
+          samples.push(
+            amplitude * Math.sin((2 * Math.PI * i) / samplesPerCycle)
+          );
         }
 
         const result = detectGradientArtifacts(samples);
@@ -235,7 +235,9 @@ describe('Signal Processing - Gradient Artifact Detection', () => {
         const samples: number[] = [];
         for (let i = 0; i < 1000; i++) {
           // Normal EEG with slight noise
-          samples.push(15 * Math.sin((2 * Math.PI * 6 * i) / 500) + Math.random() * 5);
+          samples.push(
+            15 * Math.sin((2 * Math.PI * 6 * i) / 500) + Math.random() * 5
+          );
         }
 
         const result = detectGradientArtifacts(samples);
@@ -249,7 +251,9 @@ describe('Signal Processing - Gradient Artifact Detection', () => {
         const samples: number[] = [];
         for (let i = 0; i < 500; i++) {
           // Normal EEG with slight noise
-          samples.push(15 * Math.sin((2 * Math.PI * 6 * i) / 250) + Math.random() * 5);
+          samples.push(
+            15 * Math.sin((2 * Math.PI * 6 * i) / 250) + Math.random() * 5
+          );
         }
 
         const result = detectGradientArtifacts(samples);
@@ -271,7 +275,9 @@ describe('Signal Processing - Gradient Artifact Detection', () => {
       });
 
       it('should have correct types for all properties', () => {
-        const result: GradientArtifactResult = detectGradientArtifacts([10, 100, 110]);
+        const result: GradientArtifactResult = detectGradientArtifacts([
+          10, 100, 110,
+        ]);
 
         expect(typeof result.hasGradientArtifact).toBe('boolean');
         expect(typeof result.artifactPercentage).toBe('number');

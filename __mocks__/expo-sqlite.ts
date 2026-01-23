@@ -16,8 +16,10 @@ export interface SQLiteDatabase {
 }
 
 // In-memory storage for test database
-let tables: Map<string, Map<number | string, Record<string, unknown>>> =
-  new Map();
+let tables: Map<
+  string,
+  Map<number | string, Record<string, unknown>>
+> = new Map();
 let autoIncrementCounters: Map<string, number> = new Map();
 let indexes: Set<string> = new Set();
 let tableSchemas: Map<string, string> = new Map(); // Store original CREATE TABLE SQL
@@ -241,11 +243,19 @@ const filterRows = (
     });
   }
 
-  // Handle "field >= ?" condition
+  // Handle "field >= ?" condition with placeholder
   if (where.match(/(\w+)\s*>=\s*\?/i)) {
     const match = where.match(/(\w+)\s*>=\s*\?/i)!;
     const field = match[1];
     const val = params[0] as number;
+    return rows.filter((row) => (row[field] as number) >= val);
+  }
+
+  // Handle "field >= literal_number" condition (no placeholder)
+  const literalGeMatch = where.match(/(\w+)\s*>=\s*(\d+)/i);
+  if (literalGeMatch) {
+    const field = literalGeMatch[1];
+    const val = parseInt(literalGeMatch[2], 10);
     return rows.filter((row) => (row[field] as number) >= val);
   }
 
@@ -259,6 +269,20 @@ const filterRows = (
   if (where.match(/version\s*=\s*\?/i)) {
     const version = params[0] as number;
     return rows.filter((row) => row.version === version);
+  }
+
+  // WHERE hour_of_day = ? parsing
+  if (where.match(/hour_of_day\s*=\s*\?/i)) {
+    const hourOfDay = params[0] as number;
+    return rows.filter((row) => row.hour_of_day === hourOfDay);
+  }
+
+  // Generic WHERE field = ? parsing for any single field
+  const genericMatch = where.match(/^(\w+)\s*=\s*\?$/i);
+  if (genericMatch) {
+    const field = genericMatch[1];
+    const value = params[0];
+    return rows.filter((row) => row[field] === value);
   }
 
   return rows;
@@ -367,6 +391,8 @@ const parseDelete = (
     return { tableName, key: params[0] as number, keyField: 'id' };
   } else if (sql.match(/WHERE\s+version\s*=\s*\?/i)) {
     return { tableName, key: params[0] as number, keyField: 'version' };
+  } else if (sql.match(/WHERE\s+hour_of_day\s*=\s*\?/i)) {
+    return { tableName, key: params[0] as number, keyField: 'hour_of_day' };
   }
 
   return { tableName };
@@ -506,7 +532,8 @@ class MockSQLiteDatabase implements SQLiteDatabase {
       if (key !== undefined && keyField) {
         // Delete by specific key field
         let existed = false;
-        if (keyField === 'version') {
+        if (keyField === 'version' || keyField === 'hour_of_day') {
+          // For tables using version or hour_of_day as PK
           existed = table.has(key);
           table.delete(key);
         } else {
@@ -548,6 +575,63 @@ class MockSQLiteDatabase implements SQLiteDatabase {
         ...rows.map((r) => (r[field] as number) ?? -Infinity)
       );
       return { [alias]: maxVal === -Infinity ? null : maxVal } as T;
+    }
+
+    // Handle aggregate stats queries (COUNT, SUM, AVG)
+    if (query.match(/SELECT\s+.*COUNT\(\*\).*SUM\(/is)) {
+      const tableMatch = query.match(/FROM\s+(\w+)/i);
+      if (tableMatch) {
+        const tableName = tableMatch[1];
+        const table = tables.get(tableName);
+        if (!table || table.size === 0) {
+          return {
+            total_sessions: 0,
+            total_duration_seconds: 0,
+            avg_theta_zscore: 0,
+            avg_signal_quality: 0,
+            avg_subjective_rating: null,
+          } as T;
+        }
+
+        const rows = Array.from(table.values()) as Record<string, unknown>[];
+        const total_sessions = rows.length;
+        const total_duration_seconds = rows.reduce(
+          (sum, r) => sum + ((r.duration_seconds as number) || 0),
+          0
+        );
+        const avg_theta_zscore =
+          total_sessions > 0
+            ? rows.reduce(
+                (sum, r) => sum + ((r.avg_theta_zscore as number) || 0),
+                0
+              ) / total_sessions
+            : 0;
+        const avg_signal_quality =
+          total_sessions > 0
+            ? rows.reduce(
+                (sum, r) => sum + ((r.signal_quality_avg as number) || 0),
+                0
+              ) / total_sessions
+            : 0;
+        const ratingsWithValue = rows.filter(
+          (r) => r.subjective_rating !== null && r.subjective_rating !== undefined
+        );
+        const avg_subjective_rating =
+          ratingsWithValue.length > 0
+            ? ratingsWithValue.reduce(
+                (sum, r) => sum + (r.subjective_rating as number),
+                0
+              ) / ratingsWithValue.length
+            : null;
+
+        return {
+          total_sessions,
+          total_duration_seconds,
+          avg_theta_zscore,
+          avg_signal_quality,
+          avg_subjective_rating,
+        } as T;
+      }
     }
 
     const { tableName, isCount, orderBy, where } = parseSelect(query);

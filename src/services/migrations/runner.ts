@@ -58,10 +58,10 @@ const recordMigration = (
   db: SQLite.SQLiteDatabase,
   migration: Migration
 ): void => {
-  db.runSync(
-    `INSERT INTO ${MIGRATIONS_TABLE} (version, name) VALUES (?, ?)`,
-    [migration.version, migration.name]
-  );
+  db.runSync(`INSERT INTO ${MIGRATIONS_TABLE} (version, name) VALUES (?, ?)`, [
+    migration.version,
+    migration.name,
+  ]);
 };
 
 /**

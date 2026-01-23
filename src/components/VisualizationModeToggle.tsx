@@ -1,6 +1,12 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
+import {
+  Colors,
+  Spacing,
+  BorderRadius,
+  Typography,
+  Shadows,
+} from '../constants/theme';
 import { VisualizationMode } from '../types';
 
 export interface VisualizationModeToggleProps {
@@ -40,11 +46,9 @@ const MODE_OPTIONS: ModeOption[] = [
  * VisualizationModeToggle - A segmented control for switching between
  * visualization modes (Numeric, Gauge, Chart)
  */
-export const VisualizationModeToggle: React.FC<VisualizationModeToggleProps> = ({
-  selectedMode,
-  onModeChange,
-  testID,
-}) => {
+export const VisualizationModeToggle: React.FC<
+  VisualizationModeToggleProps
+> = ({ selectedMode, onModeChange, testID }) => {
   return (
     <View style={styles.container} testID={testID}>
       <Text style={styles.label}>Visualization Mode</Text>

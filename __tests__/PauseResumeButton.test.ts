@@ -58,11 +58,11 @@ describe('PauseResumeButton', () => {
 
   describe('Component Exports in index.ts', () => {
     it('should export PauseResumeButton from index', () => {
-      expect(indexContent).toContain("export { PauseResumeButton }");
+      expect(indexContent).toContain('export { PauseResumeButton }');
     });
 
     it('should export PauseResumeButtonProps type', () => {
-      expect(indexContent).toContain("export type { PauseResumeButtonProps }");
+      expect(indexContent).toContain('export type { PauseResumeButtonProps }');
     });
 
     it('should export getButtonLabel helper', () => {
@@ -201,19 +201,27 @@ describe('PauseResumeButton', () => {
       });
 
       it('should return Pause for running state', () => {
-        expect(componentContent).toMatch(/'running'[\s\S]*?return\s+['"]Pause['"]/);
+        expect(componentContent).toMatch(
+          /'running'[\s\S]*?return\s+['"]Pause['"]/
+        );
       });
 
       it('should return Resume for paused state', () => {
-        expect(componentContent).toMatch(/'paused'[\s\S]*?return\s+['"]Resume['"]/);
+        expect(componentContent).toMatch(
+          /'paused'[\s\S]*?return\s+['"]Resume['"]/
+        );
       });
 
       it('should return Start for idle state', () => {
-        expect(componentContent).toMatch(/'idle'[\s\S]*?return\s+['"]Start['"]/);
+        expect(componentContent).toMatch(
+          /'idle'[\s\S]*?return\s+['"]Start['"]/
+        );
       });
 
       it('should return Restart for stopped state', () => {
-        expect(componentContent).toMatch(/'stopped'[\s\S]*?return\s+['"]Restart['"]/);
+        expect(componentContent).toMatch(
+          /'stopped'[\s\S]*?return\s+['"]Restart['"]/
+        );
       });
     });
 
@@ -306,7 +314,9 @@ describe('PauseResumeButton', () => {
 
   describe('Context Integration', () => {
     it('should use useSession hook', () => {
-      expect(componentContent).toMatch(/const\s*\{[^}]*\}\s*=\s*useSession\(\)/);
+      expect(componentContent).toMatch(
+        /const\s*\{[^}]*\}\s*=\s*useSession\(\)/
+      );
     });
 
     it('should destructure sessionState from context', () => {
@@ -392,7 +402,9 @@ describe('PauseResumeButton', () => {
 
   describe('Accessibility Features', () => {
     it('should have accessibilityRole="button"', () => {
-      expect(componentContent).toMatch(/accessibilityRole\s*=\s*["']button["']/);
+      expect(componentContent).toMatch(
+        /accessibilityRole\s*=\s*["']button["']/
+      );
     });
 
     it('should have accessibilityLabel', () => {
@@ -412,7 +424,9 @@ describe('PauseResumeButton', () => {
     });
 
     it('should set busy in accessibilityState for running', () => {
-      expect(componentContent).toMatch(/busy:\s*sessionState\s*===\s*['"]running['"]/);
+      expect(componentContent).toMatch(
+        /busy:\s*sessionState\s*===\s*['"]running['"]/
+      );
     });
   });
 
@@ -598,7 +612,9 @@ describe('PauseResumeButton', () => {
     });
 
     it('should have JSDoc for props interface', () => {
-      expect(componentContent).toMatch(/\/\*\*[\s\S]*?Props for PauseResumeButton/);
+      expect(componentContent).toMatch(
+        /\/\*\*[\s\S]*?Props for PauseResumeButton/
+      );
     });
   });
 });
