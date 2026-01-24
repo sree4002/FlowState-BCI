@@ -1,3 +1,13 @@
-// Hooks export placeholder
-// Export custom React hooks here as they are created
-export {};
+// Hooks exports
+
+// Battery Optimization
+export {
+  useBatteryOptimization,
+  hasOptimizationLevelChanged,
+  getOptimizationLevelDescription,
+  getBatteryLevelCategory,
+} from './useBatteryOptimization';
+export type {
+  UseBatteryOptimizationOptions,
+  UseBatteryOptimizationResult,
+} from './useBatteryOptimization';

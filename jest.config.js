@@ -43,6 +43,7 @@ module.exports = {
     '^@react-native-community/slider$':
       '<rootDir>/__mocks__/@react-native-community/slider.ts',
     '^react-native-chart-kit$': '<rootDir>/__mocks__/react-native-chart-kit.ts',
+    '^@sentry/react-native$': '<rootDir>/__mocks__/@sentry/react-native.ts',
     // Mock binary audio assets
     '\\.(wav|mp3|ogg|m4a|aac)$': '<rootDir>/__mocks__/audioFileMock.js',
   },

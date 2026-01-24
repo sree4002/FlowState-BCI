@@ -16,3 +16,6 @@ export * from './audioMixingService';
 // Data export and sharing services
 export * from './exportService';
 export * from './shareService';
+
+// Crash reporting service
+export * from './crashReportingService';

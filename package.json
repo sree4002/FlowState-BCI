@@ -10,6 +10,9 @@
     "web": "expo start --web",
     "test": "jest",
     "test:tsc": "tsc --noEmit",
+    "test:e2e": "jest --config e2e/jest.config.js",
+    "test:e2e:ios": "detox test --configuration ios.sim.debug",
+    "test:e2e:android": "detox test --configuration android.emu.debug",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""

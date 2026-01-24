@@ -40,3 +40,20 @@ export type {
   SessionDataManagerConfig,
   MemoryStats,
 } from './sessionDataManager';
+
+// Battery Optimization
+export {
+  BATTERY_THRESHOLDS,
+  SAMPLING_RATES,
+  CHART_UPDATE_INTERVALS,
+  getBatteryLevel,
+  isLowPowerMode,
+  getOptimalSamplingRate,
+  getOptimalChartUpdateInterval,
+  shouldReduceAnimations,
+  getOptimizationLevel,
+  getBatteryOptimizedConfig,
+  getCurrentBatteryOptimizedConfig,
+  isBatteryMonitoringAvailable,
+} from './batteryOptimization';
+export type { BatteryOptimizationConfig } from './batteryOptimization';

@@ -218,9 +218,9 @@
 - [x] Implement CSV export with session summary columns
 - [x] Implement JSON export with complete user profile
 - [x] Implement EDF export for raw EEG data (with electrode metadata)
-- [ ] Create share sheet integration for iOS/Android
-- [ ] Add export progress indicator for large datasets
-- [ ] Create data deletion confirmation flow with "Clear all data" option
+- [x] Create share sheet integration for iOS/Android
+- [x] Add export progress indicator for large datasets
+- [x] Create data deletion confirmation flow with "Clear all data" option
 
 ## Phase 19: A/B Testing Mode
 
@@ -253,12 +253,12 @@
 
 ## Phase 22: Audio Mixing & Controls
 
-- [ ] Implement exclusive audio mode (pause other audio during entrainment)
-- [ ] Implement mix mode (blend isochronic tones with other audio)
-- [ ] Create mixing ratio control slider
-- [ ] Configure iOS AVAudioSession for mixing behavior
-- [ ] Configure Android AudioManager for mixing behavior
-- [ ] Detect playing audio and suggest appropriate mode
+- [x] Implement exclusive audio mode (pause other audio during entrainment)
+- [x] Implement mix mode (blend isochronic tones with other audio)
+- [x] Create mixing ratio control slider
+- [x] Configure iOS AVAudioSession for mixing behavior
+- [x] Configure Android AudioManager for mixing behavior
+- [x] Detect playing audio and suggest appropriate mode
 
 ## Phase 23: Testing & Quality Assurance
 
