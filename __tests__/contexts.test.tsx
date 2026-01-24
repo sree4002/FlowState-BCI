@@ -216,7 +216,7 @@ describe('SessionContext', () => {
       expect(result.current.sessionConfig).toBeNull();
       expect(result.current.sessionState).toBe('idle');
       expect(result.current.calibrationState).toBeNull();
-      expect(result.current.visualizationMode).toBe('numeric');
+      expect(result.current.visualizationMode).toBe('chart');
       expect(result.current.currentThetaZScore).toBeNull();
       expect(result.current.elapsedSeconds).toBe(0);
       expect(result.current.recentSessions).toEqual([]);
@@ -447,7 +447,7 @@ describe('SessionContext', () => {
       expect(result.current.sessionConfig).toBeNull();
       expect(result.current.sessionState).toBe('idle');
       expect(result.current.calibrationState).toBeNull();
-      expect(result.current.visualizationMode).toBe('numeric');
+      expect(result.current.visualizationMode).toBe('chart');
       expect(result.current.currentThetaZScore).toBeNull();
       expect(result.current.elapsedSeconds).toBe(0);
     });

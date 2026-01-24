@@ -7,9 +7,14 @@
  * 3. Triggers entrainment output with appropriate cooldown
  * 4. Stops entrainment when theta recovers
  *
- * THRESHOLD LOGIC:
+ * THRESHOLD LOGIC (with hysteresis to prevent rapid toggling):
  * - Start entrainment when z_score < startThreshold (default: -0.5)
- * - Stop entrainment when z_score > stopThreshold (default: 0.5)
+ * - Stop entrainment when z_score > stopThreshold (default: -0.3)
+ *
+ * The hysteresis gap (0.2) ensures stable behavior:
+ * - LOW state (z < -0.5): Starts tone
+ * - NORMAL state (z ≈ 0): Stops tone (since 0 > -0.3)
+ * - HIGH state (z > 0.5): Stays stopped
  *
  * COOLDOWN LOGIC:
  * - After stopping entrainment, wait cooldownMs before restarting
@@ -43,7 +48,7 @@ export interface ClosedLoopControllerConfig {
   /** Z-score threshold to START entrainment (default: -0.5) */
   startThreshold?: number;
 
-  /** Z-score threshold to STOP entrainment (default: 0.5) */
+  /** Z-score threshold to STOP entrainment (default: -0.3, with hysteresis) */
   stopThreshold?: number;
 
   /** Cooldown period in ms after stopping entrainment (default: 5000) */
@@ -93,7 +98,7 @@ export class ClosedLoopController {
 
     this.config = {
       startThreshold: -0.5,
-      stopThreshold: 0.5,
+      stopThreshold: -0.3, // Hysteresis: stop when z > -0.3 (ensures NORMAL state stops tone)
       cooldownMs: 5000,
       minEntrainmentMs: 3000,
       entrainmentFrequency: 6,
@@ -241,10 +246,22 @@ export class ClosedLoopController {
   private processMetrics(metrics: EEGMetrics): void {
     const now = Date.now();
 
+    // Debug logging for threshold logic
+    console.log('[ClosedLoopController] processMetrics:', {
+      state: this.state,
+      zScore: metrics.z_score,
+      startThreshold: this.config.startThreshold,
+      stopThreshold: this.config.stopThreshold,
+      shouldStart: metrics.z_score < this.config.startThreshold,
+      shouldStop: metrics.z_score > this.config.stopThreshold,
+      isPlaying: this.entrainmentOutput.isPlaying(),
+    });
+
     switch (this.state) {
       case 'monitoring':
         // Check if we should start entrainment
         if (metrics.z_score < this.config.startThreshold) {
+          console.log('[ClosedLoopController] Starting entrainment - z_score below startThreshold');
           this.startEntrainment();
         }
         break;
@@ -256,8 +273,16 @@ export class ClosedLoopController {
           const elapsed = this.entrainmentStartTime
             ? now - this.entrainmentStartTime
             : 0;
+          console.log('[ClosedLoopController] Checking stop condition:', {
+            elapsed,
+            minEntrainmentMs: this.config.minEntrainmentMs,
+            canStop: elapsed >= this.config.minEntrainmentMs,
+          });
           if (elapsed >= this.config.minEntrainmentMs) {
+            console.log('[ClosedLoopController] Stopping entrainment - z_score above stopThreshold and min time elapsed');
             this.stopEntrainment();
+          } else {
+            console.log('[ClosedLoopController] Cannot stop yet - min entrainment time not reached');
           }
         }
         break;

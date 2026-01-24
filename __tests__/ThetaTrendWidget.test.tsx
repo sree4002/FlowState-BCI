@@ -11,12 +11,14 @@ import { ThetaTrendWidget } from '../src/components/ThetaTrendWidget';
 import { SessionProvider } from '../src/contexts/SessionContext';
 import { Session } from '../src/types';
 
-// Mock victory-native components
-jest.mock('victory-native', () => ({
-  VictoryLine: 'VictoryLine',
-  VictoryChart: 'VictoryChart',
-  VictoryAxis: 'VictoryAxis',
-  VictoryArea: 'VictoryArea',
+// Mock react-native-chart-kit components
+jest.mock('react-native-chart-kit', () => ({
+  LineChart: 'LineChart',
+  BarChart: 'BarChart',
+  PieChart: 'PieChart',
+  ProgressChart: 'ProgressChart',
+  ContributionGraph: 'ContributionGraph',
+  StackedBarChart: 'StackedBarChart',
 }));
 
 // Mock Dimensions

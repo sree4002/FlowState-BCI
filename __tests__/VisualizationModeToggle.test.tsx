@@ -192,14 +192,14 @@ describe('VisualizationModeToggle', () => {
 
 describe('VisualizationModeToggle with SessionContext', () => {
   describe('Context Integration', () => {
-    it('should have default visualizationMode as "numeric"', () => {
+    it('should have default visualizationMode as "chart"', () => {
       const wrapper = ({ children }: { children: React.ReactNode }) => (
         <SessionProvider>{children}</SessionProvider>
       );
 
       const { result } = renderHook(() => useSession(), { wrapper });
 
-      expect(result.current.visualizationMode).toBe('numeric');
+      expect(result.current.visualizationMode).toBe('chart');
     });
 
     it('should update visualizationMode to "gauge" via context', () => {
@@ -267,7 +267,7 @@ describe('VisualizationModeToggle with SessionContext', () => {
         result.current.resetSessionState();
       });
 
-      expect(result.current.visualizationMode).toBe('numeric');
+      expect(result.current.visualizationMode).toBe('chart');
     });
   });
 
@@ -309,18 +309,18 @@ describe('VisualizationModeToggle with SessionContext', () => {
         </SessionProvider>
       );
 
-      // Verify initial state - numeric should be selected
-      const numericButton = getByLabelText('Numeric visualization mode');
-      expect(numericButton.props.accessibilityState?.selected).toBe(true);
+      // Verify initial state - chart should be selected (new default)
+      const chartButton = getByLabelText('Chart visualization mode');
+      expect(chartButton.props.accessibilityState?.selected).toBe(true);
+
+      // Change mode to numeric
+      fireEvent.press(getByText('Numeric'));
 
       // Change mode to gauge
       fireEvent.press(getByText('Gauge'));
 
-      // Change mode to chart
+      // Change back to chart
       fireEvent.press(getByText('Chart'));
-
-      // Change back to numeric
-      fireEvent.press(getByText('Numeric'));
     });
   });
 });

@@ -1,11 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import {
-  VictoryLine,
-  VictoryChart,
-  VictoryAxis,
-  VictoryArea,
-} from 'victory-native';
+import { LineChart } from 'react-native-chart-kit';
 import { useSession } from '../contexts';
 import {
   Colors,
@@ -28,14 +23,6 @@ export interface ThetaTrendWidgetProps {
   showStats?: boolean;
   /** Title to display above the chart */
   title?: string;
-}
-
-/**
- * Data point for the sparkline chart
- */
-interface SparklineDataPoint {
-  x: number;
-  y: number;
 }
 
 /**
@@ -130,12 +117,11 @@ export const ThetaTrendWidget: React.FC<ThetaTrendWidgetProps> = ({
   const { recentSessions } = useSession();
 
   // Prepare data for sparkline - reverse to show oldest to newest left-to-right
-  const sparklineData: SparklineDataPoint[] = useMemo(() => {
+  const chartData = useMemo(() => {
     const sessions = recentSessions.slice(0, maxDataPoints).reverse();
-    return sessions.map((session, index) => ({
-      x: index,
-      y: session.avg_theta_zscore,
-    }));
+    const data = sessions.map((session) => session.avg_theta_zscore);
+    const labels = sessions.map((_, index) => (index + 1).toString());
+    return { data, labels };
   }, [recentSessions, maxDataPoints]);
 
   // Calculate statistics
@@ -143,16 +129,6 @@ export const ThetaTrendWidget: React.FC<ThetaTrendWidgetProps> = ({
     () => calculateStats(recentSessions.slice(0, maxDataPoints)),
     [recentSessions, maxDataPoints]
   );
-
-  // Determine chart domain
-  const yDomain = useMemo((): [number, number] => {
-    if (sparklineData.length === 0) return [-1, 2];
-    const values = sparklineData.map((d) => d.y);
-    const minY = Math.min(...values, 0);
-    const maxY = Math.max(...values, 1);
-    const padding = (maxY - minY) * 0.1 || 0.5;
-    return [minY - padding, maxY + padding];
-  }, [sparklineData]);
 
   // Get color for the latest value
   const lineColor = useMemo(() => {
@@ -167,7 +143,7 @@ export const ThetaTrendWidget: React.FC<ThetaTrendWidgetProps> = ({
   const chartHeight = showStats ? height - 40 : height;
 
   // Empty state
-  if (sparklineData.length === 0) {
+  if (chartData.data.length === 0) {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>{title}</Text>
@@ -197,53 +173,37 @@ export const ThetaTrendWidget: React.FC<ThetaTrendWidgetProps> = ({
       </View>
 
       <View style={styles.chartContainer}>
-        <VictoryChart
+        <LineChart
+          data={{
+            labels: [],
+            datasets: [{ data: chartData.data }],
+          }}
           width={chartWidth}
           height={chartHeight}
-          padding={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          domain={{ y: yDomain }}
-        >
-          {/* Hidden axes for clean sparkline look */}
-          <VictoryAxis
-            style={{
-              axis: { stroke: 'transparent' },
-              ticks: { stroke: 'transparent' },
-              tickLabels: { fill: 'transparent' },
-            }}
-          />
-          <VictoryAxis
-            dependentAxis
-            style={{
-              axis: { stroke: 'transparent' },
-              ticks: { stroke: 'transparent' },
-              tickLabels: { fill: 'transparent' },
-            }}
-          />
-
-          {/* Area fill under the line */}
-          <VictoryArea
-            data={sparklineData}
-            interpolation="monotoneX"
-            style={{
-              data: {
-                fill: lineColor,
-                fillOpacity: 0.2,
-              },
-            }}
-          />
-
-          {/* Main sparkline */}
-          <VictoryLine
-            data={sparklineData}
-            interpolation="monotoneX"
-            style={{
-              data: {
-                stroke: lineColor,
-                strokeWidth: 2,
-              },
-            }}
-          />
-        </VictoryChart>
+          chartConfig={{
+            backgroundColor: Colors.surface.primary,
+            backgroundGradientFrom: Colors.surface.primary,
+            backgroundGradientTo: Colors.surface.primary,
+            decimalPlaces: 2,
+            color: () => lineColor,
+            labelColor: () => Colors.text.tertiary,
+            strokeWidth: 2,
+            propsForBackgroundLines: {
+              strokeWidth: 0,
+            },
+            fillShadowGradientFrom: lineColor,
+            fillShadowGradientTo: Colors.surface.primary,
+            fillShadowGradientFromOpacity: 0.2,
+            fillShadowGradientToOpacity: 0,
+          }}
+          bezier
+          withDots={false}
+          withInnerLines={false}
+          withOuterLines={false}
+          withHorizontalLabels={false}
+          withVerticalLabels={false}
+          style={{ borderRadius: BorderRadius.md }}
+        />
       </View>
 
       {showStats && stats && (

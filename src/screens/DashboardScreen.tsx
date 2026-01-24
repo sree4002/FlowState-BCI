@@ -14,7 +14,7 @@
 
 import React, { useCallback } from 'react';
 import { View, StyleSheet, ScrollView, RefreshControl } from 'react-native';
-import { useDevice } from '../contexts';
+import { useDevice, useSimulatedMode } from '../contexts';
 import { useSession } from '../contexts';
 import { Colors, Spacing } from '../constants/theme';
 import { DeviceStatusWidget } from '../components/DeviceStatusWidget';
@@ -24,6 +24,7 @@ import { NextSessionWidget } from '../components/NextSessionWidget';
 import { QuickBoostButton } from '../components/QuickBoostButton';
 import { CalibrateButton } from '../components/CalibrateButton';
 import { CustomSessionButton } from '../components/CustomSessionButton';
+import { SimulatedModeDebugView } from '../components/SimulatedModeDebugView';
 
 interface DashboardScreenProps {
   navigation?: {
@@ -33,7 +34,12 @@ interface DashboardScreenProps {
 
 export default function DashboardScreen({ navigation }: DashboardScreenProps) {
   const { isConnected } = useDevice();
+  const { connectionState: simulatedConnectionState } = useSimulatedMode();
   const { sessionState, isRefreshing, refreshRecentSessions } = useSession();
+
+  // Device is usable if either real device OR simulator is connected
+  const isDeviceUsable =
+    isConnected || simulatedConnectionState === 'connected';
 
   const handleRefresh = useCallback(() => {
     refreshRecentSessions();
@@ -65,13 +71,18 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
         />
       }
     >
+      {/* Simulated Mode Debug Panel */}
+      <View style={styles.section}>
+        <SimulatedModeDebugView testID="simulated-mode-debug" />
+      </View>
+
       {/* Connection Status Bar */}
       <View style={styles.connectionBar}>
         <View
           style={[
             styles.connectionDot,
             {
-              backgroundColor: isConnected
+              backgroundColor: isDeviceUsable
                 ? Colors.accent.success
                 : Colors.accent.error,
             },
@@ -111,7 +122,7 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
         <View style={styles.primaryAction}>
           <QuickBoostButton
             onSessionStart={handleSessionStart}
-            disabled={!isConnected || isSessionActive}
+            disabled={!isDeviceUsable || isSessionActive}
             testID="quick-boost-button"
           />
         </View>
@@ -124,14 +135,14 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
               variant="secondary"
               size="md"
               label="Calibrate"
-              disabled={!isConnected || isSessionActive}
+              disabled={!isDeviceUsable || isSessionActive}
               testID="calibrate-button"
             />
           </View>
           <View style={styles.secondaryActionItem}>
             <CustomSessionButton
               onSessionStart={handleSessionStart}
-              disabled={!isConnected || isSessionActive}
+              disabled={!isDeviceUsable || isSessionActive}
               testID="custom-session-button"
             />
           </View>

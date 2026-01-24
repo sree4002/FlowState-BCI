@@ -113,8 +113,8 @@ describe('ClosedLoopController', () => {
       expect(sourceCode).toContain('startThreshold: -0.5');
     });
 
-    it('should have default stopThreshold of 0.5', () => {
-      expect(sourceCode).toContain('stopThreshold: 0.5');
+    it('should have default stopThreshold of -0.3 (hysteresis)', () => {
+      expect(sourceCode).toContain('stopThreshold: -0.3');
     });
 
     it('should have default cooldownMs of 5000', () => {

@@ -82,7 +82,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
   const [calibrationState, setCalibrationState] =
     useState<CalibrationState | null>(null);
   const [visualizationMode, setVisualizationMode] =
-    useState<VisualizationMode>('numeric');
+    useState<VisualizationMode>('chart');
   const [currentThetaZScore, setCurrentThetaZScore] = useState<number | null>(
     null
   );
@@ -138,7 +138,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({
     setSessionConfig(null);
     setSessionState('idle');
     setCalibrationState(null);
-    setVisualizationMode('numeric');
+    setVisualizationMode('chart');
     setCurrentThetaZScore(null);
     setElapsedSeconds(0);
   };

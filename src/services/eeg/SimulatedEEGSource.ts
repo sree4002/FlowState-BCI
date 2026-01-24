@@ -63,7 +63,7 @@ export class SimulatedEEGSource implements EEGSource {
     this.urlSource = config.serverUrl ? 'settings' : 'default';
 
     this.config = {
-      serverUrl: 'ws://10.5.29.185:8765', // Your LAN IP; override via settings
+      serverUrl: 'ws://10.5.29.191:8765', // Your LAN IP; override via settings
       autoReconnect: true,
       maxReconnectAttempts: 5,
       reconnectDelay: 2000,

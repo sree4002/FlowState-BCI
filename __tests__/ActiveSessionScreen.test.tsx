@@ -84,7 +84,8 @@ describe('ActiveSessionScreen', () => {
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('Disconnected')).toBeTruthy();
+      // When simulated mode is enabled, shows 'Simulator Disconnected'
+      expect(screen.getByText('Simulator Disconnected')).toBeTruthy();
     });
 
     it('should display control buttons', () => {
@@ -97,33 +98,34 @@ describe('ActiveSessionScreen', () => {
       expect(screen.getByText('Stop')).toBeTruthy();
     });
 
-    it('should display theta target hint', () => {
+    it('should display chart empty state when no session', () => {
+      render(
+        <TestWrapper>
+          <ActiveSessionScreen />
+        </TestWrapper>
+      );
+      // Chart mode is now the default, shows empty state when no session
+      expect(screen.getByText('No active session')).toBeTruthy();
+    });
+
+    it('should display chart empty state hint', () => {
       render(
         <TestWrapper>
           <ActiveSessionScreen />
         </TestWrapper>
       );
       expect(
-        screen.getByText('Target: 1.5+ for optimal focus state')
+        screen.getByText('Start a session to see real-time theta data')
       ).toBeTruthy();
     });
 
-    it('should display placeholder theta value when no data', () => {
+    it('should display theta z-score title in chart', () => {
       render(
         <TestWrapper>
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('--')).toBeTruthy();
-    });
-
-    it('should display waiting state for theta zone', () => {
-      render(
-        <TestWrapper>
-          <ActiveSessionScreen />
-        </TestWrapper>
-      );
-      expect(screen.getByText('Waiting...')).toBeTruthy();
+      expect(screen.getByText('Theta Z-Score')).toBeTruthy();
     });
 
     it('should display idle session state', () => {
@@ -132,17 +134,19 @@ describe('ActiveSessionScreen', () => {
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('idle')).toBeTruthy();
+      // When simulated mode is enabled, state is displayed as 'Idle' (capitalized)
+      expect(screen.getByText('Idle')).toBeTruthy();
     });
 
-    it('should display numeric visualization mode as default', () => {
+    it('should display chart visualization mode as default', () => {
       render(
         <TestWrapper>
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      // The label is capitalized 'Numeric' in the VisualizationModeToggle component
-      expect(screen.getByText('Numeric')).toBeTruthy();
+      // Chart is now the default visualization mode
+      // The toggle shows all modes, and Chart should be selected
+      expect(screen.getByText('Chart')).toBeTruthy();
     });
   });
 

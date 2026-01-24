@@ -93,6 +93,26 @@ export const Modal = ({ children, style, testID, visible, ...props }: any) => {
   );
 };
 
+// Mock Switch component
+export const Switch = ({
+  value,
+  onValueChange,
+  testID,
+  trackColor,
+  thumbColor,
+  ...props
+}: any) => {
+  return React.createElement('Switch', {
+    value,
+    onValueChange,
+    'data-testid': testID,
+    testID,
+    trackColor,
+    thumbColor,
+    ...props,
+  });
+};
+
 // Mock Dimensions
 export const Dimensions = {
   get: () => ({ width: 375, height: 812, scale: 2, fontScale: 1 }),
@@ -150,6 +170,11 @@ export const Keyboard = {
   addListener: () => ({ remove: () => {} }),
 };
 
+// Mock Alert
+export const Alert = {
+  alert: jest.fn(),
+};
+
 // Default export
 export default {
   View,
@@ -166,9 +191,11 @@ export default {
   Pressable,
   RefreshControl,
   Modal,
+  Switch,
   Dimensions,
   Animated,
   Easing,
   PixelRatio,
   Keyboard,
+  Alert,
 };

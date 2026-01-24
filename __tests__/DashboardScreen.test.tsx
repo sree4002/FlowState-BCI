@@ -15,6 +15,26 @@ import DashboardScreen from '../src/screens/DashboardScreen';
 import { DeviceProvider } from '../src/contexts/DeviceContext';
 import { SessionProvider } from '../src/contexts/SessionContext';
 import { SettingsProvider } from '../src/contexts/SettingsContext';
+import { SimulatedModeProvider } from '../src/contexts/SimulatedModeContext';
+
+// Mock expo-av for SimulatedModeDebugView audio test
+jest.mock('expo-av', () => ({
+  Audio: {
+    setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
+    Sound: {
+      createAsync: jest.fn().mockResolvedValue({
+        sound: {
+          playAsync: jest.fn().mockResolvedValue(undefined),
+          stopAsync: jest.fn().mockResolvedValue(undefined),
+          unloadAsync: jest.fn().mockResolvedValue(undefined),
+          setVolumeAsync: jest.fn().mockResolvedValue(undefined),
+          getStatusAsync: jest.fn().mockResolvedValue({ isLoaded: true }),
+        },
+        status: { isLoaded: true },
+      }),
+    },
+  },
+}));
 
 // Mock navigation
 const mockNavigate = jest.fn();
@@ -44,9 +64,11 @@ jest.mock('react-native-safe-area-context', () => ({
 // Wrapper component to provide all required contexts
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <SettingsProvider>
-    <DeviceProvider>
-      <SessionProvider>{children}</SessionProvider>
-    </DeviceProvider>
+    <SimulatedModeProvider>
+      <DeviceProvider>
+        <SessionProvider>{children}</SessionProvider>
+      </DeviceProvider>
+    </SimulatedModeProvider>
   </SettingsProvider>
 );
 
@@ -409,9 +431,11 @@ describe('DashboardScreen', () => {
       expect(() => {
         render(
           <SettingsProvider>
-            <DeviceProvider>
-              <DashboardScreen />
-            </DeviceProvider>
+            <SimulatedModeProvider>
+              <DeviceProvider>
+                <DashboardScreen />
+              </DeviceProvider>
+            </SimulatedModeProvider>
           </SettingsProvider>
         );
       }).toThrow('useSession must be used within a SessionProvider');

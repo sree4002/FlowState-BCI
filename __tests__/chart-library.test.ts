@@ -1,7 +1,7 @@
 /**
  * Chart Library Installation Tests
  *
- * Verifies that victory-native chart library is properly installed and configured.
+ * Verifies that react-native-chart-kit chart library is properly installed and configured.
  */
 
 import { readFileSync, existsSync } from 'fs';
@@ -17,86 +17,82 @@ describe('Chart Library Installation', () => {
       packageJson = JSON.parse(packageContent);
     });
 
-    test('should have victory-native in dependencies', () => {
+    test('should have react-native-chart-kit in dependencies', () => {
       const dependencies = packageJson.dependencies as Record<string, string>;
       expect(dependencies).toBeDefined();
-      expect(dependencies['victory-native']).toBeDefined();
-      expect(typeof dependencies['victory-native']).toBe('string');
+      expect(dependencies['react-native-chart-kit']).toBeDefined();
+      expect(typeof dependencies['react-native-chart-kit']).toBe('string');
     });
 
-    test('should have a valid version for victory-native', () => {
+    test('should have a valid version for react-native-chart-kit', () => {
       const dependencies = packageJson.dependencies as Record<string, string>;
-      const version = dependencies['victory-native'];
+      const version = dependencies['react-native-chart-kit'];
       // Should be a semver-compatible version string
       expect(version).toMatch(/^[\^~]?\d+\.\d+\.\d+/);
+    });
+
+    test('should have react-native-svg in dependencies', () => {
+      const dependencies = packageJson.dependencies as Record<string, string>;
+      expect(dependencies).toBeDefined();
+      expect(dependencies['react-native-svg']).toBeDefined();
+      expect(typeof dependencies['react-native-svg']).toBe('string');
     });
   });
 
   describe('node_modules', () => {
-    test('victory-native should be installed in node_modules', () => {
-      const victoryNativePath = resolve(
+    test('react-native-chart-kit should be installed in node_modules', () => {
+      const chartKitPath = resolve(
         __dirname,
-        '../node_modules/victory-native'
+        '../node_modules/react-native-chart-kit'
       );
-      expect(existsSync(victoryNativePath)).toBe(true);
+      expect(existsSync(chartKitPath)).toBe(true);
     });
 
-    test('victory-native package.json should exist', () => {
+    test('react-native-chart-kit package.json should exist', () => {
       const packageJsonPath = resolve(
         __dirname,
-        '../node_modules/victory-native/package.json'
+        '../node_modules/react-native-chart-kit/package.json'
       );
       expect(existsSync(packageJsonPath)).toBe(true);
     });
 
-    test('victory-native should have a valid package.json', () => {
+    test('react-native-chart-kit should have a valid package.json', () => {
       const packageJsonPath = resolve(
         __dirname,
-        '../node_modules/victory-native/package.json'
+        '../node_modules/react-native-chart-kit/package.json'
       );
       const packageContent = readFileSync(packageJsonPath, 'utf-8');
       const packageJson = JSON.parse(packageContent);
-      expect(packageJson.name).toBe('victory-native');
+      expect(packageJson.name).toBe('react-native-chart-kit');
       expect(packageJson.version).toBeDefined();
     });
 
-    test('victory-native should be resolvable', () => {
+    test('react-native-chart-kit should be resolvable', () => {
       expect(() => {
-        require.resolve('victory-native');
+        require.resolve('react-native-chart-kit');
       }).not.toThrow();
     });
 
-    test('victory-native dist folder should exist', () => {
-      const distPath = resolve(
+    test('react-native-svg should be installed in node_modules', () => {
+      const svgPath = resolve(
         __dirname,
-        '../node_modules/victory-native/dist'
+        '../node_modules/react-native-svg'
       );
-      expect(existsSync(distPath)).toBe(true);
-    });
-
-    test('victory-native should have index file', () => {
-      const indexPath = resolve(
-        __dirname,
-        '../node_modules/victory-native/dist/index.js'
-      );
-      expect(existsSync(indexPath)).toBe(true);
+      expect(existsSync(svgPath)).toBe(true);
     });
   });
 
   describe('Chart Library Purpose', () => {
-    test('victory-native is installed for charting needs', () => {
-      // This test documents the purpose of victory-native in the project
-      // Victory Native provides chart components for:
+    test('react-native-chart-kit is installed for charting needs', () => {
+      // This test documents the purpose of react-native-chart-kit in the project
+      // react-native-chart-kit provides chart components for:
       // - ThetaTrendWidget with sparkline charts
       // - ThetaTimeSeriesChart with scrolling line charts
-      // - ThetaGaugeDisplay with circular gauge charts
-      // - CircadianPatternChart showing theta by time of day
-      // - SessionFrequencyChart with bar charts
       // - And other visualization needs throughout the app
 
       const packageJsonPath = resolve(
         __dirname,
-        '../node_modules/victory-native/package.json'
+        '../node_modules/react-native-chart-kit/package.json'
       );
       expect(existsSync(packageJsonPath)).toBe(true);
     });

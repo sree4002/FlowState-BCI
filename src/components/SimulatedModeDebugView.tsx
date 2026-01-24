@@ -12,7 +12,7 @@
  * - Controls to force theta state
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -26,6 +26,11 @@ import {
 import { Audio, AVPlaybackStatus } from 'expo-av';
 import { useSimulatedMode } from '../contexts';
 import { useSettings } from '../contexts';
+import { ThetaNumericDisplay } from './ThetaNumericDisplay';
+import { ThetaGaugeDisplay } from './ThetaGaugeDisplay';
+import { ThetaTimeSeriesChart } from './ThetaTimeSeriesChart';
+import { VisualizationModeToggle } from './VisualizationModeToggle';
+import { VisualizationMode } from '../types';
 
 // Import the bundled audio asset for self-test
 
@@ -117,6 +122,36 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
   // Local state for URL editing
   const [urlInput, setUrlInput] = useState(settings.simulated_mode_server_url);
   const [audioTestStatus, setAudioTestStatus] = useState<string | null>(null);
+
+  // Visualization mode state
+  const [visualizationMode, setVisualizationMode] =
+    useState<VisualizationMode>('numeric');
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Timer for elapsed time tracking
+  useEffect(() => {
+    if (isControllerRunning) {
+      // Start timer when controller starts
+      timerRef.current = setInterval(() => {
+        setElapsedSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      // Stop timer and reset when controller stops
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      setElapsedSeconds(0);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isControllerRunning]);
 
   // Handle URL save
   const handleSaveUrl = () => {
@@ -235,6 +270,51 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
       await start();
     } else {
       await stop();
+    }
+  };
+
+  // Render visualization based on selected mode
+  const renderVisualization = () => {
+    const currentZScore = metrics?.z_score ?? null;
+    const isRunning = isControllerRunning;
+
+    switch (visualizationMode) {
+      case 'chart':
+        return (
+          <ThetaTimeSeriesChart
+            height={200}
+            timeWindowMinutes={1}
+            showTimeSelector={true}
+            showCurrentValue={true}
+            showZoneLines={true}
+            externalThetaZScore={currentZScore}
+            externalElapsedSeconds={elapsedSeconds}
+            externalIsRunning={isRunning}
+          />
+        );
+      case 'gauge':
+        return (
+          <View style={styles.visualizationCard}>
+            <ThetaGaugeDisplay
+              value={currentZScore}
+              size={180}
+              showLabel={true}
+              showValue={true}
+            />
+          </View>
+        );
+      case 'numeric':
+      default:
+        return (
+          <View style={styles.visualizationCard}>
+            <ThetaNumericDisplay
+              value={currentZScore}
+              showLabel={true}
+              showZone={true}
+              size="large"
+            />
+          </View>
+        );
     }
   };
 
@@ -412,6 +492,19 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
                 {metrics?.signal_quality?.toFixed(0) ?? '--'}
               </Text>
               <Text style={styles.metricUnit}>%</Text>
+            </View>
+          </View>
+
+          {/* Visualization Section */}
+          <View style={styles.visualizationSection}>
+            <Text style={styles.visualizationTitle}>Theta Visualization</Text>
+            <VisualizationModeToggle
+              selectedMode={visualizationMode}
+              onModeChange={setVisualizationMode}
+              testID="simulated-viz-toggle"
+            />
+            <View style={styles.visualizationContainer}>
+              {renderVisualization()}
             </View>
           </View>
 
@@ -639,6 +732,28 @@ const styles = StyleSheet.create({
   stateText: {
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.bold,
+  },
+  visualizationSection: {
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border.secondary,
+  },
+  visualizationTitle: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.sm,
+  },
+  visualizationContainer: {
+    marginTop: Spacing.sm,
+  },
+  visualizationCard: {
+    backgroundColor: Colors.surface.secondary,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   controlsSection: {
     marginTop: Spacing.md,

@@ -12,13 +12,7 @@ import {
   Dimensions,
   TouchableOpacity,
 } from 'react-native';
-import {
-  VictoryLine,
-  VictoryChart,
-  VictoryAxis,
-  VictoryArea,
-  VictoryScatter,
-} from 'victory-native';
+import { LineChart } from 'react-native-chart-kit';
 import { useSession } from '../contexts';
 import {
   Colors,
@@ -117,7 +111,7 @@ export const ThetaTimeSeriesChart: React.FC<ThetaTimeSeriesChartProps> = ({
   timeWindowMinutes = 1,
   showTimeSelector = true,
   showCurrentValue = true,
-  showZoneLines = true,
+  showZoneLines: _showZoneLines = true,
   title = 'Theta Z-Score',
   updateInterval = 500,
   onTimeWindowChange,
@@ -226,30 +220,6 @@ export const ThetaTimeSeriesChart: React.FC<ThetaTimeSeriesChartProps> = ({
     return dataPoints.filter((point) => point.x >= windowStart);
   }, [dataPoints, elapsedSeconds, timeWindowSeconds]);
 
-  // Calculate chart domain
-  const domain = useMemo(() => {
-    const xMin = Math.max(0, elapsedSeconds - timeWindowSeconds);
-    const xMax = Math.max(timeWindowSeconds, elapsedSeconds);
-
-    // Y domain with padding
-    let yMin = -1;
-    let yMax = 2;
-
-    if (visibleData.length > 0) {
-      const values = visibleData.map((d) => d.y);
-      yMin = Math.min(...values, -0.5);
-      yMax = Math.max(...values, 1.5);
-      const padding = Math.max((yMax - yMin) * 0.15, 0.5);
-      yMin -= padding;
-      yMax += padding;
-    }
-
-    return {
-      x: [xMin, xMax] as [number, number],
-      y: [yMin, yMax] as [number, number],
-    };
-  }, [elapsedSeconds, timeWindowSeconds, visibleData]);
-
   // Get line color based on current z-score
   const lineColor = useMemo(() => {
     if (currentThetaZScore !== null) {
@@ -264,28 +234,29 @@ export const ThetaTimeSeriesChart: React.FC<ThetaTimeSeriesChartProps> = ({
   const chartHeight =
     height - (showTimeSelector ? 50 : 0) - (showCurrentValue ? 30 : 0);
 
-  // Generate X-axis tick values (show 5 ticks)
-  const xTickValues = useMemo(() => {
-    const [xMin, xMax] = domain.x;
-    const tickCount = 5;
-    const step = (xMax - xMin) / (tickCount - 1);
-    return Array.from({ length: tickCount }, (_, i) =>
-      Math.round(xMin + step * i)
-    );
-  }, [domain.x]);
-
-  // Zone line data
-  const zoneLines = useMemo(() => {
-    if (!showZoneLines) return [];
-    return [
-      { y: 0, color: Colors.status.yellow, label: '0' },
-      { y: 0.5, color: Colors.status.green, label: '0.5' },
-      { y: 1.5, color: Colors.status.blue, label: '1.5' },
-    ];
-  }, [showZoneLines]);
-
   // Time window options
   const timeWindows: TimeWindowMinutes[] = [1, 2, 3, 5];
+
+  // Generate time labels for x-axis
+  const generateLabels = useMemo(() => {
+    if (visibleData.length === 0) return ['0:00'];
+    const firstTime = visibleData[0]?.x ?? 0;
+    const lastTime = visibleData[visibleData.length - 1]?.x ?? 0;
+    const step = (lastTime - firstTime) / 4;
+    return Array.from({ length: 5 }, (_, i) =>
+      formatTime(Math.round(firstTime + step * i))
+    );
+  }, [visibleData]);
+
+  // Prepare chart data - ensure at least 2 points for LineChart
+  const chartData = useMemo(() => {
+    const data = visibleData.map((d) => d.y);
+    // LineChart needs at least 2 data points
+    if (data.length < 2) {
+      return data.length === 1 ? [data[0], data[0]] : [0, 0];
+    }
+    return data;
+  }, [visibleData]);
 
   // Empty state
   if (sessionState !== 'running' && visibleData.length === 0) {
@@ -321,103 +292,43 @@ export const ThetaTimeSeriesChart: React.FC<ThetaTimeSeriesChartProps> = ({
 
       {/* Chart */}
       <View style={styles.chartContainer}>
-        <VictoryChart
+        <LineChart
+          data={{
+            labels: generateLabels,
+            datasets: [{ data: chartData }],
+          }}
           width={chartWidth}
           height={chartHeight}
-          padding={{ top: 20, bottom: 35, left: 45, right: 20 }}
-          domain={domain}
-        >
-          {/* X Axis - Time */}
-          <VictoryAxis
-            tickValues={xTickValues}
-            tickFormat={(t: number) => formatTime(t)}
-            style={{
-              axis: { stroke: Colors.chart.grid },
-              ticks: { stroke: Colors.chart.grid, size: 5 },
-              tickLabels: {
-                fill: Colors.text.tertiary,
-                fontSize: Typography.fontSize.xs,
-              },
-              grid: { stroke: Colors.chart.grid, strokeDasharray: '4,4' },
-            }}
-          />
-
-          {/* Y Axis - Z-Score */}
-          <VictoryAxis
-            dependentAxis
-            style={{
-              axis: { stroke: Colors.chart.grid },
-              ticks: { stroke: Colors.chart.grid, size: 5 },
-              tickLabels: {
-                fill: Colors.text.tertiary,
-                fontSize: Typography.fontSize.xs,
-              },
-              grid: { stroke: Colors.chart.grid, strokeDasharray: '4,4' },
-            }}
-          />
-
-          {/* Zone reference lines */}
-          {zoneLines.map((zone) => (
-            <VictoryLine
-              key={zone.y}
-              data={[
-                { x: domain.x[0], y: zone.y },
-                { x: domain.x[1], y: zone.y },
-              ]}
-              style={{
-                data: {
-                  stroke: zone.color,
-                  strokeWidth: 1,
-                  strokeDasharray: '8,4',
-                  strokeOpacity: 0.5,
-                },
-              }}
-            />
-          ))}
-
-          {/* Area fill under the line */}
-          {visibleData.length > 0 && (
-            <VictoryArea
-              data={visibleData}
-              interpolation="monotoneX"
-              style={{
-                data: {
-                  fill: lineColor,
-                  fillOpacity: 0.15,
-                },
-              }}
-            />
-          )}
-
-          {/* Main data line */}
-          {visibleData.length > 0 && (
-            <VictoryLine
-              data={visibleData}
-              interpolation="monotoneX"
-              style={{
-                data: {
-                  stroke: lineColor,
-                  strokeWidth: 2.5,
-                },
-              }}
-            />
-          )}
-
-          {/* Current value indicator dot */}
-          {visibleData.length > 0 && (
-            <VictoryScatter
-              data={[visibleData[visibleData.length - 1]]}
-              size={6}
-              style={{
-                data: {
-                  fill: lineColor,
-                  stroke: Colors.surface.primary,
-                  strokeWidth: 2,
-                },
-              }}
-            />
-          )}
-        </VictoryChart>
+          chartConfig={{
+            backgroundColor: Colors.surface.primary,
+            backgroundGradientFrom: Colors.surface.primary,
+            backgroundGradientTo: Colors.surface.primary,
+            decimalPlaces: 1,
+            color: () => lineColor,
+            labelColor: () => Colors.text.tertiary,
+            strokeWidth: 2.5,
+            propsForBackgroundLines: {
+              stroke: Colors.chart.grid,
+              strokeDasharray: '4,4',
+              strokeWidth: 1,
+            },
+            propsForLabels: {
+              fontSize: Typography.fontSize.xs,
+            },
+            fillShadowGradientFrom: lineColor,
+            fillShadowGradientTo: Colors.surface.primary,
+            fillShadowGradientFromOpacity: 0.15,
+            fillShadowGradientToOpacity: 0,
+          }}
+          bezier
+          withDots={visibleData.length < 30}
+          withInnerLines={true}
+          withOuterLines={true}
+          withHorizontalLabels={true}
+          withVerticalLabels={true}
+          fromZero={false}
+          style={{ borderRadius: BorderRadius.md }}
+        />
       </View>
 
       {/* Time window selector */}
