@@ -18,6 +18,7 @@ import {
   Modal,
   Dimensions,
   Animated,
+  ViewStyle,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
@@ -231,16 +232,18 @@ export function Tooltip({
     }
   };
 
-  const getTooltipPosition = () => {
+  const getTooltipPosition = (): ViewStyle => {
     switch (position) {
       case 'top':
-        return { bottom: '100%', marginBottom: Spacing.sm };
+        return { bottom: '100%' as const, marginBottom: Spacing.sm };
       case 'bottom':
-        return { top: '100%', marginTop: Spacing.sm };
+        return { top: '100%' as const, marginTop: Spacing.sm };
       case 'left':
-        return { right: '100%', marginRight: Spacing.sm };
+        return { right: '100%' as const, marginRight: Spacing.sm };
       case 'right':
-        return { left: '100%', marginLeft: Spacing.sm };
+        return { left: '100%' as const, marginLeft: Spacing.sm };
+      default:
+        return { top: '100%' as const, marginTop: Spacing.sm };
     }
   };
 

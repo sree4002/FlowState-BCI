@@ -153,3 +153,25 @@ export type {
   TooltipId,
   SpotlightTooltipProps,
 } from './Tooltip';
+
+export { ErrorBoundary, withErrorBoundary } from './ErrorBoundary';
+export type { ErrorBoundaryProps } from './ErrorBoundary';
+
+export {
+  LoadingSpinner,
+  SkeletonBox,
+  SkeletonCard,
+  SkeletonList,
+  SessionSkeleton,
+  DashboardSkeleton,
+  ChartSkeleton,
+} from './LoadingStates';
+export type {
+  LoadingSpinnerProps,
+  SkeletonBoxProps,
+  SkeletonCardProps,
+  SkeletonListProps,
+  SessionSkeletonProps,
+  DashboardSkeletonProps,
+  ChartSkeletonProps,
+} from './LoadingStates';

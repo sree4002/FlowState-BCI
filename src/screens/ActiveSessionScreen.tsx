@@ -139,7 +139,7 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
         return (
           <View style={styles.thetaCard}>
             <ThetaGaugeDisplay
-              zscore={currentThetaZScore ?? 0}
+              value={currentThetaZScore}
               size={200}
               showLabel={true}
               showValue={true}
