@@ -10,6 +10,7 @@
 - [x] Set up React Context for global state management (DeviceContext, SessionContext, SettingsContext)
 - [x] Configure ESLint and Prettier for code consistency
 - [x] Set up dark theme color palette (calming blues/purples) as design tokens
+- [ ] Consolidate App/src/ folder into src/ (remove duplicate folder structure, update imports)
 
 ## Phase 2: Database & Storage Layer
 
@@ -74,6 +75,11 @@
 - [x] Create ThetaNumericDisplay showing current z-score value with color coding
 - [x] Create ThetaGaugeDisplay with circular gauge and color-coded zones (red/yellow/green/blue)
 - [x] Create ThetaTimeSeriesChart with scrolling line chart (last 1-5 minutes)
+- [ ] Wire ThetaTimeSeriesChart to SimulatedModeContext data stream
+- [ ] Display real-time theta power values on chart (rolling 60-second window)
+- [ ] Add secondary y-axis or separate chart for z-score over time
+- [ ] Ensure chart renders and updates when using simulated EEG mode
+- [ ] Add loading state when waiting for first data points
 - [x] Create visualization mode toggle (Numeric, Gauge, Chart)
 - [x] Create FrequencySlider component (4-8 Hz, 0.1 Hz increments)
 - [x] Create VolumeSlider component (0-100%)
@@ -270,6 +276,7 @@
 
 ## Phase 24: Polish & Performance
 
+- [ ] Fix 321 ESLint/Prettier warnings (one-time cleanup with `npm run lint -- --fix`)
 - [ ] Optimize real-time chart rendering for smooth 2-5 Hz updates
 - [ ] Implement memory management for long session data buffers
 - [ ] Add loading states and skeleton screens throughout app
