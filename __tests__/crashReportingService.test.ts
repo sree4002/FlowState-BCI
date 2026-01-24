@@ -61,7 +61,7 @@ describe('Crash Reporting Service', () => {
     it('should initialize with valid DSN', async () => {
       injectMockSentryModule(mockSentryModule);
 
-      const result = await initializeCrashReporting('https://test@sentry.io/123');
+      const result = initializeCrashReporting('https://test@sentry.io/123');
 
       expect(result).toBe(true);
       expect(mockInit).toHaveBeenCalledTimes(1);
@@ -75,7 +75,7 @@ describe('Crash Reporting Service', () => {
     it('should return false for empty DSN', async () => {
       injectMockSentryModule(mockSentryModule);
 
-      const result = await initializeCrashReporting('');
+      const result = initializeCrashReporting('');
 
       expect(result).toBe(false);
       expect(mockInit).not.toHaveBeenCalled();
@@ -84,7 +84,7 @@ describe('Crash Reporting Service', () => {
     it('should return false for whitespace-only DSN', async () => {
       injectMockSentryModule(mockSentryModule);
 
-      const result = await initializeCrashReporting('   ');
+      const result = initializeCrashReporting('   ');
 
       expect(result).toBe(false);
       expect(mockInit).not.toHaveBeenCalled();
@@ -93,8 +93,8 @@ describe('Crash Reporting Service', () => {
     it('should warn and return true if already initialized', async () => {
       injectMockSentryModule(mockSentryModule);
 
-      await initializeCrashReporting('https://test@sentry.io/123');
-      const result = await initializeCrashReporting('https://other@sentry.io/456');
+      initializeCrashReporting('https://test@sentry.io/123');
+      const result = initializeCrashReporting('https://other@sentry.io/456');
 
       expect(result).toBe(true);
       expect(mockInit).toHaveBeenCalledTimes(1);
@@ -103,7 +103,7 @@ describe('Crash Reporting Service', () => {
     it('should accept custom options', async () => {
       injectMockSentryModule(mockSentryModule);
 
-      const result = await initializeCrashReporting('https://test@sentry.io/123', {
+      const result = initializeCrashReporting('https://test@sentry.io/123', {
         environment: 'staging',
         debug: true,
         tracesSampleRate: 0.5,
@@ -126,7 +126,7 @@ describe('Crash Reporting Service', () => {
       // We test the unavailable scenario by not injecting a mock and verifying
       // the initialization still succeeds when the global mock is present.
       // The actual unavailable scenario is covered by the fallback behavior tests.
-      const result = await initializeCrashReporting('https://test@sentry.io/123');
+      const result = initializeCrashReporting('https://test@sentry.io/123');
 
       // In test env with mock available, this will succeed
       expect(result).toBe(true);
@@ -137,7 +137,7 @@ describe('Crash Reporting Service', () => {
 
       expect(isCrashReportingInitialized()).toBe(false);
 
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
 
       expect(isCrashReportingInitialized()).toBe(true);
     });
@@ -150,7 +150,7 @@ describe('Crash Reporting Service', () => {
   describe('captureException', () => {
     beforeEach(async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
     });
 
     it('should capture an error and return event ID', () => {
@@ -215,7 +215,7 @@ describe('Crash Reporting Service', () => {
   describe('captureMessage', () => {
     beforeEach(async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
     });
 
     it('should capture a message with default info level', () => {
@@ -281,7 +281,7 @@ describe('Crash Reporting Service', () => {
   describe('setUser', () => {
     beforeEach(async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
     });
 
     it('should set user with ID only', () => {
@@ -321,7 +321,7 @@ describe('Crash Reporting Service', () => {
   describe('clearUser', () => {
     beforeEach(async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
     });
 
     it('should clear user by setting null', () => {
@@ -354,7 +354,7 @@ describe('Crash Reporting Service', () => {
   describe('addBreadcrumb', () => {
     beforeEach(async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
     });
 
     it('should add breadcrumb with message only', () => {
@@ -434,7 +434,7 @@ describe('Crash Reporting Service', () => {
   describe('setContext', () => {
     beforeEach(async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
     });
 
     it('should set context with key and data', () => {
@@ -509,14 +509,14 @@ describe('Crash Reporting Service', () => {
 
     it('should return true after successful initialization', async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
 
       expect(isCrashReportingInitialized()).toBe(true);
     });
 
     it('should return false after reset', async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
 
       resetCrashReportingState();
 
@@ -546,7 +546,7 @@ describe('Crash Reporting Service', () => {
   describe('resetCrashReportingState', () => {
     it('should reset all state to initial values', async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
 
       expect(isCrashReportingInitialized()).toBe(true);
       expect(isSentryModuleAvailable()).toBe(true);
@@ -570,7 +570,7 @@ describe('Crash Reporting Service', () => {
       };
 
       injectMockSentryModule(customMock);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
 
       const error = new Error('Test');
       const eventId = captureException(error);
@@ -594,7 +594,7 @@ describe('Crash Reporting Service', () => {
   describe('Integration Tests', () => {
     beforeEach(async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
     });
 
     it('should complete full crash reporting workflow', () => {
@@ -651,7 +651,7 @@ describe('Crash Reporting Service', () => {
     it('should handle initialization with minimal options', async () => {
       injectMockSentryModule(mockSentryModule);
 
-      const result = await initializeCrashReporting('https://test@sentry.io/123');
+      const result = initializeCrashReporting('https://test@sentry.io/123');
 
       expect(result).toBe(true);
       expect(mockInit).toHaveBeenCalledWith(
@@ -664,7 +664,7 @@ describe('Crash Reporting Service', () => {
 
     it('should handle error with no message', async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
 
       const error = new Error();
       captureException(error);
@@ -674,7 +674,7 @@ describe('Crash Reporting Service', () => {
 
     it('should handle empty breadcrumb message', async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
 
       addBreadcrumb('');
 
@@ -687,7 +687,7 @@ describe('Crash Reporting Service', () => {
 
     it('should handle empty context object', async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
 
       setContext('empty', {});
 
@@ -696,7 +696,7 @@ describe('Crash Reporting Service', () => {
 
     it('should handle undefined optional parameters gracefully', async () => {
       injectMockSentryModule(mockSentryModule);
-      await initializeCrashReporting('https://test@sentry.io/123');
+      initializeCrashReporting('https://test@sentry.io/123');
 
       setUser('user-1', undefined);
       addBreadcrumb('msg', undefined, undefined);

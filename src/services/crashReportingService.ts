@@ -93,22 +93,39 @@ let isSentryAvailable: boolean | null = null;
 // ============================================================================
 
 /**
- * Attempts to dynamically load the Sentry module
- * Returns null if the module is not available
+ * Stub Sentry module for when @sentry/react-native is not installed
  */
-const loadSentryModule = async (): Promise<SentryModule | null> => {
+const stubSentryModule: SentryModule = {
+  init: () => {},
+  captureException: () => 'stub-event-id',
+  captureMessage: () => 'stub-message-id',
+  setUser: () => {},
+  addBreadcrumb: () => {},
+  setContext: () => {},
+  Severity: {
+    Info: 'info',
+    Warning: 'warning',
+    Error: 'error',
+  },
+};
+
+/**
+ * Attempts to load the Sentry module synchronously using require
+ * Returns stub module if the real module is not available
+ */
+const loadSentryModule = (): SentryModule => {
   if (sentryModule !== null) {
     return sentryModule;
   }
 
   if (isSentryAvailable === false) {
-    return null;
+    return stubSentryModule;
   }
 
   try {
-    // Dynamic import to handle cases where Sentry is not installed
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sentry = (await import('@sentry/react-native')) as any;
+    // Use require for optional dependency - avoids TypeScript import errors
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const sentry = require('@sentry/react-native');
 
     sentryModule = {
       init: sentry.init,
@@ -122,13 +139,11 @@ const loadSentryModule = async (): Promise<SentryModule | null> => {
 
     isSentryAvailable = true;
     return sentryModule;
-  } catch (error) {
-    console.warn(
-      'Sentry module not available. Crash reporting will be disabled.',
-      error
-    );
+  } catch {
+    // Sentry not installed - use stub
     isSentryAvailable = false;
-    return null;
+    sentryModule = stubSentryModule;
+    return stubSentryModule;
   }
 };
 
@@ -149,20 +164,20 @@ const getSentryModule = (): SentryModule | null => {
  *
  * @param dsn - The Sentry DSN (Data Source Name)
  * @param options - Additional configuration options
- * @returns Promise that resolves to true if initialization succeeded
+ * @returns true if initialization succeeded, false otherwise
  *
  * @example
  * ```typescript
- * const success = await initializeCrashReporting('https://xxx@sentry.io/123');
+ * const success = initializeCrashReporting('https://xxx@sentry.io/123');
  * if (success) {
  *   console.log('Crash reporting initialized');
  * }
  * ```
  */
-export const initializeCrashReporting = async (
+export const initializeCrashReporting = (
   dsn: string,
   options?: Partial<Omit<CrashReportingConfig, 'dsn'>>
-): Promise<boolean> => {
+): boolean => {
   if (isInitialized) {
     console.warn('Crash reporting is already initialized');
     return true;
@@ -174,12 +189,7 @@ export const initializeCrashReporting = async (
   }
 
   try {
-    const sentry = await loadSentryModule();
-
-    if (!sentry) {
-      console.warn('Sentry module not available. Crash reporting disabled.');
-      return false;
-    }
+    const sentry = loadSentryModule();
 
     const devMode = isDevelopment();
     const config: CrashReportingConfig = {
