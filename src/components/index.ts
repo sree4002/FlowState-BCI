@@ -211,3 +211,16 @@ export {
   getModeButtonStyle,
   getModeButtonTextStyle,
 } from './AudioMixingControls';
+
+export { DeveloperOptions, VersionTapUnlocker } from './DeveloperOptions';
+export type { DeveloperOptionsProps } from './DeveloperOptions';
+
+export {
+  DebugOverlay,
+  DebugBar,
+  useTripleTap,
+  getSignalQualityColor as getDebugSignalQualityColor,
+  getThetaZScoreColor,
+  getConnectionStatusInfo,
+} from './DebugOverlay';
+export type { DebugOverlayProps, DebugBarProps } from './DebugOverlay';

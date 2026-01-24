@@ -230,6 +230,49 @@ export const Alert = {
   alert: jest.fn(),
 };
 
+// Mock PanResponder
+export const PanResponder = {
+  create: (config: any) => ({
+    panHandlers: {
+      onStartShouldSetResponder: config.onStartShouldSetPanResponder,
+      onMoveShouldSetResponder: config.onMoveShouldSetPanResponder,
+      onResponderRelease: config.onPanResponderRelease,
+      onResponderGrant: config.onPanResponderGrant,
+      onResponderMove: config.onPanResponderMove,
+      onResponderTerminate: config.onPanResponderTerminate,
+    },
+  }),
+};
+
+// Mock LayoutAnimation
+export const LayoutAnimation = {
+  configureNext: jest.fn(),
+  create: jest.fn(),
+  Types: {
+    spring: 'spring',
+    linear: 'linear',
+    easeInEaseOut: 'easeInEaseOut',
+    easeIn: 'easeIn',
+    easeOut: 'easeOut',
+  },
+  Properties: {
+    opacity: 'opacity',
+    scaleX: 'scaleX',
+    scaleY: 'scaleY',
+    scaleXY: 'scaleXY',
+  },
+  Presets: {
+    easeInEaseOut: {},
+    linear: {},
+    spring: {},
+  },
+};
+
+// Mock UIManager
+export const UIManager = {
+  setLayoutAnimationEnabledExperimental: jest.fn(),
+};
+
 // Default export
 export default {
   View,
@@ -253,4 +296,7 @@ export default {
   PixelRatio,
   Keyboard,
   Alert,
+  PanResponder,
+  LayoutAnimation,
+  UIManager,
 };

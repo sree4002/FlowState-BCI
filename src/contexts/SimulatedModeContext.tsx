@@ -131,6 +131,22 @@ export const SimulatedModeProvider: React.FC<SimulatedModeProviderProps> = ({
     }));
   }, [settings.simulated_mode_enabled]);
 
+  // Apply force_theta_state from settings to the EEG source
+  useEffect(() => {
+    if (!eegSourceRef.current) return;
+
+    const forceStateValue = settings.force_theta_state;
+    console.log('[SimulatedModeContext] force_theta_state changed:', forceStateValue);
+
+    if (forceStateValue === 'auto') {
+      eegSourceRef.current.clearForcedState();
+      console.log('[SimulatedModeContext] Cleared forced state (auto mode)');
+    } else {
+      eegSourceRef.current.forceState(forceStateValue);
+      console.log('[SimulatedModeContext] Applied forced state:', forceStateValue);
+    }
+  }, [settings.force_theta_state]);
+
   // Metrics handler
   const handleMetrics = useCallback((metrics: EEGMetrics) => {
     setState((prev) => ({

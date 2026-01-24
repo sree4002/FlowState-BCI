@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  PanResponder,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   Colors,
   Spacing,
@@ -21,6 +23,7 @@ import { VisualizationModeToggle } from '../components/VisualizationModeToggle';
 import { ThetaTimeSeriesChart } from '../components/ThetaTimeSeriesChart';
 import { ThetaGaugeDisplay } from '../components/ThetaGaugeDisplay';
 import { ThetaNumericDisplay } from '../components/ThetaNumericDisplay';
+import { DebugOverlay, DebugBar, useTripleTap } from '../components/DebugOverlay';
 
 interface ActiveSessionScreenProps {
   navigation?: any;
@@ -47,11 +50,17 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
     metrics: simulatedMetrics,
     isControllerRunning,
     connectionState,
+    start: startSimulation,
+    stop: stopSimulation,
   } = useSimulatedMode();
 
   // Track elapsed time for simulated mode
   const [simulatedElapsedSeconds, setSimulatedElapsedSeconds] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Debug overlay/bar state
+  const [showDebugOverlay, setShowDebugOverlay] = useState(false);
+  const [showDebugBar, setShowDebugBar] = useState(false);
 
   // Determine if we're using simulated mode
   const isSimulatedMode = settings.simulated_mode_enabled;
@@ -91,6 +100,93 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
     };
   }, [isSimulatedMode, isControllerRunning]);
 
+  // Triple-tap gesture handler
+  const handleTripleTap = useCallback(() => {
+    setShowDebugOverlay(true);
+  }, []);
+
+  const { onPress: handleVisualizationPress } = useTripleTap(handleTripleTap);
+
+  // Pan responder for swipe-down gesture to show debug bar
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => false,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        // Only respond to downward swipes from near top of container
+        return gestureState.dy > 30 && gestureState.y0 < 150;
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 50) {
+          setShowDebugBar((prev) => !prev);
+        }
+      },
+    })
+  ).current;
+
+  // Close debug overlay handler
+  const handleCloseDebugOverlay = useCallback(() => {
+    setShowDebugOverlay(false);
+  }, []);
+
+  // Debug bar tap to show full overlay
+  const handleDebugBarTap = useCallback(() => {
+    setShowDebugBar(false);
+    setShowDebugOverlay(true);
+  }, []);
+
+  // Session control handlers
+  const handleStart = useCallback(async () => {
+    console.log('[ActiveSessionScreen] Start button pressed');
+    console.log('[ActiveSessionScreen] Current state:', {
+      sessionState,
+      isSimulatedMode,
+      connectionState,
+      isControllerRunning,
+    });
+
+    if (isSimulatedMode) {
+      try {
+        await startSimulation();
+      } catch (error) {
+        console.error('[ActiveSessionScreen] Failed to start simulation:', error);
+      }
+    } else {
+      // TODO: Handle real BLE session start
+      console.log('[ActiveSessionScreen] BLE session start not implemented');
+    }
+  }, [isSimulatedMode, sessionState, connectionState, isControllerRunning, startSimulation]);
+
+  const handleStop = useCallback(async () => {
+    console.log('[ActiveSessionScreen] Stop button pressed');
+
+    if (isSimulatedMode) {
+      try {
+        await stopSimulation();
+      } catch (error) {
+        console.error('[ActiveSessionScreen] Failed to stop simulation:', error);
+      }
+    } else {
+      // TODO: Handle real BLE session stop
+      console.log('[ActiveSessionScreen] BLE session stop not implemented');
+    }
+  }, [isSimulatedMode, stopSimulation]);
+
+  // Get connection status for debug overlay
+  const getConnectionStatus = (): 'connected' | 'disconnected' | 'connecting' => {
+    if (isSimulatedMode) {
+      return connectionState === 'connected' ? 'connected' : 'disconnected';
+    }
+    return deviceInfo?.is_connected ? 'connected' : 'disconnected';
+  };
+
+  // Get signal quality for debug overlay
+  const getDebugSignalQuality = (): number => {
+    if (isSimulatedMode) {
+      return simulatedMetrics?.signal_quality ?? 0;
+    }
+    return signalQuality?.score ?? 0;
+  };
+
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -120,280 +216,285 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
   };
 
   // Render the appropriate visualization based on mode
+  // Wrapped with triple-tap handler for debug overlay
   const renderVisualization = () => {
-    switch (visualizationMode) {
-      case 'chart':
-        return (
-          <ThetaTimeSeriesChart
-            height={250}
-            timeWindowMinutes={1}
-            showTimeSelector={true}
-            showCurrentValue={true}
-            showZoneLines={true}
-            externalThetaZScore={currentThetaZScore}
-            externalElapsedSeconds={elapsedSeconds}
-            externalIsRunning={isRunning}
-          />
-        );
-      case 'gauge':
-        return (
-          <View style={styles.thetaCard}>
-            <ThetaGaugeDisplay
-              value={currentThetaZScore}
-              size={200}
-              showLabel={true}
-              showValue={true}
+    const content = (() => {
+      switch (visualizationMode) {
+        case 'chart':
+          return (
+            <ThetaTimeSeriesChart
+              height={250}
+              timeWindowMinutes={1}
+              showTimeSelector={true}
+              showCurrentValue={true}
+              showZoneLines={true}
+              externalThetaZScore={currentThetaZScore}
+              externalElapsedSeconds={elapsedSeconds}
+              externalIsRunning={isRunning}
             />
-          </View>
-        );
-      case 'numeric':
-      default:
-        return (
-          <View style={styles.thetaCard}>
-            <Text style={styles.sectionTitle}>Theta Z-Score</Text>
-            <View style={styles.thetaValueContainer}>
-              <Text style={[styles.thetaValue, { color: getThetaZoneColor() }]}>
-                {currentThetaZScore !== null
-                  ? currentThetaZScore.toFixed(2)
-                  : '--'}
-              </Text>
-              <View
-                style={[
-                  styles.thetaZoneBadge,
-                  { backgroundColor: getThetaZoneColor() },
-                ]}
-              >
-                <Text style={styles.thetaZoneText}>{getThetaZoneLabel()}</Text>
-              </View>
+          );
+        case 'gauge':
+          return (
+            <View style={styles.thetaCard}>
+              <ThetaGaugeDisplay
+                value={currentThetaZScore}
+                size={200}
+                showLabel={true}
+                showValue={true}
+              />
             </View>
-            <Text style={styles.thetaHint}>
-              Target: 1.5+ for optimal focus state
-            </Text>
-          </View>
-        );
-    }
+          );
+        case 'numeric':
+        default:
+          return (
+            <View style={styles.thetaCard}>
+              <Text style={styles.sectionTitle}>Theta Z-Score</Text>
+              <View style={styles.thetaValueContainer}>
+                <Text style={[styles.thetaValue, { color: getThetaZoneColor() }]}>
+                  {currentThetaZScore !== null
+                    ? currentThetaZScore.toFixed(2)
+                    : '--'}
+                </Text>
+                <View
+                  style={[
+                    styles.thetaZoneBadge,
+                    { backgroundColor: getThetaZoneColor() },
+                  ]}
+                >
+                  <Text style={styles.thetaZoneText}>{getThetaZoneLabel()}</Text>
+                </View>
+              </View>
+              <Text style={styles.thetaHint}>
+                Target: 1.5+ for optimal focus state
+              </Text>
+            </View>
+          );
+      }
+    })();
+
+    return (
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={handleVisualizationPress}
+        testID="visualization-triple-tap-area"
+      >
+        {content}
+      </TouchableOpacity>
+    );
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
-      {/* Header Status Bar */}
-      <View style={styles.statusBar}>
-        <View style={styles.statusItem}>
-          <View
-            style={[
-              styles.statusIndicator,
-              {
-                backgroundColor: isSimulatedMode
-                  ? connectionState === 'connected'
-                    ? Colors.accent.success
-                    : Colors.accent.error
-                  : deviceInfo?.is_connected
-                    ? Colors.accent.success
-                    : Colors.accent.error,
-              },
-            ]}
-          />
-          <Text style={styles.statusText}>
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      {/* Debug Bar (shown via swipe-down) */}
+      <DebugBar
+        visible={showDebugBar}
+        thetaZScore={currentThetaZScore ?? 0}
+        signalQuality={getDebugSignalQuality()}
+        isSimulated={isSimulatedMode}
+        onTap={handleDebugBarTap}
+        testID="session-debug-bar"
+      />
+
+      {/* Debug Overlay (shown via triple-tap or shake) */}
+      <DebugOverlay
+        visible={showDebugOverlay}
+        onClose={handleCloseDebugOverlay}
+        thetaZScore={currentThetaZScore ?? 0}
+        signalQuality={getDebugSignalQuality()}
+        isSimulated={isSimulatedMode}
+        connectionStatus={getConnectionStatus()}
+        testID="session-debug-overlay"
+      />
+
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        {...panResponder.panHandlers}
+      >
+        {/* Compact Status Bar */}
+        <View style={styles.statusBar}>
+          <View style={styles.statusPill}>
+            <View
+              style={[
+                styles.statusDot,
+                {
+                  backgroundColor: isSimulatedMode
+                    ? connectionState === 'connected'
+                      ? Colors.accent.success
+                      : Colors.accent.error
+                    : deviceInfo?.is_connected
+                      ? Colors.accent.success
+                      : Colors.accent.error,
+                },
+              ]}
+            />
+            <Text style={styles.statusText}>
+              {isSimulatedMode
+                ? connectionState === 'connected'
+                  ? 'SIM'
+                  : 'OFF'
+                : deviceInfo?.is_connected
+                  ? 'LIVE'
+                  : 'OFF'}
+            </Text>
+          </View>
+          <View style={styles.statusPill}>
+            <Text style={styles.statusText}>
+              SQ:{' '}
+              {isSimulatedMode
+                ? (simulatedMetrics?.signal_quality?.toFixed(0) ?? '--')
+                : (signalQuality?.score ?? '--')}%
+            </Text>
+          </View>
+        </View>
+
+        {/* Large Centered Timer */}
+        <View style={styles.timerSection}>
+          <Text style={styles.timerValue}>{formatTime(elapsedSeconds)}</Text>
+          <Text style={styles.timerLabel}>
             {isSimulatedMode
-              ? connectionState === 'connected'
-                ? 'Simulator Connected'
-                : 'Simulator Disconnected'
-              : deviceInfo?.is_connected
-                ? 'Connected'
-                : 'Disconnected'}
+              ? isControllerRunning
+                ? 'Simulated Session'
+                : 'Ready'
+              : (sessionConfig?.type ?? 'No active session')}
           </Text>
         </View>
-        <View style={styles.statusItem}>
-          <View
-            style={[
-              styles.statusIndicator,
-              {
-                backgroundColor: isSimulatedMode
-                  ? simulatedMetrics?.signal_quality
-                    ? simulatedMetrics.signal_quality >= 80
-                      ? Colors.signal.excellent
-                      : simulatedMetrics.signal_quality >= 60
-                        ? Colors.signal.good
-                        : Colors.signal.fair
-                    : Colors.signal.poor
-                  : getSignalQualityColor(),
-              },
-            ]}
+
+        {/* Theta Visualization (Numeric, Gauge, or Chart based on mode) */}
+        {renderVisualization()}
+
+        {/* Visualization Mode Toggle */}
+        <View style={styles.visualizationToggleContainer}>
+          <VisualizationModeToggle
+            selectedMode={visualizationMode}
+            onModeChange={setVisualizationMode}
+            testID="visualization-mode-toggle"
           />
-          <Text style={styles.statusText}>
-            Signal:{' '}
-            {isSimulatedMode
-              ? (simulatedMetrics?.signal_quality?.toFixed(0) ?? '--')
-              : (signalQuality?.score ?? '--')}
-            %
-          </Text>
         </View>
-      </View>
 
-      {/* Session Timer */}
-      <View style={styles.timerCard}>
-        <Text style={styles.timerLabel}>Session Time</Text>
-        <Text style={styles.timerValue}>{formatTime(elapsedSeconds)}</Text>
-        <Text style={styles.sessionTypeText}>
-          {isSimulatedMode
-            ? isControllerRunning
-              ? 'Simulated Session'
-              : 'Simulated Mode (Idle)'
-            : (sessionConfig?.type ?? 'No active session')}
-        </Text>
-      </View>
+        {/* Session Controls - Large buttons at bottom */}
+        <View style={styles.controlsContainer}>
+          <TouchableOpacity
+            style={[
+              styles.controlButton,
+              styles.primaryButton,
+              isRunning && styles.pauseButton,
+            ]}
+            onPress={handleStart}
+            disabled={isRunning}
+            accessibilityLabel={isRunning ? 'Pause session' : 'Start session'}
+            accessibilityRole="button"
+          >
+            <Text style={styles.controlButtonText}>
+              {isRunning ? 'Running' : 'Start'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.controlButton, styles.stopButton]}
+            onPress={handleStop}
+            disabled={!isRunning}
+            accessibilityLabel="Stop session"
+            accessibilityRole="button"
+          >
+            <Text style={styles.controlButtonText}>Stop</Text>
+          </TouchableOpacity>
+        </View>
 
-      {/* Theta Visualization (Numeric, Gauge, or Chart based on mode) */}
-      {renderVisualization()}
-
-      {/* Visualization Mode Toggle */}
-      <View style={styles.visualizationToggleContainer}>
-        <VisualizationModeToggle
-          selectedMode={visualizationMode}
-          onModeChange={setVisualizationMode}
-          testID="visualization-mode-toggle"
-        />
-      </View>
-
-      {/* Signal Quality Card */}
-      <View style={styles.infoCard}>
-        <Text style={styles.sectionTitle}>Signal Quality</Text>
-        <View style={styles.signalDetails}>
-          <View style={styles.signalRow}>
-            <Text style={styles.signalLabel}>Overall Score</Text>
+        {/* Signal Quality Card - Compact */}
+        <View style={styles.infoCard}>
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Signal Quality</Text>
             <Text
-              style={[styles.signalValue, { color: getSignalQualityColor() }]}
+              style={[styles.infoValue, { color: getSignalQualityColor() }]}
             >
               {signalQuality?.score ?? '--'}%
             </Text>
           </View>
-          <View style={styles.signalRow}>
-            <Text style={styles.signalLabel}>Artifact %</Text>
-            <Text style={styles.signalValue}>
-              {signalQuality?.artifact_percentage?.toFixed(1) ?? '--'}%
+          <View style={styles.infoRow}>
+            <Text style={styles.infoLabel}>Mode</Text>
+            <Text style={styles.infoValue}>
+              {isSimulatedMode ? 'Simulated' : 'BLE Device'}
+            </Text>
+          </View>
+          <View style={[styles.infoRow, styles.lastInfoRow]}>
+            <Text style={styles.infoLabel}>Status</Text>
+            <Text style={styles.infoValue}>
+              {isSimulatedMode
+                ? isControllerRunning
+                  ? 'Running'
+                  : 'Idle'
+                : sessionState}
             </Text>
           </View>
         </View>
-      </View>
-
-      {/* Session Controls */}
-      <View style={styles.controlsContainer}>
-        <TouchableOpacity
-          style={[
-            styles.controlButton,
-            sessionState === 'running' && styles.pauseButton,
-          ]}
-          accessibilityLabel={
-            sessionState === 'running' ? 'Pause session' : 'Start session'
-          }
-          accessibilityRole="button"
-        >
-          <Text style={styles.controlButtonText}>
-            {sessionState === 'running' ? 'Pause' : 'Start'}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.controlButton, styles.stopButton]}
-          accessibilityLabel="Stop session"
-          accessibilityRole="button"
-        >
-          <Text style={styles.controlButtonText}>Stop</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Session Info */}
-      <View style={styles.infoCard}>
-        <Text style={styles.sectionTitle}>Session Info</Text>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Status</Text>
-          <Text style={styles.infoValue}>
-            {isSimulatedMode
-              ? isControllerRunning
-                ? 'Running (Simulated)'
-                : 'Idle'
-              : sessionState}
-          </Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Mode</Text>
-          <Text style={styles.infoValue}>
-            {isSimulatedMode ? 'Simulated EEG' : 'BLE Device'}
-          </Text>
-        </View>
-        <View style={styles.infoRow}>
-          <Text style={styles.infoLabel}>Device</Text>
-          <Text style={styles.infoValue}>
-            {isSimulatedMode
-              ? 'WebSocket Simulator'
-              : (deviceInfo?.name ?? 'None')}
-          </Text>
-        </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: Colors.background.primary,
   },
+  container: {
+    flex: 1,
+  },
   contentContainer: {
-    padding: Spacing.lg,
+    paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.xxl,
   },
+  // Compact status bar
   statusBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: Spacing.lg,
+    marginVertical: Spacing.md,
   },
-  statusItem: {
+  statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  statusIndicator: {
-    width: 8,
-    height: 8,
+    backgroundColor: Colors.surface.primary,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
     borderRadius: BorderRadius.round,
-    marginRight: Spacing.sm,
+  },
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: Spacing.xs,
   },
   statusText: {
     color: Colors.text.secondary,
     fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
   },
-  timerCard: {
-    backgroundColor: Colors.surface.primary,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xl,
+  // Large centered timer
+  timerSection: {
     alignItems: 'center',
-    marginBottom: Spacing.lg,
-    ...Shadows.md,
-  },
-  timerLabel: {
-    color: Colors.text.tertiary,
-    fontSize: Typography.fontSize.sm,
-    marginBottom: Spacing.sm,
+    marginVertical: Spacing.xl,
   },
   timerValue: {
     color: Colors.text.primary,
-    fontSize: 48,
+    fontSize: 72,
     fontWeight: Typography.fontWeight.bold,
-    letterSpacing: 2,
+    letterSpacing: -2,
+    fontVariant: ['tabular-nums'],
   },
-  sessionTypeText: {
-    color: Colors.text.secondary,
+  timerLabel: {
+    color: Colors.text.tertiary,
     fontSize: Typography.fontSize.md,
     marginTop: Spacing.sm,
     textTransform: 'capitalize',
   },
+  // Theta visualization cards
   thetaCard: {
     backgroundColor: Colors.surface.primary,
     borderRadius: BorderRadius.xl,
     padding: Spacing.lg,
     marginBottom: Spacing.lg,
+    alignItems: 'center',
     ...Shadows.md,
   },
   sectionTitle: {
@@ -406,15 +507,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    width: '100%',
   },
   thetaValue: {
-    fontSize: 40,
+    fontSize: 48,
     fontWeight: Typography.fontWeight.bold,
   },
   thetaZoneBadge: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.round,
   },
   thetaZoneText: {
     color: Colors.text.inverse,
@@ -426,30 +528,7 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.sm,
     marginTop: Spacing.md,
   },
-  infoCard: {
-    backgroundColor: Colors.surface.primary,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...Shadows.md,
-  },
-  signalDetails: {
-    gap: Spacing.sm,
-  },
-  signalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  signalLabel: {
-    color: Colors.text.secondary,
-    fontSize: Typography.fontSize.md,
-  },
-  signalValue: {
-    color: Colors.text.primary,
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semibold,
-  },
+  // Controls
   controlsContainer: {
     flexDirection: 'row',
     gap: Spacing.md,
@@ -457,22 +536,34 @@ const styles = StyleSheet.create({
   },
   controlButton: {
     flex: 1,
-    backgroundColor: Colors.primary.main,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.lg,
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 56,
     ...Shadows.sm,
+  },
+  primaryButton: {
+    backgroundColor: Colors.primary.main,
   },
   pauseButton: {
     backgroundColor: Colors.secondary.main,
   },
   stopButton: {
     backgroundColor: Colors.accent.error,
+    flex: 0.5,
   },
   controlButtonText: {
-    color: Colors.text.primary,
+    color: '#FFFFFF',
     fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semibold,
+    fontWeight: Typography.fontWeight.bold,
+  },
+  // Info card (compact)
+  infoCard: {
+    backgroundColor: Colors.surface.primary,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   infoRow: {
     flexDirection: 'row',
@@ -482,13 +573,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border.secondary,
   },
+  lastInfoRow: {
+    borderBottomWidth: 0,
+  },
   infoLabel: {
-    color: Colors.text.secondary,
-    fontSize: Typography.fontSize.md,
+    color: Colors.text.tertiary,
+    fontSize: Typography.fontSize.sm,
   },
   infoValue: {
     color: Colors.text.primary,
-    fontSize: Typography.fontSize.md,
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.medium,
     textTransform: 'capitalize',
   },
   visualizationToggleContainer: {

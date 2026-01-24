@@ -39,7 +39,8 @@ describe('ActiveSessionScreen', () => {
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('Session Time')).toBeTruthy();
+      // Timer shows 00:00 format
+      expect(screen.getByText('00:00')).toBeTruthy();
     });
 
     it('should display initial timer value as 00:00', () => {
@@ -69,13 +70,15 @@ describe('ActiveSessionScreen', () => {
       expect(screen.getByText('Signal Quality')).toBeTruthy();
     });
 
-    it('should display session info section', () => {
+    it('should display session status info', () => {
       render(
         <TestWrapper>
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('Session Info')).toBeTruthy();
+      // Info card shows status, mode, and signal quality
+      expect(screen.getByText('Status')).toBeTruthy();
+      expect(screen.getByText('Mode')).toBeTruthy();
     });
 
     it('should display connection status as disconnected initially', () => {
@@ -84,8 +87,8 @@ describe('ActiveSessionScreen', () => {
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      // When simulated mode is enabled, shows 'Simulator Disconnected'
-      expect(screen.getByText('Simulator Disconnected')).toBeTruthy();
+      // When simulated mode is disabled, shows 'OFF' in compact status pill
+      expect(screen.getByText('OFF')).toBeTruthy();
     });
 
     it('should display control buttons', () => {
@@ -105,7 +108,8 @@ describe('ActiveSessionScreen', () => {
         </TestWrapper>
       );
       // Chart mode is now the default, shows empty state when no session
-      expect(screen.getByText('No active session')).toBeTruthy();
+      // Use getAllByText since text appears multiple times
+      expect(screen.getAllByText('No active session').length).toBeGreaterThan(0);
     });
 
     it('should display chart empty state hint', () => {
@@ -134,8 +138,8 @@ describe('ActiveSessionScreen', () => {
           <ActiveSessionScreen />
         </TestWrapper>
       );
-      // When simulated mode is enabled, state is displayed as 'Idle' (capitalized)
-      expect(screen.getByText('Idle')).toBeTruthy();
+      // Session state is 'idle' (textTransform: capitalize is applied via CSS in actual render)
+      expect(screen.getByText('idle')).toBeTruthy();
     });
 
     it('should display chart visualization mode as default', () => {

@@ -65,10 +65,12 @@ export const defaultSettings: AppSettings = {
   ab_testing_enabled: false,
 
   // Developer settings
-  simulated_mode_enabled: true,
-  // NOTE: For physical devices, use your computer's LAN IP (e.g., ws://192.168.x.x:8765)
+  developer_mode_enabled: false,
+  simulated_mode_enabled: false,
+  // NOTE: For physical devices, use your computer's LAN IP
   // localhost only works on iOS Simulator; Android emulator needs 10.0.2.2
   simulated_mode_server_url: 'ws://10.5.29.191:8765',
+  force_theta_state: 'auto',
 };
 
 /**

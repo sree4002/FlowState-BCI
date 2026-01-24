@@ -15,8 +15,10 @@ export const SafeAreaProvider: React.FC<{ children: React.ReactNode }> = ({
 export const SafeAreaView: React.FC<{
   children?: React.ReactNode;
   style?: any;
-}> = ({ children, style }) => {
-  return React.createElement('SafeAreaView', { style }, children);
+  edges?: Array<'top' | 'bottom' | 'left' | 'right'>;
+  testID?: string;
+}> = ({ children, style, edges, testID }) => {
+  return React.createElement('SafeAreaView', { style, edges, testID }, children);
 };
 
 // Mock useSafeAreaInsets hook
