@@ -150,10 +150,31 @@ export const Animated = {
       return this;
     }
   },
-  timing: () => ({ start: (callback?: () => void) => callback?.() }),
-  spring: () => ({ start: (callback?: () => void) => callback?.() }),
-  parallel: () => ({ start: (callback?: () => void) => callback?.() }),
-  sequence: () => ({ start: (callback?: () => void) => callback?.() }),
+  timing: () => ({
+    start: (callback?: () => void) => callback?.(),
+    stop: () => {},
+    reset: () => {},
+  }),
+  spring: () => ({
+    start: (callback?: () => void) => callback?.(),
+    stop: () => {},
+    reset: () => {},
+  }),
+  parallel: () => ({
+    start: (callback?: () => void) => callback?.(),
+    stop: () => {},
+    reset: () => {},
+  }),
+  sequence: () => ({
+    start: (callback?: () => void) => callback?.(),
+    stop: () => {},
+    reset: () => {},
+  }),
+  loop: () => ({
+    start: (callback?: () => void) => callback?.(),
+    stop: () => {},
+    reset: () => {},
+  }),
 };
 
 // Mock PixelRatio
