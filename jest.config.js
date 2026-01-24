@@ -2,7 +2,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  roots: ['<rootDir>/__tests__', '<rootDir>/App/__tests__'],
+  roots: ['<rootDir>/__tests__'],
   transform: {
     '^.+\\.tsx?$': [
       'ts-jest',
@@ -20,13 +20,11 @@ module.exports = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
-    'App/**/*.{ts,tsx}',
     '!src/**/*.d.ts',
     '!**/*.test.{ts,tsx}',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
-    '/App/__tests__/', // Temporarily ignore React Native component tests
     'NextSessionWidget.test.tsx', // Temporarily ignore RN component test (requires full RN env)
     'butterworth-filter.test.ts', // Skip - tests unimplemented butterworth filter functions
     'zscore-normalization.test.ts', // Skip - tests unimplemented z-score normalization functions
