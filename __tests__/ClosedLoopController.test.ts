@@ -34,7 +34,9 @@ describe('ClosedLoopController', () => {
     });
 
     it('should export ClosedLoopControllerConfig interface', () => {
-      expect(sourceCode).toContain('export interface ClosedLoopControllerConfig');
+      expect(sourceCode).toContain(
+        'export interface ClosedLoopControllerConfig'
+      );
     });
 
     it('should export ControllerStateCallback type', () => {
@@ -154,15 +156,21 @@ describe('ClosedLoopController', () => {
     });
 
     it('should have onStateChange method', () => {
-      expect(sourceCode).toContain('onStateChange(callback: ControllerStateCallback)');
+      expect(sourceCode).toContain(
+        'onStateChange(callback: ControllerStateCallback)'
+      );
     });
 
     it('should have offStateChange method', () => {
-      expect(sourceCode).toContain('offStateChange(callback: ControllerStateCallback)');
+      expect(sourceCode).toContain(
+        'offStateChange(callback: ControllerStateCallback)'
+      );
     });
 
     it('should have updateConfig method', () => {
-      expect(sourceCode).toContain('updateConfig(updates: Partial<ClosedLoopControllerConfig>)');
+      expect(sourceCode).toContain(
+        'updateConfig(updates: Partial<ClosedLoopControllerConfig>)'
+      );
     });
   });
 

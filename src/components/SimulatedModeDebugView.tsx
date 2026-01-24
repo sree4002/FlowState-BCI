@@ -28,7 +28,7 @@ import { useSimulatedMode } from '../contexts';
 import { useSettings } from '../contexts';
 
 // Import the bundled audio asset for self-test
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const AUDIO_TEST_ASSET = require('../../assets/audio/isochronic_theta6_carrier440.wav');
 import {
   Colors,
@@ -136,7 +136,10 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
     });
     setUrlInput(defaultUrl);
     stop();
-    Alert.alert('Reset', 'Simulated mode settings have been reset to defaults.');
+    Alert.alert(
+      'Reset',
+      'Simulated mode settings have been reset to defaults.'
+    );
   };
 
   // Audio self-test
@@ -169,21 +172,31 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
         { shouldPlay: false, volume: 1.0 },
         (playbackStatus: AVPlaybackStatus) => {
           if (playbackStatus.isLoaded) {
-            console.log(`[AudioSelfTest] Status: isPlaying=${playbackStatus.isPlaying}, pos=${playbackStatus.positionMillis}ms`);
+            console.log(
+              `[AudioSelfTest] Status: isPlaying=${playbackStatus.isPlaying}, pos=${playbackStatus.positionMillis}ms`
+            );
           } else if (playbackStatus.error) {
-            console.error(`[AudioSelfTest] Playback error: ${playbackStatus.error}`);
+            console.error(
+              `[AudioSelfTest] Playback error: ${playbackStatus.error}`
+            );
           }
         }
       );
       console.log('[AudioSelfTest] Step 2: Loaded OK');
-      console.log('[AudioSelfTest] Initial status:', JSON.stringify(status, null, 2));
+      console.log(
+        '[AudioSelfTest] Initial status:',
+        JSON.stringify(status, null, 2)
+      );
 
       // Step 3: Play at full volume
       console.log('[AudioSelfTest] Step 3: Playing at volume 1.0...');
       await sound.setVolumeAsync(1.0);
       const playResult = await sound.playAsync();
       console.log('[AudioSelfTest] Step 3: playAsync OK');
-      console.log('[AudioSelfTest] Play result:', JSON.stringify(playResult, null, 2));
+      console.log(
+        '[AudioSelfTest] Play result:',
+        JSON.stringify(playResult, null, 2)
+      );
 
       setAudioTestStatus('Playing... (2 sec)');
 
@@ -192,14 +205,20 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
 
       // Step 5: Get final status and stop
       const finalStatus = await sound.getStatusAsync();
-      console.log('[AudioSelfTest] Final status:', JSON.stringify(finalStatus, null, 2));
+      console.log(
+        '[AudioSelfTest] Final status:',
+        JSON.stringify(finalStatus, null, 2)
+      );
 
       await sound.stopAsync();
       await sound.unloadAsync();
 
       console.log('[AudioSelfTest] ========== SUCCESS ==========');
       setAudioTestStatus('✅ SUCCESS');
-      Alert.alert('Audio Self-Test', 'Audio played successfully! Check logs for details.');
+      Alert.alert(
+        'Audio Self-Test',
+        'Audio played successfully! Check logs for details.'
+      );
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       console.error('[AudioSelfTest] ========== FAILED ==========');
@@ -322,7 +341,9 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
                     { backgroundColor: Colors.accent.focus },
                   ]}
                 />
-                <Text style={[styles.statusLabel, { color: Colors.accent.focus }]}>
+                <Text
+                  style={[styles.statusLabel, { color: Colors.accent.focus }]}
+                >
                   Entrainment Active
                 </Text>
               </View>
@@ -347,9 +368,7 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
                 style={[
                   styles.metricValue,
                   {
-                    color: getThetaStateColor(
-                      metrics?.theta_state ?? 'normal'
-                    ),
+                    color: getThetaStateColor(metrics?.theta_state ?? 'normal'),
                   },
                 ]}
               >
@@ -366,7 +385,8 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
                   styles.stateBadge,
                   {
                     backgroundColor:
-                      getThetaStateColor(metrics?.theta_state ?? 'normal') + '20',
+                      getThetaStateColor(metrics?.theta_state ?? 'normal') +
+                      '20',
                   },
                 ]}
               >
@@ -374,7 +394,9 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
                   style={[
                     styles.stateText,
                     {
-                      color: getThetaStateColor(metrics?.theta_state ?? 'normal'),
+                      color: getThetaStateColor(
+                        metrics?.theta_state ?? 'normal'
+                      ),
                     },
                   ]}
                 >
@@ -437,9 +459,7 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
           <TouchableOpacity
             style={[
               styles.actionButton,
-              isControllerRunning
-                ? styles.stopButton
-                : styles.startButton,
+              isControllerRunning ? styles.stopButton : styles.startButton,
             ]}
             onPress={handleStartStop}
           >
@@ -450,7 +470,10 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
 
           {/* Error Display */}
           {error && (
-            <TouchableOpacity style={styles.errorContainer} onPress={clearError}>
+            <TouchableOpacity
+              style={styles.errorContainer}
+              onPress={clearError}
+            >
               <Text style={styles.errorText}>{error}</Text>
               <Text style={styles.errorDismiss}>Tap to dismiss</Text>
             </TouchableOpacity>
@@ -489,9 +512,7 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
             <Text style={styles.debugSectionTitle}>Debug Tools</Text>
 
             {/* Platform Info */}
-            <Text style={styles.platformInfo}>
-              Platform: {Platform.OS}
-            </Text>
+            <Text style={styles.platformInfo}>Platform: {Platform.OS}</Text>
 
             {/* Audio Self-Test Button */}
             <TouchableOpacity
@@ -509,7 +530,9 @@ export const SimulatedModeDebugView: React.FC<SimulatedModeDebugViewProps> = ({
               style={[styles.debugButton, styles.resetButton]}
               onPress={handleResetSettings}
             >
-              <Text style={styles.debugButtonText}>Reset Simulated Settings</Text>
+              <Text style={styles.debugButtonText}>
+                Reset Simulated Settings
+              </Text>
             </TouchableOpacity>
           </View>
         </>

@@ -94,9 +94,9 @@ const defaultState: SimulatedModeContextState = {
 /**
  * Create context
  */
-const SimulatedModeContext = createContext<SimulatedModeContextType | undefined>(
-  undefined
-);
+const SimulatedModeContext = createContext<
+  SimulatedModeContextType | undefined
+>(undefined);
 
 /**
  * Provider props
@@ -140,21 +140,27 @@ export const SimulatedModeProvider: React.FC<SimulatedModeProviderProps> = ({
   }, []);
 
   // Connection state handler
-  const handleConnectionState = useCallback((connectionState: EEGConnectionState) => {
-    setState((prev) => ({
-      ...prev,
-      connectionState,
-    }));
-  }, []);
+  const handleConnectionState = useCallback(
+    (connectionState: EEGConnectionState) => {
+      setState((prev) => ({
+        ...prev,
+        connectionState,
+      }));
+    },
+    []
+  );
 
   // Closed-loop state handler
-  const handleControllerState = useCallback((controllerState: ControllerState) => {
-    setState((prev) => ({
-      ...prev,
-      controllerState,
-      isEntrainmentActive: controllerState === 'entraining',
-    }));
-  }, []);
+  const handleControllerState = useCallback(
+    (controllerState: ControllerState) => {
+      setState((prev) => ({
+        ...prev,
+        controllerState,
+        isEntrainmentActive: controllerState === 'entraining',
+      }));
+    },
+    []
+  );
 
   // Start simulated mode
   const start = useCallback(async () => {
@@ -215,7 +221,10 @@ export const SimulatedModeProvider: React.FC<SimulatedModeProviderProps> = ({
         isControllerRunning: true,
       }));
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to start simulated mode';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to start simulated mode';
       setState((prev) => ({
         ...prev,
         error: message,
@@ -276,7 +285,10 @@ export const SimulatedModeProvider: React.FC<SimulatedModeProviderProps> = ({
 
       console.log('[SimulatedModeContext] Stop complete');
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to stop simulated mode';
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to stop simulated mode';
       console.error('[SimulatedModeContext] Stop error:', message);
       setState((prev) => ({
         ...prev,
@@ -332,7 +344,10 @@ export const SimulatedModeProvider: React.FC<SimulatedModeProviderProps> = ({
             await audioOutputRef.current.dispose();
           }
         } catch (e) {
-          console.error('[SimulatedModeContext] Cleanup audio output error:', e);
+          console.error(
+            '[SimulatedModeContext] Cleanup audio output error:',
+            e
+          );
         }
 
         console.log('[SimulatedModeContext] Cleanup complete');
@@ -364,7 +379,9 @@ export const SimulatedModeProvider: React.FC<SimulatedModeProviderProps> = ({
 export const useSimulatedMode = (): SimulatedModeContextType => {
   const context = useContext(SimulatedModeContext);
   if (context === undefined) {
-    throw new Error('useSimulatedMode must be used within a SimulatedModeProvider');
+    throw new Error(
+      'useSimulatedMode must be used within a SimulatedModeProvider'
+    );
   }
   return context;
 };

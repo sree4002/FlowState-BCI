@@ -14,7 +14,9 @@ declare module 'victory-native' {
   export interface VictoryChartProps {
     width?: number;
     height?: number;
-    padding?: number | { top?: number; bottom?: number; left?: number; right?: number };
+    padding?:
+      | number
+      | { top?: number; bottom?: number; left?: number; right?: number };
     domain?: { x?: [number, number]; y?: [number, number] };
     domainPadding?: number | { x?: number; y?: number };
     style?: object;
@@ -37,7 +39,13 @@ declare module 'victory-native' {
 
   export interface VictoryAxisProps {
     dependentAxis?: boolean;
-    style?: { axis?: object; axisLabel?: object; grid?: object; ticks?: object; tickLabels?: object };
+    style?: {
+      axis?: object;
+      axisLabel?: object;
+      grid?: object;
+      ticks?: object;
+      tickLabels?: object;
+    };
     tickFormat?: (t: number) => string;
     tickCount?: number;
     tickValues?: number[];

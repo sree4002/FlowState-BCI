@@ -58,7 +58,7 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
 
   // Use simulated mode data when enabled, otherwise use session context
   const currentThetaZScore = isSimulatedMode
-    ? simulatedMetrics?.z_score ?? null
+    ? (simulatedMetrics?.z_score ?? null)
     : sessionThetaZScore;
   const elapsedSeconds = isSimulatedMode
     ? simulatedElapsedSeconds
@@ -226,8 +226,8 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
           <Text style={styles.statusText}>
             Signal:{' '}
             {isSimulatedMode
-              ? simulatedMetrics?.signal_quality?.toFixed(0) ?? '--'
-              : signalQuality?.score ?? '--'}
+              ? (simulatedMetrics?.signal_quality?.toFixed(0) ?? '--')
+              : (signalQuality?.score ?? '--')}
             %
           </Text>
         </View>
@@ -242,7 +242,7 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
             ? isControllerRunning
               ? 'Simulated Session'
               : 'Simulated Mode (Idle)'
-            : sessionConfig?.type ?? 'No active session'}
+            : (sessionConfig?.type ?? 'No active session')}
         </Text>
       </View>
 
@@ -326,7 +326,9 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Device</Text>
           <Text style={styles.infoValue}>
-            {isSimulatedMode ? 'WebSocket Simulator' : deviceInfo?.name ?? 'None'}
+            {isSimulatedMode
+              ? 'WebSocket Simulator'
+              : (deviceInfo?.name ?? 'None')}
           </Text>
         </View>
       </View>

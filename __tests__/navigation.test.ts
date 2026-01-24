@@ -23,7 +23,11 @@ describe('React Navigation Setup', () => {
     });
 
     it('should have ActiveSessionScreen.tsx', () => {
-      const screenPath = path.join(srcPath, 'screens', 'ActiveSessionScreen.tsx');
+      const screenPath = path.join(
+        srcPath,
+        'screens',
+        'ActiveSessionScreen.tsx'
+      );
       expect(fs.existsSync(screenPath)).toBe(true);
     });
 

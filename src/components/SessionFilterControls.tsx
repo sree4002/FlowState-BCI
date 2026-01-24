@@ -578,7 +578,9 @@ export const SessionFilterControls: React.FC<SessionFilterControlsProps> = ({
         onPress={handleCollapsedToggle}
         accessibilityRole="button"
         accessibilityLabel={`Filters${activeFilterCount > 0 ? `, ${activeFilterCount} active` : ''}`}
-        accessibilityHint={isCollapsed ? 'Double tap to expand' : 'Double tap to collapse'}
+        accessibilityHint={
+          isCollapsed ? 'Double tap to expand' : 'Double tap to collapse'
+        }
         testID={`${testID}-header`}
       >
         <View style={styles.headerLeft}>

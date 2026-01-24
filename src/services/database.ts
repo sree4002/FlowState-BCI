@@ -725,7 +725,9 @@ export const deleteCircadianPattern = (
   db: SQLite.SQLiteDatabase,
   hourOfDay: number
 ): void => {
-  db.runSync('DELETE FROM circadian_patterns WHERE hour_of_day = ?', [hourOfDay]);
+  db.runSync('DELETE FROM circadian_patterns WHERE hour_of_day = ?', [
+    hourOfDay,
+  ]);
 };
 
 /**

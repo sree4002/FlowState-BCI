@@ -135,15 +135,23 @@ export class ClosedLoopController {
    * Stop the closed-loop control
    */
   async stop(): Promise<void> {
-    console.log('[ClosedLoopController] stop() called, current state:', this.state);
+    console.log(
+      '[ClosedLoopController] stop() called, current state:',
+      this.state
+    );
 
     // Always try to stop entrainment, regardless of state or isPlaying()
     // This ensures audio stops even if there's a state mismatch
     try {
-      console.log('[ClosedLoopController] Force stopping entrainment output...');
+      console.log(
+        '[ClosedLoopController] Force stopping entrainment output...'
+      );
       await this.entrainmentOutput.stop();
     } catch (error) {
-      console.error('[ClosedLoopController] Error stopping entrainment:', error);
+      console.error(
+        '[ClosedLoopController] Error stopping entrainment:',
+        error
+      );
     }
 
     // Unregister callbacks (safe to call even if not registered)
@@ -286,7 +294,10 @@ export class ClosedLoopController {
       );
       this.setState('entraining', this.lastMetrics ?? undefined);
     } catch (error) {
-      console.error('[ClosedLoopController] Failed to start entrainment:', error);
+      console.error(
+        '[ClosedLoopController] Failed to start entrainment:',
+        error
+      );
       this.setState('monitoring', this.lastMetrics ?? undefined);
     }
   }
@@ -299,7 +310,10 @@ export class ClosedLoopController {
     try {
       await this.entrainmentOutput.stop();
     } catch (error) {
-      console.error('[ClosedLoopController] Failed to stop entrainment:', error);
+      console.error(
+        '[ClosedLoopController] Failed to stop entrainment:',
+        error
+      );
     }
 
     // Enter cooldown
@@ -309,13 +323,21 @@ export class ClosedLoopController {
   }
 
   private handleConnectionState(connectionState: EEGConnectionState): void {
-    console.log('[ClosedLoopController] Connection state changed:', connectionState);
+    console.log(
+      '[ClosedLoopController] Connection state changed:',
+      connectionState
+    );
 
     if (connectionState === 'disconnected' || connectionState === 'error') {
       // Always try to stop entrainment when EEG source disconnects
-      console.log('[ClosedLoopController] Connection lost, force stopping entrainment...');
+      console.log(
+        '[ClosedLoopController] Connection lost, force stopping entrainment...'
+      );
       this.entrainmentOutput.stop().catch((err) => {
-        console.error('[ClosedLoopController] Error stopping on disconnect:', err);
+        console.error(
+          '[ClosedLoopController] Error stopping on disconnect:',
+          err
+        );
       });
 
       if (this.state !== 'idle') {

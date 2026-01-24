@@ -614,7 +614,8 @@ class MockSQLiteDatabase implements SQLiteDatabase {
               ) / total_sessions
             : 0;
         const ratingsWithValue = rows.filter(
-          (r) => r.subjective_rating !== null && r.subjective_rating !== undefined
+          (r) =>
+            r.subjective_rating !== null && r.subjective_rating !== undefined
         );
         const avg_subjective_rating =
           ratingsWithValue.length > 0

@@ -25,9 +25,7 @@ import { SESSION_TYPE_LABELS } from '../src/components/SessionListItem';
 import { Session } from '../src/types';
 
 // Mock session data
-const createMockSession = (
-  overrides: Partial<Session> = {}
-): Session => ({
+const createMockSession = (overrides: Partial<Session> = {}): Session => ({
   id: Math.floor(Math.random() * 10000),
   session_type: 'quick_boost',
   start_time: Date.now(),
@@ -743,7 +741,11 @@ describe('Utility Functions', () => {
       };
       const result = filterSessions(sessions, filters);
       expect(result.length).toBe(2);
-      expect(result.every((s) => ['calibration', 'quick_boost'].includes(s.session_type))).toBe(true);
+      expect(
+        result.every((s) =>
+          ['calibration', 'quick_boost'].includes(s.session_type)
+        )
+      ).toBe(true);
     });
 
     it('should filter by date range - today only', () => {

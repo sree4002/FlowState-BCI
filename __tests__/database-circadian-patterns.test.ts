@@ -282,7 +282,9 @@ describe('Database - Circadian Patterns Table', () => {
       upsertCircadianPattern(db, patternData);
       const original = getCircadianPatternByHour(db, 9);
 
-      updateCircadianPattern(db, original!.hour_of_day, { avg_theta_mean: 14.0 });
+      updateCircadianPattern(db, original!.hour_of_day, {
+        avg_theta_mean: 14.0,
+      });
 
       const updated = getCircadianPatternByHour(db, 9);
       expect(updated?.avg_theta_mean).toBe(14.0);

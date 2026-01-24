@@ -47,7 +47,9 @@ describe('PhoneAudioOutput', () => {
     });
 
     it('should import AVPlaybackStatus from expo-av', () => {
-      expect(sourceCode).toMatch(/import.*AVPlaybackStatus.*from.*['"]expo-av['"]/);
+      expect(sourceCode).toMatch(
+        /import.*AVPlaybackStatus.*from.*['"]expo-av['"]/
+      );
     });
 
     it('should import EntrainmentOutput interface', () => {
@@ -57,7 +59,9 @@ describe('PhoneAudioOutput', () => {
 
   describe('WAV Asset', () => {
     it('should require the pre-generated isochronic WAV file', () => {
-      expect(sourceCode).toContain("require('../../../assets/audio/isochronic_theta6_carrier440.wav')");
+      expect(sourceCode).toContain(
+        "require('../../../assets/audio/isochronic_theta6_carrier440.wav')"
+      );
     });
 
     it('should define ISOCHRONIC_TONE_ASSET constant', () => {
@@ -65,7 +69,10 @@ describe('PhoneAudioOutput', () => {
     });
 
     it('should have WAV file available', () => {
-      const wavPath = path.join(__dirname, '../assets/audio/isochronic_theta6_carrier440.wav');
+      const wavPath = path.join(
+        __dirname,
+        '../assets/audio/isochronic_theta6_carrier440.wav'
+      );
       expect(fs.existsSync(wavPath)).toBe(true);
     });
   });
@@ -82,7 +89,9 @@ describe('PhoneAudioOutput', () => {
 
   describe('Constructor', () => {
     it('should accept optional config', () => {
-      expect(sourceCode).toContain('constructor(config: PhoneAudioOutputConfig = {})');
+      expect(sourceCode).toContain(
+        'constructor(config: PhoneAudioOutputConfig = {})'
+      );
     });
 
     it('should have default frequency of 6 Hz (baked into WAV)', () => {
@@ -100,7 +109,9 @@ describe('PhoneAudioOutput', () => {
 
   describe('Public Methods', () => {
     it('should have play method', () => {
-      expect(sourceCode).toContain('async play(frequency?: number, volume?: number): Promise<void>');
+      expect(sourceCode).toContain(
+        'async play(frequency?: number, volume?: number): Promise<void>'
+      );
     });
 
     it('should have stop method', () => {
@@ -124,11 +135,15 @@ describe('PhoneAudioOutput', () => {
     });
 
     it('should have onStateChange method', () => {
-      expect(sourceCode).toContain('onStateChange(callback: EntrainmentStateCallback): void');
+      expect(sourceCode).toContain(
+        'onStateChange(callback: EntrainmentStateCallback): void'
+      );
     });
 
     it('should have offStateChange method', () => {
-      expect(sourceCode).toContain('offStateChange(callback: EntrainmentStateCallback): void');
+      expect(sourceCode).toContain(
+        'offStateChange(callback: EntrainmentStateCallback): void'
+      );
     });
 
     it('should have dispose method', () => {
@@ -172,7 +187,9 @@ describe('PhoneAudioOutput', () => {
     });
 
     it('should use Set for stateCallbacks', () => {
-      expect(sourceCode).toContain('stateCallbacks: Set<EntrainmentStateCallback>');
+      expect(sourceCode).toContain(
+        'stateCallbacks: Set<EntrainmentStateCallback>'
+      );
     });
   });
 
@@ -268,7 +285,9 @@ describe('PhoneAudioOutput', () => {
     });
 
     it('should stop and pause after fade complete', () => {
-      const methodMatch = sourceCode.match(/private async forceStopSound[\s\S]*?(?=private async forceUnloadSound)/);
+      const methodMatch = sourceCode.match(
+        /private async forceStopSound[\s\S]*?(?=private async forceUnloadSound)/
+      );
       expect(methodMatch?.[0]).toContain('stopAsync()');
       expect(methodMatch?.[0]).toContain('pauseAsync()');
     });
@@ -350,7 +369,9 @@ describe('PhoneAudioOutput', () => {
       stopAsync: jest.fn().mockResolvedValue(undefined),
       pauseAsync: jest.fn().mockResolvedValue(undefined),
       unloadAsync: jest.fn().mockResolvedValue(undefined),
-      getStatusAsync: jest.fn().mockResolvedValue({ isLoaded: true, isPlaying: false }),
+      getStatusAsync: jest
+        .fn()
+        .mockResolvedValue({ isLoaded: true, isPlaying: false }),
       setOnPlaybackStatusUpdate: jest.fn(),
     };
 
@@ -361,7 +382,9 @@ describe('PhoneAudioOutput', () => {
     it('should trigger kill-switch when idle but status.isPlaying is true', () => {
       // Verify the code structure handles this case
       // The actual kill-switch is in createPlaybackStatusHandler
-      const handlerMatch = sourceCode.match(/createPlaybackStatusHandler[\s\S]*?return \(status[\s\S]*?\};/);
+      const handlerMatch = sourceCode.match(
+        /createPlaybackStatusHandler[\s\S]*?return \(status[\s\S]*?\};/
+      );
       expect(handlerMatch).toBeTruthy();
 
       // Check it calls forceStopSound when isGhostAudio
@@ -394,21 +417,27 @@ describe('PhoneAudioOutput', () => {
       expect(sourceCode).toContain('!this.isKillingStaleSound');
 
       // Verify flag is set to true before calling forceStopSound
-      const killSwitchBlock = sourceCode.match(/if \(isGhostAudio[\s\S]*?setTimeout/);
+      const killSwitchBlock = sourceCode.match(
+        /if \(isGhostAudio[\s\S]*?setTimeout/
+      );
       expect(killSwitchBlock).toBeTruthy();
       expect(killSwitchBlock![0]).toContain('this.isKillingStaleSound = true');
     });
 
     it('should reset debounce flag after 500ms', () => {
       // Verify the setTimeout resets the flag
-      const timeoutMatch = sourceCode.match(/setTimeout\(\(\) => \{[\s\S]*?isKillingStaleSound = false[\s\S]*?\}, 500\)/);
+      const timeoutMatch = sourceCode.match(
+        /setTimeout\(\(\) => \{[\s\S]*?isKillingStaleSound = false[\s\S]*?\}, 500\)/
+      );
       expect(timeoutMatch).toBeTruthy();
     });
 
     it('should not trigger kill-switch when playing state matches audio playing', () => {
       // When state is 'playing' and audio is playing, no kill-switch needed
-      // Verify 'playing' is NOT in the shouldBeStopped condition
-      const conditionMatch = sourceCode.match(/const shouldBeStopped = .*?;/);
+      // Verify 'playing' is NOT in the shouldBeStopped condition (handles multiline formatting)
+      const conditionMatch = sourceCode.match(
+        /const shouldBeStopped =[\s\S]*?this\.state === 'stopping'/
+      );
       expect(conditionMatch).toBeTruthy();
       expect(conditionMatch![0]).not.toContain("'playing'");
     });
@@ -462,7 +491,10 @@ describe('PhoneAudioOutput', () => {
 
   describe('Service Index Export', () => {
     it('should be exported from services/entrainment/index.ts', () => {
-      const indexPath = path.join(__dirname, '../src/services/entrainment/index.ts');
+      const indexPath = path.join(
+        __dirname,
+        '../src/services/entrainment/index.ts'
+      );
       const indexContent = fs.readFileSync(indexPath, 'utf-8');
       expect(indexContent).toContain('PhoneAudioOutput');
     });

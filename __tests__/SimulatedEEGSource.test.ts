@@ -73,17 +73,23 @@ describe('SimulatedEEGSource', () => {
 
   describe('SimulatorControlMessage Interface', () => {
     it('should have command property', () => {
-      expect(sourceCode).toMatch(/command:\s*['"]set_state['"].*\|.*['"]clear_state['"]/);
+      expect(sourceCode).toMatch(
+        /command:\s*['"]set_state['"].*\|.*['"]clear_state['"]/
+      );
     });
 
     it('should have optional state property', () => {
-      expect(sourceCode).toMatch(/state\?:\s*['"]low['"].*\|.*['"]normal['"].*\|.*['"]high['"]/);
+      expect(sourceCode).toMatch(
+        /state\?:\s*['"]low['"].*\|.*['"]normal['"].*\|.*['"]high['"]/
+      );
     });
   });
 
   describe('Constructor', () => {
     it('should accept optional config', () => {
-      expect(sourceCode).toContain('constructor(config: SimulatedEEGSourceConfig = {})');
+      expect(sourceCode).toContain(
+        'constructor(config: SimulatedEEGSourceConfig = {})'
+      );
     });
 
     it('should have default serverUrl with port 8765', () => {
@@ -118,11 +124,15 @@ describe('SimulatedEEGSource', () => {
     });
 
     it('should have onConnectionStateChange method', () => {
-      expect(sourceCode).toContain('onConnectionStateChange(callback: ConnectionStateCallback)');
+      expect(sourceCode).toContain(
+        'onConnectionStateChange(callback: ConnectionStateCallback)'
+      );
     });
 
     it('should have offConnectionStateChange method', () => {
-      expect(sourceCode).toContain('offConnectionStateChange(callback: ConnectionStateCallback)');
+      expect(sourceCode).toContain(
+        'offConnectionStateChange(callback: ConnectionStateCallback)'
+      );
     });
 
     it('should have getConnectionState method', () => {
@@ -134,11 +144,15 @@ describe('SimulatedEEGSource', () => {
     });
 
     it('should have sendControlMessage method', () => {
-      expect(sourceCode).toContain('sendControlMessage(message: SimulatorControlMessage)');
+      expect(sourceCode).toContain(
+        'sendControlMessage(message: SimulatorControlMessage)'
+      );
     });
 
     it('should have forceState method', () => {
-      expect(sourceCode).toContain("forceState(state: 'low' | 'normal' | 'high')");
+      expect(sourceCode).toContain(
+        "forceState(state: 'low' | 'normal' | 'high')"
+      );
     });
 
     it('should have clearForcedState method', () => {
@@ -174,7 +188,9 @@ describe('SimulatedEEGSource', () => {
 
   describe('Connection State Management', () => {
     it('should track connectionState', () => {
-      expect(sourceCode).toContain("connectionState: EEGConnectionState = 'disconnected'");
+      expect(sourceCode).toContain(
+        "connectionState: EEGConnectionState = 'disconnected'"
+      );
     });
 
     it('should track reconnectAttempts', () => {
@@ -272,11 +288,15 @@ describe('SimulatedEEGSource', () => {
     });
 
     it('should log parse errors', () => {
-      expect(sourceCode).toContain('[SimulatedEEGSource] Failed to parse message');
+      expect(sourceCode).toContain(
+        '[SimulatedEEGSource] Failed to parse message'
+      );
     });
 
     it('should log invalid message format', () => {
-      expect(sourceCode).toContain('[SimulatedEEGSource] Invalid message format');
+      expect(sourceCode).toContain(
+        '[SimulatedEEGSource] Invalid message format'
+      );
     });
 
     it('should catch callback errors', () => {
@@ -406,7 +426,10 @@ describe('SimulatedEEGSource Functional Tests', () => {
 
     it('sendControlMessage should return false when not connected', () => {
       const source = new SimulatedEEGSource();
-      const result = source.sendControlMessage({ command: 'set_state', state: 'high' });
+      const result = source.sendControlMessage({
+        command: 'set_state',
+        state: 'high',
+      });
       expect(result).toBe(false);
     });
   });

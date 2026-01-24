@@ -156,12 +156,9 @@ describe('DashboardScreen', () => {
       const firstChild = tree?.children?.[0];
       expect(firstChild).toBeDefined();
       // Accept various types due to React Native mocking differences
-      expect([
-        'view',
-        'View',
-        'refreshcontrol',
-        'RefreshControl',
-      ]).toContain(firstChild?.type);
+      expect(['view', 'View', 'refreshcontrol', 'RefreshControl']).toContain(
+        firstChild?.type
+      );
     });
 
     it('renders current session card section', () => {

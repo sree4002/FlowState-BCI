@@ -32,7 +32,7 @@ import {
 } from './EntrainmentOutput';
 
 // Import the pre-generated isochronic tone WAV
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const ISOCHRONIC_TONE_ASSET = require('../../../assets/audio/isochronic_theta6_carrier440.wav');
 
 // Global instance counter for debugging
@@ -93,25 +93,33 @@ export class PhoneAudioOutput implements EntrainmentOutput {
       this.stateCallbacks.add(config.onStateChange);
     }
 
-    console.log(`[PhoneAudioOutput#${this.instanceId}] Created with volume: ${this.currentVolume}`);
+    console.log(
+      `[PhoneAudioOutput#${this.instanceId}] Created with volume: ${this.currentVolume}`
+    );
   }
 
   async play(frequency?: number, volume?: number): Promise<void> {
     // Serialize with other operations
     return this.serializeOperation(async () => {
       if (this.isDisposed) {
-        console.warn(`[PhoneAudioOutput#${this.instanceId}] play() called after dispose, ignoring`);
+        console.warn(
+          `[PhoneAudioOutput#${this.instanceId}] play() called after dispose, ignoring`
+        );
         return;
       }
 
       if (this.state === 'playing') {
-        console.log(`[PhoneAudioOutput#${this.instanceId}] Already playing (sound#${this.soundInstanceId}), ignoring play()`);
+        console.log(
+          `[PhoneAudioOutput#${this.instanceId}] Already playing (sound#${this.soundInstanceId}), ignoring play()`
+        );
         return;
       }
 
       // Note: frequency parameter is ignored since it's baked into the WAV
       if (frequency && frequency !== 6) {
-        console.warn(`[PhoneAudioOutput#${this.instanceId}] Frequency change ignored - using pre-generated 6 Hz WAV`);
+        console.warn(
+          `[PhoneAudioOutput#${this.instanceId}] Frequency change ignored - using pre-generated 6 Hz WAV`
+        );
       }
 
       if (volume !== undefined) {
@@ -133,9 +141,14 @@ export class PhoneAudioOutput implements EntrainmentOutput {
         await this.sound.playAsync();
 
         this.setState('playing');
-        console.log(`[PhoneAudioOutput#${this.instanceId}] ▶️ Playing sound#${this.soundInstanceId} at volume ${this.currentVolume}`);
+        console.log(
+          `[PhoneAudioOutput#${this.instanceId}] ▶️ Playing sound#${this.soundInstanceId} at volume ${this.currentVolume}`
+        );
       } catch (error) {
-        console.error(`[PhoneAudioOutput#${this.instanceId}] Failed to start playback:`, error);
+        console.error(
+          `[PhoneAudioOutput#${this.instanceId}] Failed to start playback:`,
+          error
+        );
         this.setState('idle');
         throw error;
       }
@@ -145,7 +158,9 @@ export class PhoneAudioOutput implements EntrainmentOutput {
   async stop(): Promise<void> {
     // Serialize with other operations
     return this.serializeOperation(async () => {
-      console.log(`[PhoneAudioOutput#${this.instanceId}] stop() called, state=${this.state}, sound#${this.soundInstanceId}`);
+      console.log(
+        `[PhoneAudioOutput#${this.instanceId}] stop() called, state=${this.state}, sound#${this.soundInstanceId}`
+      );
 
       // Force stop regardless of state - always try to stop the sound
       await this.forceStopSound();
@@ -164,12 +179,17 @@ export class PhoneAudioOutput implements EntrainmentOutput {
 
   setVolume(volume: number): void {
     this.currentVolume = Math.max(0, Math.min(volume, 1));
-    console.log(`[PhoneAudioOutput#${this.instanceId}] Volume set to ${this.currentVolume}`);
+    console.log(
+      `[PhoneAudioOutput#${this.instanceId}] Volume set to ${this.currentVolume}`
+    );
 
     // Apply immediately if sound is loaded (fire and forget)
     if (this.sound && !this.isDisposed) {
       this.sound.setVolumeAsync(this.currentVolume).catch((err) => {
-        console.error(`[PhoneAudioOutput#${this.instanceId}] Failed to set volume:`, err);
+        console.error(
+          `[PhoneAudioOutput#${this.instanceId}] Failed to set volume:`,
+          err
+        );
       });
     }
   }
@@ -214,9 +234,15 @@ export class PhoneAudioOutput implements EntrainmentOutput {
   /**
    * Audio self-test: plays the bundled WAV for 2 seconds to verify expo-av works.
    */
-  async selfTest(): Promise<{ success: boolean; error?: string; status?: AVPlaybackStatus }> {
+  async selfTest(): Promise<{
+    success: boolean;
+    error?: string;
+    status?: AVPlaybackStatus;
+  }> {
     const testId = ++globalSoundInstanceCounter;
-    console.log(`[PhoneAudioOutput#${this.instanceId}] ========== SELF-TEST #${testId} START ==========`);
+    console.log(
+      `[PhoneAudioOutput#${this.instanceId}] ========== SELF-TEST #${testId} START ==========`
+    );
 
     try {
       // Configure audio mode
@@ -228,11 +254,14 @@ export class PhoneAudioOutput implements EntrainmentOutput {
       });
 
       // Create a separate test sound
-      const { sound: testSound, status: initialStatus } = await Audio.Sound.createAsync(
-        ISOCHRONIC_TONE_ASSET,
-        { shouldPlay: false, volume: 1.0 }
+      const { sound: testSound, status: initialStatus } =
+        await Audio.Sound.createAsync(ISOCHRONIC_TONE_ASSET, {
+          shouldPlay: false,
+          volume: 1.0,
+        });
+      console.log(
+        `[PhoneAudioOutput#${this.instanceId}] Self-test sound created`
       );
-      console.log(`[PhoneAudioOutput#${this.instanceId}] Self-test sound created`);
 
       // Play at full volume
       await testSound.setVolumeAsync(1.0);
@@ -249,11 +278,15 @@ export class PhoneAudioOutput implements EntrainmentOutput {
       await testSound.stopAsync();
       await testSound.unloadAsync();
 
-      console.log(`[PhoneAudioOutput#${this.instanceId}] ========== SELF-TEST #${testId} SUCCESS ==========`);
+      console.log(
+        `[PhoneAudioOutput#${this.instanceId}] ========== SELF-TEST #${testId} SUCCESS ==========`
+      );
       return { success: true, status: finalStatus };
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
-      console.error(`[PhoneAudioOutput#${this.instanceId}] ========== SELF-TEST #${testId} FAILED ==========`);
+      console.error(
+        `[PhoneAudioOutput#${this.instanceId}] ========== SELF-TEST #${testId} FAILED ==========`
+      );
       console.error(`[PhoneAudioOutput#${this.instanceId}] Error:`, errorMsg);
       return { success: false, error: errorMsg };
     }
@@ -265,7 +298,9 @@ export class PhoneAudioOutput implements EntrainmentOutput {
    * Serialize operations to prevent race conditions.
    * Each operation waits for the previous one to complete.
    */
-  private async serializeOperation(operation: () => Promise<void>): Promise<void> {
+  private async serializeOperation(
+    operation: () => Promise<void>
+  ): Promise<void> {
     const previousOperation = this.operationPromise;
 
     // Chain this operation after the previous one
@@ -289,13 +324,17 @@ export class PhoneAudioOutput implements EntrainmentOutput {
   private async initialize(): Promise<void> {
     // Already initialized and sound exists
     if (this.isInitialized && this.sound) {
-      console.log(`[PhoneAudioOutput#${this.instanceId}] Already initialized with sound#${this.soundInstanceId}`);
+      console.log(
+        `[PhoneAudioOutput#${this.instanceId}] Already initialized with sound#${this.soundInstanceId}`
+      );
       return;
     }
 
     // Already initializing - wait for it
     if (this.initPromise) {
-      console.log(`[PhoneAudioOutput#${this.instanceId}] Init already in progress, waiting...`);
+      console.log(
+        `[PhoneAudioOutput#${this.instanceId}] Init already in progress, waiting...`
+      );
       return this.initPromise;
     }
 
@@ -315,12 +354,16 @@ export class PhoneAudioOutput implements EntrainmentOutput {
   private async doInitialize(): Promise<void> {
     // If there's an existing sound, clean it up first
     if (this.sound) {
-      console.log(`[PhoneAudioOutput#${this.instanceId}] Cleaning up old sound#${this.soundInstanceId} before reinit`);
+      console.log(
+        `[PhoneAudioOutput#${this.instanceId}] Cleaning up old sound#${this.soundInstanceId} before reinit`
+      );
       await this.forceUnloadSound();
     }
 
     const newSoundId = ++globalSoundInstanceCounter;
-    console.log(`[PhoneAudioOutput#${this.instanceId}] 🔄 Initializing new sound#${newSoundId}...`);
+    console.log(
+      `[PhoneAudioOutput#${this.instanceId}] 🔄 Initializing new sound#${newSoundId}...`
+    );
 
     // Configure audio mode for playback
     try {
@@ -331,7 +374,10 @@ export class PhoneAudioOutput implements EntrainmentOutput {
         shouldDuckAndroid: true,
       });
     } catch (modeError) {
-      console.error(`[PhoneAudioOutput#${this.instanceId}] Failed to set audio mode:`, modeError);
+      console.error(
+        `[PhoneAudioOutput#${this.instanceId}] Failed to set audio mode:`,
+        modeError
+      );
       throw modeError;
     }
 
@@ -351,9 +397,14 @@ export class PhoneAudioOutput implements EntrainmentOutput {
       this.soundInstanceId = newSoundId;
       this.isInitialized = true;
 
-      console.log(`[PhoneAudioOutput#${this.instanceId}] ✅ Sound#${newSoundId} loaded, duration=${(status as AVPlaybackStatus & { isLoaded: true }).durationMillis}ms`);
+      console.log(
+        `[PhoneAudioOutput#${this.instanceId}] ✅ Sound#${newSoundId} loaded, duration=${(status as AVPlaybackStatus & { isLoaded: true }).durationMillis}ms`
+      );
     } catch (loadError) {
-      console.error(`[PhoneAudioOutput#${this.instanceId}] Failed to load audio:`, loadError);
+      console.error(
+        `[PhoneAudioOutput#${this.instanceId}] Failed to load audio:`,
+        loadError
+      );
       throw loadError;
     }
   }
@@ -368,7 +419,9 @@ export class PhoneAudioOutput implements EntrainmentOutput {
     }
 
     const soundId = this.soundInstanceId;
-    console.log(`[PhoneAudioOutput#${this.instanceId}] Force stopping sound#${soundId}...`);
+    console.log(
+      `[PhoneAudioOutput#${this.instanceId}] Force stopping sound#${soundId}...`
+    );
 
     try {
       // Quick fade out (shorter than normal for force stop)
@@ -413,9 +466,14 @@ export class PhoneAudioOutput implements EntrainmentOutput {
         // Ignore
       }
 
-      console.log(`[PhoneAudioOutput#${this.instanceId}] Sound#${soundId} force stopped`);
+      console.log(
+        `[PhoneAudioOutput#${this.instanceId}] Sound#${soundId} force stopped`
+      );
     } catch (error) {
-      console.error(`[PhoneAudioOutput#${this.instanceId}] Error during force stop:`, error);
+      console.error(
+        `[PhoneAudioOutput#${this.instanceId}] Error during force stop:`,
+        error
+      );
     }
   }
 
@@ -428,17 +486,24 @@ export class PhoneAudioOutput implements EntrainmentOutput {
     }
 
     const soundId = this.soundInstanceId;
-    console.log(`[PhoneAudioOutput#${this.instanceId}] Unloading sound#${soundId}...`);
+    console.log(
+      `[PhoneAudioOutput#${this.instanceId}] Unloading sound#${soundId}...`
+    );
 
     try {
       await this.sound.unloadAsync();
     } catch (error) {
-      console.error(`[PhoneAudioOutput#${this.instanceId}] Error unloading sound#${soundId}:`, error);
+      console.error(
+        `[PhoneAudioOutput#${this.instanceId}] Error unloading sound#${soundId}:`,
+        error
+      );
     }
 
     this.sound = null;
     this.isInitialized = false;
-    console.log(`[PhoneAudioOutput#${this.instanceId}] 🗑️ Sound#${soundId} unloaded`);
+    console.log(
+      `[PhoneAudioOutput#${this.instanceId}] 🗑️ Sound#${soundId} unloaded`
+    );
   }
 
   /**
@@ -455,26 +520,33 @@ export class PhoneAudioOutput implements EntrainmentOutput {
 
       if (!status.isLoaded) {
         if (status.error) {
-          console.error(`[PhoneAudioOutput#${this.instanceId}] Sound#${soundId} error:`, status.error);
+          console.error(
+            `[PhoneAudioOutput#${this.instanceId}] Sound#${soundId} error:`,
+            status.error
+          );
         }
         return;
       }
 
       // KILL-SWITCH: If disposed, idle, or stopping but audio is playing, force kill it
-      const shouldBeStopped = this.isDisposed || this.state === 'idle' || this.state === 'stopping';
+      const shouldBeStopped =
+        this.isDisposed || this.state === 'idle' || this.state === 'stopping';
       const isGhostAudio = status.isPlaying && shouldBeStopped;
 
       if (isGhostAudio && !this.isKillingStaleSound) {
         console.warn(
           `[PhoneAudioOutput#${this.instanceId}] 🚨 KILL-SWITCH: Ghost audio detected! ` +
-          `state=${this.state}, isDisposed=${this.isDisposed}, status.isPlaying=${status.isPlaying}`
+            `state=${this.state}, isDisposed=${this.isDisposed}, status.isPlaying=${status.isPlaying}`
         );
         this.isKillingStaleSound = true;
 
         // Fire-and-forget force stop
         this.forceStopSound()
           .catch((err) => {
-            console.error(`[PhoneAudioOutput#${this.instanceId}] Kill-switch error:`, err);
+            console.error(
+              `[PhoneAudioOutput#${this.instanceId}] Kill-switch error:`,
+              err
+            );
           })
           .finally(() => {
             // Reset debounce after a short delay to allow re-trigger if needed
@@ -490,13 +562,18 @@ export class PhoneAudioOutput implements EntrainmentOutput {
     if (this.state !== state) {
       const oldState = this.state;
       this.state = state;
-      console.log(`[PhoneAudioOutput#${this.instanceId}] State: ${oldState} → ${state}`);
+      console.log(
+        `[PhoneAudioOutput#${this.instanceId}] State: ${oldState} → ${state}`
+      );
 
       this.stateCallbacks.forEach((callback) => {
         try {
           callback(state);
         } catch (error) {
-          console.error(`[PhoneAudioOutput#${this.instanceId}] State callback error:`, error);
+          console.error(
+            `[PhoneAudioOutput#${this.instanceId}] State callback error:`,
+            error
+          );
         }
       });
     }

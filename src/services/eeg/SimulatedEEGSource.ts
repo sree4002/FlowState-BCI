@@ -86,32 +86,49 @@ export class SimulatedEEGSource implements EEGSource {
   }
 
   async start(): Promise<void> {
-    if (this.connectionState === 'connected' || this.connectionState === 'connecting') {
+    if (
+      this.connectionState === 'connected' ||
+      this.connectionState === 'connecting'
+    ) {
       console.warn('[SimulatedEEGSource] Already connected or connecting');
       return;
     }
 
     // Block on web platform
     if (Platform.OS === 'web') {
-      console.error('[SimulatedEEGSource] Simulated mode is NOT supported on web platform');
+      console.error(
+        '[SimulatedEEGSource] Simulated mode is NOT supported on web platform'
+      );
       this.setConnectionState('error');
-      throw new Error('Simulated mode is not supported on web. Use a physical device or emulator.');
+      throw new Error(
+        'Simulated mode is not supported on web. Use a physical device or emulator.'
+      );
     }
 
     // Validate URL
     const url = this.config.serverUrl!;
     if (!url.startsWith('ws://') && !url.startsWith('wss://')) {
-      console.error(`[SimulatedEEGSource] Invalid URL scheme: ${url} (must start with ws:// or wss://)`);
+      console.error(
+        `[SimulatedEEGSource] Invalid URL scheme: ${url} (must start with ws:// or wss://)`
+      );
       this.setConnectionState('error');
       throw new Error(`Invalid WebSocket URL: ${url}`);
     }
 
     // Warn about localhost on device (ios/android)
-    if ((url.includes('localhost') || url.includes('127.0.0.1')) &&
-        (Platform.OS === 'ios' || Platform.OS === 'android')) {
-      console.warn('[SimulatedEEGSource] ⚠️ WARNING: Using localhost URL on device!');
-      console.warn('[SimulatedEEGSource] This will NOT work on a physical device.');
-      console.warn('[SimulatedEEGSource] Use your computer\'s LAN IP instead (e.g., ws://192.168.x.x:8765)');
+    if (
+      (url.includes('localhost') || url.includes('127.0.0.1')) &&
+      (Platform.OS === 'ios' || Platform.OS === 'android')
+    ) {
+      console.warn(
+        '[SimulatedEEGSource] ⚠️ WARNING: Using localhost URL on device!'
+      );
+      console.warn(
+        '[SimulatedEEGSource] This will NOT work on a physical device.'
+      );
+      console.warn(
+        "[SimulatedEEGSource] Use your computer's LAN IP instead (e.g., ws://192.168.x.x:8765)"
+      );
     }
 
     this.shouldReconnect = true;
@@ -171,7 +188,10 @@ export class SimulatedEEGSource implements EEGSource {
       this.ws.send(JSON.stringify(message));
       return true;
     } catch (error) {
-      console.error('[SimulatedEEGSource] Failed to send control message:', error);
+      console.error(
+        '[SimulatedEEGSource] Failed to send control message:',
+        error
+      );
       return false;
     }
   }
@@ -197,7 +217,9 @@ export class SimulatedEEGSource implements EEGSource {
 
     const serverUrl = this.config.serverUrl!;
     console.log('[SimulatedEEGSource] ========== CONNECT ==========');
-    console.log(`[SimulatedEEGSource] Using serverUrl: ${serverUrl} (source=${this.urlSource})`);
+    console.log(
+      `[SimulatedEEGSource] Using serverUrl: ${serverUrl} (source=${this.urlSource})`
+    );
     console.log(`[SimulatedEEGSource] Platform: ${Platform.OS}`);
     console.log('[SimulatedEEGSource] Creating WebSocket...');
 
@@ -208,7 +230,10 @@ export class SimulatedEEGSource implements EEGSource {
           this.ws = new WebSocket(serverUrl);
           console.log('[SimulatedEEGSource] WebSocket object created');
         } catch (createError) {
-          console.error('[SimulatedEEGSource] Failed to create WebSocket:', createError);
+          console.error(
+            '[SimulatedEEGSource] Failed to create WebSocket:',
+            createError
+          );
           reject(createError);
           return;
         }
@@ -216,8 +241,12 @@ export class SimulatedEEGSource implements EEGSource {
         // Connection timeout (5 seconds)
         this.connectionTimeoutTimer = setTimeout(() => {
           if (this.connectionState === 'connecting') {
-            console.error('[SimulatedEEGSource] ❌ Connection TIMEOUT after 5 seconds');
-            console.error('[SimulatedEEGSource] Server may not be running or URL may be wrong');
+            console.error(
+              '[SimulatedEEGSource] ❌ Connection TIMEOUT after 5 seconds'
+            );
+            console.error(
+              '[SimulatedEEGSource] Server may not be running or URL may be wrong'
+            );
             console.error(`[SimulatedEEGSource] Attempted URL: ${serverUrl}`);
             this.ws?.close();
             reject(new Error(`Connection timeout to ${serverUrl}`));
@@ -237,14 +266,18 @@ export class SimulatedEEGSource implements EEGSource {
           this.clearConnectionTimeout();
           console.log('[SimulatedEEGSource] ❌ WebSocket CLOSED');
           console.log(`[SimulatedEEGSource]   code: ${event.code}`);
-          console.log(`[SimulatedEEGSource]   reason: "${event.reason || '(no reason)'}"`);
+          console.log(
+            `[SimulatedEEGSource]   reason: "${event.reason || '(no reason)'}"`
+          );
           this.ws = null;
 
           // Interpret close codes
           if (event.code === 1000) {
             console.log('[SimulatedEEGSource]   → Normal closure');
           } else if (event.code === 1006) {
-            console.log('[SimulatedEEGSource]   → Abnormal closure (connection failed or dropped)');
+            console.log(
+              '[SimulatedEEGSource]   → Abnormal closure (connection failed or dropped)'
+            );
           } else if (event.code === 1002) {
             console.log('[SimulatedEEGSource]   → Protocol error');
           } else if (event.code === 1003) {
@@ -261,7 +294,10 @@ export class SimulatedEEGSource implements EEGSource {
         this.ws.onerror = (error: Event) => {
           this.clearConnectionTimeout();
           console.error('[SimulatedEEGSource] ❌ WebSocket ERROR');
-          console.error('[SimulatedEEGSource] Error event:', JSON.stringify(error, null, 2));
+          console.error(
+            '[SimulatedEEGSource] Error event:',
+            JSON.stringify(error, null, 2)
+          );
           console.error(`[SimulatedEEGSource] URL was: ${serverUrl}`);
           console.error('[SimulatedEEGSource] Common causes:');
           console.error('  - Server not running');
@@ -329,13 +365,18 @@ export class SimulatedEEGSource implements EEGSource {
 
   private setConnectionState(state: EEGConnectionState): void {
     if (this.connectionState !== state) {
-      console.log(`[SimulatedEEGSource] State: ${this.connectionState} → ${state}`);
+      console.log(
+        `[SimulatedEEGSource] State: ${this.connectionState} → ${state}`
+      );
       this.connectionState = state;
       this.connectionCallbacks.forEach((callback) => {
         try {
           callback(state);
         } catch (error) {
-          console.error('[SimulatedEEGSource] Connection callback error:', error);
+          console.error(
+            '[SimulatedEEGSource] Connection callback error:',
+            error
+          );
         }
       });
     }

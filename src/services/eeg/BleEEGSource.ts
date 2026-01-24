@@ -67,8 +67,12 @@ export class BleEEGSource implements EEGSource {
     // 1. Use BLEService to scan/connect to device
     // 2. Subscribe to EEG data characteristic
     // 3. Start signal processing pipeline
-    console.warn('[BleEEGSource] NOT IMPLEMENTED - Use SimulatedEEGSource for development');
-    throw new Error('BleEEGSource not yet implemented. Use SimulatedEEGSource for development.');
+    console.warn(
+      '[BleEEGSource] NOT IMPLEMENTED - Use SimulatedEEGSource for development'
+    );
+    throw new Error(
+      'BleEEGSource not yet implemented. Use SimulatedEEGSource for development.'
+    );
   }
 
   async stop(): Promise<void> {
@@ -127,7 +131,7 @@ export class BleEEGSource implements EEGSource {
    * - Band power extraction
    * - Z-score normalization
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   private handleBleData(_rawData: Uint8Array): void {
     // TODO: Process raw EEG samples to compute metrics
     // const metrics: EEGMetrics = {
@@ -140,7 +144,6 @@ export class BleEEGSource implements EEGSource {
     // this.emitMetrics(metrics);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private emitMetrics(_metrics: EEGMetrics): void {
     // TODO: Emit to all registered callbacks
   }

@@ -43,7 +43,9 @@ export interface PairedDeviceData {
  * @param device - DeviceInfo object
  * @returns PairedDeviceData with only essential pairing fields
  */
-export const deviceInfoToPairedData = (device: DeviceInfo): PairedDeviceData => ({
+export const deviceInfoToPairedData = (
+  device: DeviceInfo
+): PairedDeviceData => ({
   id: device.id,
   name: device.name,
   type: device.type,
@@ -56,9 +58,14 @@ export const deviceInfoToPairedData = (device: DeviceInfo): PairedDeviceData => 
  * @param device - PairedDeviceData to save
  * @returns Promise resolving to true on success, false on failure
  */
-export const savePairedDevice = async (device: PairedDeviceData): Promise<boolean> => {
+export const savePairedDevice = async (
+  device: PairedDeviceData
+): Promise<boolean> => {
   try {
-    await AsyncStorage.setItem(STORAGE_KEYS.PAIRED_DEVICE, JSON.stringify(device));
+    await AsyncStorage.setItem(
+      STORAGE_KEYS.PAIRED_DEVICE,
+      JSON.stringify(device)
+    );
     return true;
   } catch (error) {
     console.error('Failed to save paired device:', error);
