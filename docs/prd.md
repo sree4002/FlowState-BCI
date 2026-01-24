@@ -262,16 +262,16 @@
 
 ## Phase 23: Testing & Quality Assurance
 
-- [ ] Set up Jest for unit testing
-- [ ] Write unit tests for signal processing functions (filter, FFT, artifact detection)
-- [ ] Write unit tests for z-score normalization
-- [ ] Write unit tests for database CRUD operations
+- [x] Set up Jest for unit testing
+- [x] Write unit tests for signal processing functions (filter, FFT, artifact detection)
+- [x] Write unit tests for z-score normalization
+- [x] Write unit tests for database CRUD operations
 - [ ] Set up Detox for end-to-end testing
 - [ ] Write E2E test for onboarding flow
 - [ ] Write E2E test for calibration flow
 - [ ] Write E2E test for daily session flow
 - [ ] Write E2E test for data export flow
-- [ ] Create mock BLE device for integration testing
+- [x] Create mock BLE device for integration testing (MockBleService)
 - [ ] Add crash reporting integration (Sentry or similar)
 
 ## Phase 24: Polish & Performance
@@ -288,11 +288,11 @@
 
 ## Phase 25: Documentation & Release Prep
 
-- [ ] Write README with setup instructions and architecture overview
+- [x] Write README with setup instructions and architecture overview
 - [ ] Document API endpoints for Python service
 - [ ] Create user guide with screenshots for key features
 - [ ] Write privacy policy document
 - [ ] Prepare app store metadata (description, screenshots, keywords)
 - [ ] Configure app icons and splash screen
-- [ ] Set up CI/CD pipeline for builds
+- [x] Set up CI/CD pipeline for builds
 - [ ] Create release checklist for TestFlight/Play Store deployment
