@@ -8,12 +8,18 @@ import { render, screen } from '@testing-library/react-native';
 import { ActiveSessionScreen } from '../src/screens/ActiveSessionScreen';
 import { SessionProvider } from '../src/contexts/SessionContext';
 import { DeviceProvider } from '../src/contexts/DeviceContext';
+import { SettingsProvider } from '../src/contexts/SettingsContext';
+import { SimulatedModeProvider } from '../src/contexts/SimulatedModeContext';
 
 // Test wrapper with required providers
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <SessionProvider>
-    <DeviceProvider>{children}</DeviceProvider>
-  </SessionProvider>
+  <SettingsProvider>
+    <SimulatedModeProvider>
+      <SessionProvider>
+        <DeviceProvider>{children}</DeviceProvider>
+      </SessionProvider>
+    </SimulatedModeProvider>
+  </SettingsProvider>
 );
 
 describe('ActiveSessionScreen', () => {

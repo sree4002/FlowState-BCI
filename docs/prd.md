@@ -75,11 +75,11 @@
 - [x] Create ThetaNumericDisplay showing current z-score value with color coding
 - [x] Create ThetaGaugeDisplay with circular gauge and color-coded zones (red/yellow/green/blue)
 - [x] Create ThetaTimeSeriesChart with scrolling line chart (last 1-5 minutes)
-- [ ] Wire ThetaTimeSeriesChart to SimulatedModeContext data stream
-- [ ] Display real-time theta power values on chart (rolling 60-second window)
-- [ ] Add secondary y-axis or separate chart for z-score over time
-- [ ] Ensure chart renders and updates when using simulated EEG mode
-- [ ] Add loading state when waiting for first data points
+- [x] Wire ThetaTimeSeriesChart to SimulatedModeContext data stream
+- [x] Display real-time theta power values on chart (rolling 60-second window)
+- [x] Add secondary y-axis or separate chart for z-score over time
+- [x] Ensure chart renders and updates when using simulated EEG mode
+- [x] Add loading state when waiting for first data points
 - [x] Create visualization mode toggle (Numeric, Gauge, Chart)
 - [x] Create FrequencySlider component (4-8 Hz, 0.1 Hz increments)
 - [x] Create VolumeSlider component (0-100%)

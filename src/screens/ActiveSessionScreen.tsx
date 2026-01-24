@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,12 @@ import {
 } from '../constants/theme';
 import { useSession } from '../contexts/SessionContext';
 import { useDevice } from '../contexts/DeviceContext';
+import { useSettings } from '../contexts/SettingsContext';
+import { useSimulatedMode } from '../contexts/SimulatedModeContext';
 import { VisualizationModeToggle } from '../components/VisualizationModeToggle';
+import { ThetaTimeSeriesChart } from '../components/ThetaTimeSeriesChart';
+import { ThetaGaugeDisplay } from '../components/ThetaGaugeDisplay';
+import { ThetaNumericDisplay } from '../components/ThetaNumericDisplay';
 
 interface ActiveSessionScreenProps {
   navigation?: any;
@@ -30,13 +35,61 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
 }) => {
   const {
     sessionState,
-    currentThetaZScore,
-    elapsedSeconds,
+    currentThetaZScore: sessionThetaZScore,
+    elapsedSeconds: sessionElapsedSeconds,
     sessionConfig,
     visualizationMode,
     setVisualizationMode,
   } = useSession();
   const { deviceInfo, signalQuality } = useDevice();
+  const { settings } = useSettings();
+  const {
+    metrics: simulatedMetrics,
+    isControllerRunning,
+    connectionState,
+  } = useSimulatedMode();
+
+  // Track elapsed time for simulated mode
+  const [simulatedElapsedSeconds, setSimulatedElapsedSeconds] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Determine if we're using simulated mode
+  const isSimulatedMode = settings.simulated_mode_enabled;
+
+  // Use simulated mode data when enabled, otherwise use session context
+  const currentThetaZScore = isSimulatedMode
+    ? simulatedMetrics?.z_score ?? null
+    : sessionThetaZScore;
+  const elapsedSeconds = isSimulatedMode
+    ? simulatedElapsedSeconds
+    : sessionElapsedSeconds;
+  const isRunning = isSimulatedMode
+    ? isControllerRunning
+    : sessionState === 'running';
+
+  // Timer for simulated mode elapsed time
+  useEffect(() => {
+    if (isSimulatedMode && isControllerRunning) {
+      // Start timer when controller starts
+      timerRef.current = setInterval(() => {
+        setSimulatedElapsedSeconds((prev) => prev + 1);
+      }, 1000);
+    } else if (!isControllerRunning) {
+      // Stop timer and reset when controller stops
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      setSimulatedElapsedSeconds(0);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [isSimulatedMode, isControllerRunning]);
 
   const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
@@ -66,6 +119,61 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
     return 'Below Target';
   };
 
+  // Render the appropriate visualization based on mode
+  const renderVisualization = () => {
+    switch (visualizationMode) {
+      case 'chart':
+        return (
+          <ThetaTimeSeriesChart
+            height={250}
+            timeWindowMinutes={1}
+            showTimeSelector={true}
+            showCurrentValue={true}
+            showZoneLines={true}
+            externalThetaZScore={currentThetaZScore}
+            externalElapsedSeconds={elapsedSeconds}
+            externalIsRunning={isRunning}
+          />
+        );
+      case 'gauge':
+        return (
+          <View style={styles.thetaCard}>
+            <ThetaGaugeDisplay
+              zscore={currentThetaZScore ?? 0}
+              size={200}
+              showLabel={true}
+              showValue={true}
+            />
+          </View>
+        );
+      case 'numeric':
+      default:
+        return (
+          <View style={styles.thetaCard}>
+            <Text style={styles.sectionTitle}>Theta Z-Score</Text>
+            <View style={styles.thetaValueContainer}>
+              <Text style={[styles.thetaValue, { color: getThetaZoneColor() }]}>
+                {currentThetaZScore !== null
+                  ? currentThetaZScore.toFixed(2)
+                  : '--'}
+              </Text>
+              <View
+                style={[
+                  styles.thetaZoneBadge,
+                  { backgroundColor: getThetaZoneColor() },
+                ]}
+              >
+                <Text style={styles.thetaZoneText}>{getThetaZoneLabel()}</Text>
+              </View>
+            </View>
+            <Text style={styles.thetaHint}>
+              Target: 1.5+ for optimal focus state
+            </Text>
+          </View>
+        );
+    }
+  };
+
   return (
     <ScrollView
       style={styles.container}
@@ -78,25 +186,49 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
             style={[
               styles.statusIndicator,
               {
-                backgroundColor: deviceInfo?.is_connected
-                  ? Colors.accent.success
-                  : Colors.accent.error,
+                backgroundColor: isSimulatedMode
+                  ? connectionState === 'connected'
+                    ? Colors.accent.success
+                    : Colors.accent.error
+                  : deviceInfo?.is_connected
+                    ? Colors.accent.success
+                    : Colors.accent.error,
               },
             ]}
           />
           <Text style={styles.statusText}>
-            {deviceInfo?.is_connected ? 'Connected' : 'Disconnected'}
+            {isSimulatedMode
+              ? connectionState === 'connected'
+                ? 'Simulator Connected'
+                : 'Simulator Disconnected'
+              : deviceInfo?.is_connected
+                ? 'Connected'
+                : 'Disconnected'}
           </Text>
         </View>
         <View style={styles.statusItem}>
           <View
             style={[
               styles.statusIndicator,
-              { backgroundColor: getSignalQualityColor() },
+              {
+                backgroundColor: isSimulatedMode
+                  ? simulatedMetrics?.signal_quality
+                    ? simulatedMetrics.signal_quality >= 80
+                      ? Colors.signal.excellent
+                      : simulatedMetrics.signal_quality >= 60
+                        ? Colors.signal.good
+                        : Colors.signal.fair
+                    : Colors.signal.poor
+                  : getSignalQualityColor(),
+              },
             ]}
           />
           <Text style={styles.statusText}>
-            Signal: {signalQuality?.score ?? '--'}%
+            Signal:{' '}
+            {isSimulatedMode
+              ? simulatedMetrics?.signal_quality?.toFixed(0) ?? '--'
+              : signalQuality?.score ?? '--'}
+            %
           </Text>
         </View>
       </View>
@@ -106,30 +238,16 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
         <Text style={styles.timerLabel}>Session Time</Text>
         <Text style={styles.timerValue}>{formatTime(elapsedSeconds)}</Text>
         <Text style={styles.sessionTypeText}>
-          {sessionConfig?.type ?? 'No active session'}
+          {isSimulatedMode
+            ? isControllerRunning
+              ? 'Simulated Session'
+              : 'Simulated Mode (Idle)'
+            : sessionConfig?.type ?? 'No active session'}
         </Text>
       </View>
 
-      {/* Theta Z-Score Display */}
-      <View style={styles.thetaCard}>
-        <Text style={styles.sectionTitle}>Theta Z-Score</Text>
-        <View style={styles.thetaValueContainer}>
-          <Text style={[styles.thetaValue, { color: getThetaZoneColor() }]}>
-            {currentThetaZScore !== null ? currentThetaZScore.toFixed(2) : '--'}
-          </Text>
-          <View
-            style={[
-              styles.thetaZoneBadge,
-              { backgroundColor: getThetaZoneColor() },
-            ]}
-          >
-            <Text style={styles.thetaZoneText}>{getThetaZoneLabel()}</Text>
-          </View>
-        </View>
-        <Text style={styles.thetaHint}>
-          Target: 1.5+ for optimal focus state
-        </Text>
-      </View>
+      {/* Theta Visualization (Numeric, Gauge, or Chart based on mode) */}
+      {renderVisualization()}
 
       {/* Visualization Mode Toggle */}
       <View style={styles.visualizationToggleContainer}>
@@ -191,11 +309,25 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
         <Text style={styles.sectionTitle}>Session Info</Text>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Status</Text>
-          <Text style={styles.infoValue}>{sessionState}</Text>
+          <Text style={styles.infoValue}>
+            {isSimulatedMode
+              ? isControllerRunning
+                ? 'Running (Simulated)'
+                : 'Idle'
+              : sessionState}
+          </Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Text style={styles.infoLabel}>Mode</Text>
+          <Text style={styles.infoValue}>
+            {isSimulatedMode ? 'Simulated EEG' : 'BLE Device'}
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Text style={styles.infoLabel}>Device</Text>
-          <Text style={styles.infoValue}>{deviceInfo?.name ?? 'None'}</Text>
+          <Text style={styles.infoValue}>
+            {isSimulatedMode ? 'WebSocket Simulator' : deviceInfo?.name ?? 'None'}
+          </Text>
         </View>
       </View>
     </ScrollView>

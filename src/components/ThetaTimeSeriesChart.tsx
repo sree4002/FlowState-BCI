@@ -63,6 +63,12 @@ export interface ThetaTimeSeriesChartProps {
   updateInterval?: number;
   /** Callback when time window changes */
   onTimeWindowChange?: (minutes: TimeWindowMinutes) => void;
+  /** Optional externally provided theta z-score (overrides SessionContext) */
+  externalThetaZScore?: number | null;
+  /** Optional externally provided elapsed seconds (overrides SessionContext) */
+  externalElapsedSeconds?: number;
+  /** Optional externally provided running state (overrides SessionContext) */
+  externalIsRunning?: boolean;
 }
 
 /**
@@ -115,8 +121,28 @@ export const ThetaTimeSeriesChart: React.FC<ThetaTimeSeriesChartProps> = ({
   title = 'Theta Z-Score',
   updateInterval = 500,
   onTimeWindowChange,
+  externalThetaZScore,
+  externalElapsedSeconds,
+  externalIsRunning,
 }) => {
-  const { currentThetaZScore, elapsedSeconds, sessionState } = useSession();
+  const sessionContext = useSession();
+
+  // Use external props if provided, otherwise fall back to SessionContext
+  const currentThetaZScore =
+    externalThetaZScore !== undefined
+      ? externalThetaZScore
+      : sessionContext.currentThetaZScore;
+  const elapsedSeconds =
+    externalElapsedSeconds !== undefined
+      ? externalElapsedSeconds
+      : sessionContext.elapsedSeconds;
+  const isRunning =
+    externalIsRunning !== undefined
+      ? externalIsRunning
+      : sessionContext.sessionState === 'running';
+
+  // Derive sessionState for internal use
+  const sessionState = isRunning ? 'running' : 'idle';
 
   // Internal state for time window selection
   const [selectedWindow, setSelectedWindow] =
