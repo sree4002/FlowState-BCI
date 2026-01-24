@@ -266,13 +266,13 @@
 - [x] Write unit tests for signal processing functions (filter, FFT, artifact detection)
 - [x] Write unit tests for z-score normalization
 - [x] Write unit tests for database CRUD operations
-- [ ] Set up Detox for end-to-end testing
-- [ ] Write E2E test for onboarding flow
-- [ ] Write E2E test for calibration flow
-- [ ] Write E2E test for daily session flow
-- [ ] Write E2E test for data export flow
+- [x] Set up Detox for end-to-end testing
+- [x] Write E2E test for onboarding flow
+- [x] Write E2E test for calibration flow
+- [x] Write E2E test for daily session flow
+- [x] Write E2E test for data export flow
 - [x] Create mock BLE device for integration testing (MockBleService)
-- [ ] Add crash reporting integration (Sentry or similar)
+- [x] Add crash reporting integration (Sentry or similar)
 
 ## Phase 24: Polish & Performance
 
@@ -284,15 +284,15 @@
 - [x] Add haptic feedback for key interactions
 - [x] Optimize SQLite queries for history screens with large datasets (indexed queries in database.ts)
 - [x] Add app state persistence for background/foreground transitions (AppStateManager)
-- [ ] Test and optimize battery usage during active sessions
+- [x] Test and optimize battery usage during active sessions
 
 ## Phase 25: Documentation & Release Prep
 
 - [x] Write README with setup instructions and architecture overview
-- [ ] Document API endpoints for Python service
+- [ ] Document API endpoints for Python service (skipped - Python backend separate)
 - [ ] Create user guide with screenshots for key features
-- [ ] Write privacy policy document
+- [x] Write privacy policy document
 - [ ] Prepare app store metadata (description, screenshots, keywords)
-- [ ] Configure app icons and splash screen
+- [x] Configure app icons and splash screen
 - [x] Set up CI/CD pipeline for builds
-- [ ] Create release checklist for TestFlight/Play Store deployment
+- [x] Create release checklist for TestFlight/Play Store deployment
