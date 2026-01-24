@@ -9,3 +9,10 @@ export * from './CalibrationStateMachine';
 export * from './eeg';
 export * from './entrainment';
 export * from './ClosedLoopController';
+
+// Audio mixing service
+export * from './audioMixingService';
+
+// Data export and sharing services
+export * from './exportService';
+export * from './shareService';

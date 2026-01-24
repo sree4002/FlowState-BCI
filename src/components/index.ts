@@ -175,3 +175,39 @@ export type {
   DashboardSkeletonProps,
   ChartSkeletonProps,
 } from './LoadingStates';
+
+export { ExportProgressModal } from './ExportProgressModal';
+export type { ExportProgressModalProps } from './ExportProgressModal';
+export {
+  clampProgress,
+  formatProgress,
+  getProgressAccessibilityLabel,
+  getProgressBarWidth,
+  getProgressColor,
+} from './ExportProgressModal';
+
+export { DataDeletionModal } from './DataDeletionModal';
+export type {
+  DataDeletionModalProps,
+  DataDeletionType,
+} from './DataDeletionModal';
+export {
+  getModalTitle,
+  getWarningMessage,
+  getConfirmAccessibilityLabel,
+  getConfirmAccessibilityHint,
+  getCheckboxLabel,
+} from './DataDeletionModal';
+
+export { AudioMixingControls } from './AudioMixingControls';
+export type {
+  AudioMixingControlsProps,
+  AudioStatusDisplay,
+} from './AudioMixingControls';
+export {
+  getAudioStatusColor,
+  getAudioStatusLabel,
+  getAudioStatusAccessibilityLabel,
+  getModeButtonStyle,
+  getModeButtonTextStyle,
+} from './AudioMixingControls';

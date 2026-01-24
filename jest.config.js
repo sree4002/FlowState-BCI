@@ -33,6 +33,8 @@ module.exports = {
     '^expo-sqlite$': '<rootDir>/__mocks__/expo-sqlite.ts',
     '^expo-av$': '<rootDir>/__mocks__/expo-av.ts',
     '^expo-haptics$': '<rootDir>/__mocks__/expo-haptics.ts',
+    '^expo-sharing$': '<rootDir>/__mocks__/expo-sharing.ts',
+    '^expo-file-system$': '<rootDir>/__mocks__/expo-file-system.ts',
     '^react-native$': '<rootDir>/__mocks__/react-native.ts',
     '^react-native-safe-area-context$':
       '<rootDir>/__mocks__/react-native-safe-area-context.ts',

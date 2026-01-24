@@ -1,6 +1,7 @@
 /**
  * Data Export Service for FlowState BCI
  * Provides utilities for exporting data in CSV, JSON, and EDF formats
+ * Includes share sheet integration for iOS and Android
  */
 
 import type {
@@ -11,6 +12,22 @@ import type {
   AppSettings,
 } from '../types';
 
+import {
+  shareFile,
+  isShareAvailable,
+  getMimeTypeForExtension,
+  type ShareResult,
+} from './shareService';
+
+/**
+ * Progress callback type for export operations
+ * Called at key milestones during export (0%, 25%, 50%, 75%, 100%)
+ */
+export type ExportProgressCallback = (
+  progress: number,
+  message: string
+) => void;
+
 /**
  * Export options for customizing output
  */
@@ -19,6 +36,8 @@ export interface ExportOptions {
   delimiter?: string;
   prettyPrint?: boolean;
   indentation?: number;
+  /** Optional progress callback for tracking export progress */
+  onProgress?: ExportProgressCallback;
 }
 
 /**
@@ -140,11 +159,20 @@ export const exportSessionsToCSV = (
   sessions: Session[],
   options: ExportOptions = {}
 ): string => {
+  const { onProgress } = options;
+
+  // Report start of export
+  onProgress?.(0, 'Preparing session data...');
+
   if (sessions.length === 0) {
+    onProgress?.(100, 'Export complete');
     return options.includeHeaders !== false
       ? 'id,session_type,start_time,end_time,duration_seconds,avg_theta_zscore,max_theta_zscore,entrainment_freq,volume,signal_quality_avg,subjective_rating,notes'
       : '';
   }
+
+  // Report 25% - starting data transformation
+  onProgress?.(25, 'Formatting session data...');
 
   const formattedSessions = sessions.map((session) => ({
     id: session.id,
@@ -161,7 +189,18 @@ export const exportSessionsToCSV = (
     notes: session.notes,
   }));
 
-  return objectsToCSV(formattedSessions, options);
+  // Report 50% - data formatted
+  onProgress?.(50, 'Converting to CSV format...');
+
+  // Report 75% - starting CSV conversion
+  onProgress?.(75, 'Generating CSV output...');
+
+  const result = objectsToCSV(formattedSessions, options);
+
+  // Report 100% - complete
+  onProgress?.(100, 'Export complete');
+
+  return result;
 };
 
 /**
@@ -171,11 +210,20 @@ export const exportBaselinesToCSV = (
   baselines: BaselineProfile[],
   options: ExportOptions = {}
 ): string => {
+  const { onProgress } = options;
+
+  // Report start of export
+  onProgress?.(0, 'Preparing baseline data...');
+
   if (baselines.length === 0) {
+    onProgress?.(100, 'Export complete');
     return options.includeHeaders !== false
       ? 'theta_mean,theta_std,alpha_mean,beta_mean,peak_theta_freq,optimal_freq,calibration_timestamp,quality_score'
       : '';
   }
+
+  // Report 25% - starting data transformation
+  onProgress?.(25, 'Formatting baseline data...');
 
   const formattedBaselines = baselines.map((baseline) => ({
     theta_mean: baseline.theta_mean.toFixed(6),
@@ -190,7 +238,18 @@ export const exportBaselinesToCSV = (
     quality_score: baseline.quality_score.toFixed(2),
   }));
 
-  return objectsToCSV(formattedBaselines, options);
+  // Report 50% - data formatted
+  onProgress?.(50, 'Converting to CSV format...');
+
+  // Report 75% - starting CSV conversion
+  onProgress?.(75, 'Generating CSV output...');
+
+  const result = objectsToCSV(formattedBaselines, options);
+
+  // Report 100% - complete
+  onProgress?.(100, 'Export complete');
+
+  return result;
 };
 
 /**
@@ -201,11 +260,21 @@ export const exportEEGDataToCSV = (
   packets: EEGDataPacket[],
   options: ExportOptions = {}
 ): string => {
+  const { onProgress } = options;
+
+  // Report start of export
+  onProgress?.(0, 'Preparing EEG data...');
+
   if (packets.length === 0) {
+    onProgress?.(100, 'Export complete');
     return '';
   }
 
   const { includeHeaders = true, delimiter = ',' } = options;
+
+  // Report 25% - analyzing data structure
+  onProgress?.(25, 'Analyzing EEG packet structure...');
+
   const maxSamples = Math.max(...packets.map((p) => p.samples.length));
   const rows: string[] = [];
 
@@ -216,6 +285,9 @@ export const exportEEGDataToCSV = (
     }
     rows.push(headers.join(delimiter));
   }
+
+  // Report 50% - processing packets
+  onProgress?.(50, 'Processing EEG packets...');
 
   for (const packet of packets) {
     const values: string[] = [
@@ -230,7 +302,15 @@ export const exportEEGDataToCSV = (
     rows.push(values.join(delimiter));
   }
 
-  return rows.join('\n');
+  // Report 75% - generating output
+  onProgress?.(75, 'Generating CSV output...');
+
+  const result = rows.join('\n');
+
+  // Report 100% - complete
+  onProgress?.(100, 'Export complete');
+
+  return result;
 };
 
 // ============================================================================
@@ -244,8 +324,30 @@ export const exportSessionsToJSON = (
   sessions: Session[],
   options: ExportOptions = {}
 ): string => {
-  const { prettyPrint = true, indentation = 2 } = options;
-  return JSON.stringify(sessions, null, prettyPrint ? indentation : undefined);
+  const { prettyPrint = true, indentation = 2, onProgress } = options;
+
+  // Report start of export
+  onProgress?.(0, 'Preparing session data...');
+
+  // Report 25% - validating data
+  onProgress?.(25, 'Validating session data...');
+
+  // Report 50% - serializing
+  onProgress?.(50, 'Serializing to JSON...');
+
+  // Report 75% - formatting
+  onProgress?.(75, 'Formatting JSON output...');
+
+  const result = JSON.stringify(
+    sessions,
+    null,
+    prettyPrint ? indentation : undefined
+  );
+
+  // Report 100% - complete
+  onProgress?.(100, 'Export complete');
+
+  return result;
 };
 
 /**
@@ -255,8 +357,30 @@ export const exportBaselinesToJSON = (
   baselines: BaselineProfile[],
   options: ExportOptions = {}
 ): string => {
-  const { prettyPrint = true, indentation = 2 } = options;
-  return JSON.stringify(baselines, null, prettyPrint ? indentation : undefined);
+  const { prettyPrint = true, indentation = 2, onProgress } = options;
+
+  // Report start of export
+  onProgress?.(0, 'Preparing baseline data...');
+
+  // Report 25% - validating data
+  onProgress?.(25, 'Validating baseline data...');
+
+  // Report 50% - serializing
+  onProgress?.(50, 'Serializing to JSON...');
+
+  // Report 75% - formatting
+  onProgress?.(75, 'Formatting JSON output...');
+
+  const result = JSON.stringify(
+    baselines,
+    null,
+    prettyPrint ? indentation : undefined
+  );
+
+  // Report 100% - complete
+  onProgress?.(100, 'Export complete');
+
+  return result;
 };
 
 /**
@@ -267,8 +391,26 @@ export const exportUserDataToJSON = (
   data: UserDataExport,
   options: ExportOptions = {}
 ): string => {
-  const { prettyPrint = true, indentation = 2 } = options;
-  return JSON.stringify(data, null, prettyPrint ? indentation : undefined);
+  const { prettyPrint = true, indentation = 2, onProgress } = options;
+
+  // Report start of export
+  onProgress?.(0, 'Preparing user data...');
+
+  // Report 25% - processing sessions
+  onProgress?.(25, 'Processing sessions...');
+
+  // Report 50% - processing baselines
+  onProgress?.(50, 'Processing baselines...');
+
+  // Report 75% - serializing
+  onProgress?.(75, 'Serializing user data...');
+
+  const result = JSON.stringify(data, null, prettyPrint ? indentation : undefined);
+
+  // Report 100% - complete
+  onProgress?.(100, 'Export complete');
+
+  return result;
 };
 
 /**
@@ -765,3 +907,359 @@ export const validateBaselinesForExport = (
     errors,
   };
 };
+
+// ============================================================================
+// Share Sheet Integration Functions
+// ============================================================================
+
+/**
+ * Result of a save and share operation
+ */
+export interface SaveAndShareResult extends ShareResult {
+  /** The temporary file path where data was saved */
+  filePath?: string;
+  /** The filename used for the export */
+  filename?: string;
+}
+
+// Type definition for internal file system module
+interface ExportFileSystemModule {
+  cacheDirectory: string;
+  writeAsStringAsync: (
+    fileUri: string,
+    contents: string,
+    options?: { encoding?: string }
+  ) => Promise<void>;
+  deleteAsync: (
+    fileUri: string,
+    options?: { idempotent?: boolean }
+  ) => Promise<void>;
+  EncodingType: { UTF8: string; Base64: string };
+}
+
+// Lazy-loaded file system module
+let fileSystemModule: ExportFileSystemModule | null = null;
+
+/**
+ * Attempts to load the expo-file-system module
+ */
+const loadFileSystem = async (): Promise<ExportFileSystemModule | null> => {
+  if (fileSystemModule !== null) {
+    return fileSystemModule;
+  }
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const module = (await import('expo-file-system')) as any;
+    fileSystemModule = {
+      cacheDirectory: module.cacheDirectory || '',
+      writeAsStringAsync: module.writeAsStringAsync,
+      deleteAsync: module.deleteAsync,
+      EncodingType: module.EncodingType || { UTF8: 'utf8', Base64: 'base64' },
+    };
+    return fileSystemModule;
+  } catch (error) {
+    console.warn('expo-file-system module not available:', error);
+    return null;
+  }
+};
+
+/**
+ * Saves sessions to a temporary CSV file and opens the share sheet
+ *
+ * @param sessions - Array of sessions to export
+ * @param options - Export options for CSV generation
+ * @returns Promise resolving to SaveAndShareResult
+ *
+ * @example
+ * ```typescript
+ * const result = await saveAndShareCSV(sessions);
+ * if (result.success) {
+ *   console.log('Shared successfully from:', result.filePath);
+ * } else {
+ *   console.error('Share failed:', result.error);
+ * }
+ * ```
+ */
+export const saveAndShareCSV = async (
+  sessions: Session[],
+  options: ExportOptions = {}
+): Promise<SaveAndShareResult> => {
+  try {
+    // Check if sharing is available
+    const available = await isShareAvailable();
+    if (!available) {
+      return {
+        success: false,
+        error: 'Sharing is not available on this device',
+        platform: 'unknown',
+      };
+    }
+
+    // Load file system
+    const FileSystem = await loadFileSystem();
+    if (!FileSystem) {
+      return {
+        success: false,
+        error: 'File system not available',
+        platform: 'unknown',
+      };
+    }
+
+    // Generate CSV content
+    const csvContent = exportSessionsToCSV(sessions, options);
+
+    // Generate filename
+    const filename = generateExportFilename('sessions', 'csv');
+    const filePath = `${FileSystem.cacheDirectory}${filename}`;
+
+    // Write to temp file
+    await FileSystem.writeAsStringAsync(filePath, csvContent, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+
+    // Share the file
+    const mimeType = getMimeTypeForExtension('csv');
+    const shareResult = await shareFile(
+      filePath,
+      mimeType,
+      'FlowState Sessions Export'
+    );
+
+    // Schedule cleanup of temp file
+    scheduleFileCleanup(FileSystem, filePath);
+
+    return {
+      ...shareResult,
+      filePath,
+      filename,
+    };
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error occurred';
+    return {
+      success: false,
+      error: errorMessage,
+      platform: 'unknown',
+    };
+  }
+};
+
+/**
+ * Saves user data to a temporary JSON file and opens the share sheet
+ *
+ * @param userData - Complete user data export object
+ * @param options - Export options for JSON generation
+ * @returns Promise resolving to SaveAndShareResult
+ *
+ * @example
+ * ```typescript
+ * const userData = createUserDataExport(baselines, sessions, settings, device);
+ * const result = await saveAndShareJSON(userData);
+ * if (result.success) {
+ *   console.log('User data shared successfully');
+ * }
+ * ```
+ */
+export const saveAndShareJSON = async (
+  userData: UserDataExport,
+  options: ExportOptions = {}
+): Promise<SaveAndShareResult> => {
+  try {
+    // Check if sharing is available
+    const available = await isShareAvailable();
+    if (!available) {
+      return {
+        success: false,
+        error: 'Sharing is not available on this device',
+        platform: 'unknown',
+      };
+    }
+
+    // Load file system
+    const FileSystem = await loadFileSystem();
+    if (!FileSystem) {
+      return {
+        success: false,
+        error: 'File system not available',
+        platform: 'unknown',
+      };
+    }
+
+    // Generate JSON content
+    const jsonContent = exportUserDataToJSON(userData, options);
+
+    // Generate filename
+    const filename = generateExportFilename('userdata', 'json');
+    const filePath = `${FileSystem.cacheDirectory}${filename}`;
+
+    // Write to temp file
+    await FileSystem.writeAsStringAsync(filePath, jsonContent, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+
+    // Share the file
+    const mimeType = getMimeTypeForExtension('json');
+    const shareResult = await shareFile(
+      filePath,
+      mimeType,
+      'FlowState Data Export'
+    );
+
+    // Schedule cleanup of temp file
+    scheduleFileCleanup(FileSystem, filePath);
+
+    return {
+      ...shareResult,
+      filePath,
+      filename,
+    };
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error occurred';
+    return {
+      success: false,
+      error: errorMessage,
+      platform: 'unknown',
+    };
+  }
+};
+
+/**
+ * EDF share options
+ */
+export interface EDFShareOptions extends ExportOptions {
+  /** Duration of each data record in seconds (default: 1) */
+  dataRecordDuration?: number;
+}
+
+/**
+ * Saves EEG data to a temporary EDF file and opens the share sheet
+ *
+ * @param eegData - Object containing packets and device info
+ * @param options - EDF export and share options
+ * @returns Promise resolving to SaveAndShareResult
+ *
+ * @example
+ * ```typescript
+ * const result = await saveAndShareEDF({
+ *   packets: eegPackets,
+ *   deviceInfo: connectedDevice
+ * });
+ * if (result.success) {
+ *   console.log('EDF data shared successfully');
+ * }
+ * ```
+ */
+export const saveAndShareEDF = async (
+  eegData: {
+    packets: EEGDataPacket[];
+    deviceInfo: DeviceInfo;
+  },
+  options: EDFShareOptions = {}
+): Promise<SaveAndShareResult> => {
+  try {
+    // Validate input
+    if (!eegData.packets || eegData.packets.length === 0) {
+      return {
+        success: false,
+        error: 'No EEG data packets provided',
+        platform: 'unknown',
+      };
+    }
+
+    if (!eegData.deviceInfo) {
+      return {
+        success: false,
+        error: 'Device info is required for EDF export',
+        platform: 'unknown',
+      };
+    }
+
+    // Check if sharing is available
+    const available = await isShareAvailable();
+    if (!available) {
+      return {
+        success: false,
+        error: 'Sharing is not available on this device',
+        platform: 'unknown',
+      };
+    }
+
+    // Load file system
+    const FileSystem = await loadFileSystem();
+    if (!FileSystem) {
+      return {
+        success: false,
+        error: 'File system not available',
+        platform: 'unknown',
+      };
+    }
+
+    // Create EDF data
+    const dataRecordDuration = options.dataRecordDuration ?? 1;
+    const edfExportData = createEDFExportData(
+      eegData.packets,
+      eegData.deviceInfo,
+      dataRecordDuration
+    );
+
+    // Serialize to text format (EDF text representation)
+    const edfContent = serializeEDFToText(edfExportData);
+
+    // Generate filename
+    const filename = generateExportFilename('eeg', 'edf');
+    const filePath = `${FileSystem.cacheDirectory}${filename}`;
+
+    // Write to temp file
+    await FileSystem.writeAsStringAsync(filePath, edfContent, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+
+    // Share the file
+    const mimeType = getMimeTypeForExtension('edf');
+    const shareResult = await shareFile(
+      filePath,
+      mimeType,
+      'FlowState EEG Data Export'
+    );
+
+    // Schedule cleanup of temp file
+    scheduleFileCleanup(FileSystem, filePath);
+
+    return {
+      ...shareResult,
+      filePath,
+      filename,
+    };
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error occurred';
+    return {
+      success: false,
+      error: errorMessage,
+      platform: 'unknown',
+    };
+  }
+};
+
+/**
+ * Schedules cleanup of a temporary file after a delay
+ * Gives the share sheet time to read the file before deletion
+ */
+const scheduleFileCleanup = (
+  FileSystem: ExportFileSystemModule,
+  filePath: string,
+  delayMs: number = 30000 // 30 seconds default
+): void => {
+  setTimeout(async () => {
+    try {
+      await FileSystem.deleteAsync(filePath, { idempotent: true });
+    } catch {
+      // Ignore cleanup errors - file may already be deleted or moved
+    }
+  }, delayMs);
+};
+
+// Re-export share service types and functions for convenience
+export { isShareAvailable, type ShareResult };

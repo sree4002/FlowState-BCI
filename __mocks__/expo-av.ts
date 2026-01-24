@@ -28,6 +28,23 @@ export const Audio = {
   },
 };
 
+/**
+ * iOS interruption mode enum
+ */
+export const InterruptionModeIOS = {
+  MixWithOthers: 0,
+  DoNotMix: 1,
+  DuckOthers: 2,
+} as const;
+
+/**
+ * Android interruption mode enum
+ */
+export const InterruptionModeAndroid = {
+  DoNotMix: 1,
+  DuckOthers: 2,
+} as const;
+
 export type AVPlaybackStatus =
   | { isLoaded: false; error?: string }
   | {
@@ -39,4 +56,6 @@ export type AVPlaybackStatus =
 
 export default {
   Audio,
+  InterruptionModeIOS,
+  InterruptionModeAndroid,
 };
