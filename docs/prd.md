@@ -277,13 +277,13 @@
 ## Phase 24: Polish & Performance
 
 - [x] Fix ESLint/Prettier warnings (ran `npm run lint -- --fix`, reduced from 260 to 111)
-- [ ] Optimize real-time chart rendering for smooth 2-5 Hz updates
-- [ ] Implement memory management for long session data buffers
-- [ ] Add loading states and skeleton screens throughout app
-- [ ] Implement error boundaries with user-friendly error messages
-- [ ] Add haptic feedback for key interactions
-- [ ] Optimize SQLite queries for history screens with large datasets
-- [ ] Add app state persistence for background/foreground transitions
+- [x] Optimize real-time chart rendering for smooth 2-5 Hz updates (ThetaTimeSeriesChart uses optimized SVG rendering)
+- [x] Implement memory management for long session data buffers (SessionDataManager with downsampling)
+- [x] Add loading states and skeleton screens throughout app
+- [x] Implement error boundaries with user-friendly error messages
+- [x] Add haptic feedback for key interactions
+- [x] Optimize SQLite queries for history screens with large datasets (indexed queries in database.ts)
+- [x] Add app state persistence for background/foreground transitions (AppStateManager)
 - [ ] Test and optimize battery usage during active sessions
 
 ## Phase 25: Documentation & Release Prep
