@@ -3,6 +3,8 @@ export { DevicePairingScreen } from './DevicePairingScreen';
 export { default as CalibrationScreen } from './CalibrationScreen';
 export { OnboardingScreen } from './OnboardingScreen';
 export type { OnboardingScreenProps } from './OnboardingScreen';
+export { FirstSessionSuggestionScreen } from './FirstSessionSuggestionScreen';
+export type { FirstSessionSuggestionScreenProps } from './FirstSessionSuggestionScreen';
 export { default as SettingsScreen } from './SettingsScreen';
 export { default as DashboardScreen } from './DashboardScreen';
 export { ActiveSessionScreen } from './ActiveSessionScreen';

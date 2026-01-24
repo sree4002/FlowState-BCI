@@ -161,9 +161,9 @@
 - [x] Create TourScreen3: "Track your progress and optimize over time"
 - [x] Create PermissionsScreen for Bluetooth, Notifications, Calendar requests
 - [x] Create DevicePairingPrompt with "Pair now" or "Skip for later" options
-- [ ] Create FirstSessionSuggestion screen (Quick Boost vs Calibrate choice)
-- [ ] Implement onboarding completion flag in AsyncStorage
-- [ ] Add contextual tooltips system for first-time feature discovery
+- [x] Create FirstSessionSuggestion screen (Quick Boost vs Calibrate choice)
+- [x] Implement onboarding completion flag in AsyncStorage
+- [x] Add contextual tooltips system for first-time feature discovery
 
 ## Phase 14: Python Signal Processing Service
 

@@ -139,3 +139,17 @@ export type { SimulatedModeDebugViewProps } from './SimulatedModeDebugView';
 
 export { CalibrateButton } from './CalibrateButton';
 export type { CalibrateButtonProps } from './CalibrateButton';
+
+export {
+  Tooltip,
+  SpotlightTooltip,
+  useTooltipDismissed,
+  resetAllTooltips,
+  getDismissedTooltips,
+} from './Tooltip';
+export type {
+  TooltipProps,
+  TooltipPosition,
+  TooltipId,
+  SpotlightTooltipProps,
+} from './Tooltip';
