@@ -215,9 +215,9 @@
 
 ## Phase 18: Data Export Implementation
 
-- [ ] Implement CSV export with session summary columns
-- [ ] Implement JSON export with complete user profile
-- [ ] Implement EDF export for raw EEG data (with electrode metadata)
+- [x] Implement CSV export with session summary columns
+- [x] Implement JSON export with complete user profile
+- [x] Implement EDF export for raw EEG data (with electrode metadata)
 - [ ] Create share sheet integration for iOS/Android
 - [ ] Add export progress indicator for large datasets
 - [ ] Create data deletion confirmation flow with "Clear all data" option

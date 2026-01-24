@@ -67,7 +67,41 @@ export const SafeAreaView = View;
 export const Image = View;
 export const ActivityIndicator = View;
 export const TextInput = View;
-export const FlatList = View;
+
+// Mock FlatList component that renders its items
+export const FlatList = ({
+  data,
+  renderItem,
+  keyExtractor,
+  horizontal,
+  testID,
+  onViewableItemsChanged,
+  style,
+  ...props
+}: any) => {
+  if (!data || !renderItem) {
+    return React.createElement('View', { 'data-testid': testID, testID, ...props });
+  }
+  const items = data.map((item: any, index: number) => {
+    const key = keyExtractor ? keyExtractor(item, index) : index.toString();
+    return React.createElement(
+      'View',
+      { key },
+      renderItem({ item, index })
+    );
+  });
+  return React.createElement(
+    'View',
+    {
+      style,
+      'data-testid': testID,
+      testID,
+      'data-horizontal': horizontal,
+      ...props,
+    },
+    items
+  );
+};
 
 // Mock Pressable component with testID support
 export const Pressable = ({ children, style, testID, ...props }: any) => {
