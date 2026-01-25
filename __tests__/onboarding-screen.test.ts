@@ -72,7 +72,7 @@ describe('OnboardingScreen Module', () => {
       fileContent = fs.readFileSync(ONBOARDING_SCREEN_PATH, 'utf-8');
     });
 
-    it('should have 3 slides defined in the SLIDES array', () => {
+    it('should have 5 slides defined in the SLIDES array', () => {
       const slidesMatch = fileContent.match(
         /const SLIDES: OnboardingSlide\[\] = \[[\s\S]*?\];/
       );
@@ -81,23 +81,33 @@ describe('OnboardingScreen Module', () => {
         const slidesContent = slidesMatch[0];
         // Count occurrences of slide objects (by counting { id: patterns)
         const slideCount = (slidesContent.match(/id: '\d+'/g) || []).length;
-        expect(slideCount).toBe(3);
+        expect(slideCount).toBe(5);
       }
     });
 
-    it('should have slide 1 about theta wave monitoring', () => {
-      expect(fileContent).toContain('Monitor Your Theta Waves');
+    it('should have slide 1 hook about training focus', () => {
+      expect(fileContent).toContain('Train Your Focus');
+      expect(fileContent).toContain('neurofeedback training');
+    });
+
+    it('should have slide 2 about real-time theta monitoring', () => {
+      expect(fileContent).toContain('Real-Time Theta Monitoring');
       expect(fileContent).toContain('real-time');
     });
 
-    it('should have slide 2 about personalized audio entrainment', () => {
-      expect(fileContent).toContain('Personalized Audio Entrainment');
-      expect(fileContent).toContain('adaptive audio');
+    it('should have slide 3 about AI-powered insights', () => {
+      expect(fileContent).toContain('AI-Powered Insights');
+      expect(fileContent).toContain('peak performance hours');
     });
 
-    it('should have slide 3 about progress tracking', () => {
-      expect(fileContent).toContain('Track Your Progress');
-      expect(fileContent).toContain('peak hours');
+    it('should have slide 4 about device connection and permissions', () => {
+      expect(fileContent).toContain('Connect Your Device');
+      expect(fileContent).toContain('permissions');
+    });
+
+    it('should have slide 5 call to action', () => {
+      expect(fileContent).toContain('Ready to Focus?');
+      expect(fileContent).toContain('journey');
     });
   });
 
@@ -251,10 +261,17 @@ describe('OnboardingScreen TypeScript types', () => {
   it('should define OnboardingSlide interface', () => {
     expect(fileContent).toContain('interface OnboardingSlide');
     expect(fileContent).toContain('id: string');
-    expect(fileContent).toContain('icon: string');
+    expect(fileContent).toContain('type:');
     expect(fileContent).toContain('title: string');
     expect(fileContent).toContain('description: string');
-    expect(fileContent).toContain('backgroundColor: string');
+  });
+
+  it('should have slide type union for different screen types', () => {
+    expect(fileContent).toContain("'hook'");
+    expect(fileContent).toContain("'theta'");
+    expect(fileContent).toContain("'ai'");
+    expect(fileContent).toContain("'permissions'");
+    expect(fileContent).toContain("'start'");
   });
 
   it('should have proper return type', () => {

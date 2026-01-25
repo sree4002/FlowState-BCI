@@ -91,8 +91,17 @@ describe('React Navigation Setup', () => {
       );
       expect(appContent).toContain('name="Dashboard"');
       expect(appContent).toContain('name="Session"');
-      expect(appContent).toContain('name="History"');
+      expect(appContent).toContain('name="Insights"');
+      expect(appContent).toContain('name="Profile"');
+    });
+
+    it('should have Settings as a stack screen', () => {
+      const appContent = fs.readFileSync(
+        path.join(rootPath, 'App.tsx'),
+        'utf-8'
+      );
       expect(appContent).toContain('name="Settings"');
+      expect(appContent).toContain('Stack.Screen');
     });
 
     it('should use NavigationContainer', () => {

@@ -2,11 +2,9 @@
  * DashboardScreen Component Tests
  *
  * Tests for the WHOOP-style DashboardScreen including:
- * - Hero card with main stat
- * - Stats row (sessions, time, theta avg)
- * - Quick action buttons
- * - Trend widget
- * - Device status indicator
+ * - Focus Score card with breakdown
+ * - AI Insight card
+ * - Streak tracking card
  * - SafeArea handling
  */
 
@@ -20,6 +18,12 @@ import { SimulatedModeProvider } from '../src/contexts/SimulatedModeContext';
 
 // Mock navigation
 const mockNavigate = jest.fn();
+jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
+  useNavigation: () => ({
+    navigate: mockNavigate,
+  }),
+}));
 
 // Wrapper component to provide all required contexts
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -60,163 +64,94 @@ describe('DashboardScreen', () => {
         screen.queryByText(/Good evening/i);
       expect(hasGreeting).toBeTruthy();
     });
-  });
 
-  describe('Hero Card', () => {
-    it('renders hero card with label', () => {
+    it('renders User name', () => {
       render(
         <TestWrapper>
           <DashboardScreen />
         </TestWrapper>
       );
-      // Hero card shows "No Sessions" label when no data
-      expect(screen.getByText('No Sessions')).toBeTruthy();
+      expect(screen.getByText('User')).toBeTruthy();
+    });
+  });
+
+  describe('Focus Score Card', () => {
+    it('renders Focus Score label', () => {
+      render(
+        <TestWrapper>
+          <DashboardScreen />
+        </TestWrapper>
+      );
+      expect(screen.getByText('Focus Score')).toBeTruthy();
     });
 
-    it('shows sublabel with hint when no sessions', () => {
+    it('renders Focus Score breakdown items', () => {
+      render(
+        <TestWrapper>
+          <DashboardScreen />
+        </TestWrapper>
+      );
+      expect(screen.getByText('Quality')).toBeTruthy();
+      expect(screen.getByText('Consistency')).toBeTruthy();
+      expect(screen.getByText('Focus Time')).toBeTruthy();
+    });
+  });
+
+  describe('AI Insight Card', () => {
+    it('renders Insight title', () => {
+      render(
+        <TestWrapper>
+          <DashboardScreen />
+        </TestWrapper>
+      );
+      expect(screen.getByText('Insight')).toBeTruthy();
+    });
+
+    it('renders insight text', () => {
       render(
         <TestWrapper>
           <DashboardScreen />
         </TestWrapper>
       );
       expect(
-        screen.getByText('Start a session to see your stats')
+        screen.getByText(/morning sessions show.*better theta response/i)
       ).toBeTruthy();
     });
   });
 
-  describe('Stats Row', () => {
-    it('renders sessions count', () => {
+  describe('Streak Card', () => {
+    it('renders day streak label', () => {
       render(
         <TestWrapper>
           <DashboardScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('Sessions')).toBeTruthy();
+      expect(screen.getByText('day streak')).toBeTruthy();
     });
 
-    it('renders minutes count', () => {
+    it('renders sessions this week', () => {
       render(
         <TestWrapper>
           <DashboardScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('Minutes')).toBeTruthy();
+      // Multiple elements may contain "sessions" so use getAllByText
+      expect(screen.getAllByText(/sessions/i).length).toBeGreaterThan(0);
+      expect(screen.getByText('this week')).toBeTruthy();
     });
 
-    it('renders avg theta label', () => {
+    it('renders week days', () => {
       render(
         <TestWrapper>
           <DashboardScreen />
         </TestWrapper>
       );
-      expect(screen.getByText('Avg Theta')).toBeTruthy();
-    });
-
-    it('shows zero sessions when no data', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen />
-        </TestWrapper>
-      );
-      // Should show 0 for sessions and minutes
-      const zeros = screen.getAllByText('0');
-      expect(zeros.length).toBeGreaterThanOrEqual(2);
-    });
-  });
-
-  describe('Quick Actions', () => {
-    it('renders Quick Actions section title', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen />
-        </TestWrapper>
-      );
-      expect(screen.getByText('Quick Actions')).toBeTruthy();
-    });
-
-    it('renders Quick Boost button', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen />
-        </TestWrapper>
-      );
-      expect(screen.getByTestId('quick-boost-button')).toBeTruthy();
-      expect(screen.getByText('Quick Boost')).toBeTruthy();
-    });
-
-    it('renders Quick Boost subtitle', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen />
-        </TestWrapper>
-      );
-      expect(screen.getByText('5 min theta session')).toBeTruthy();
-    });
-
-    it('renders Calibrate button', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen />
-        </TestWrapper>
-      );
-      expect(screen.getByTestId('calibrate-button')).toBeTruthy();
-      expect(screen.getByText('Calibrate')).toBeTruthy();
-    });
-
-    it('renders Custom session button', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen />
-        </TestWrapper>
-      );
-      expect(screen.getByTestId('custom-session-button')).toBeTruthy();
-      expect(screen.getByText('Custom')).toBeTruthy();
-    });
-
-    it('navigates to Session on Quick Boost press', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen navigation={{ navigate: mockNavigate }} />
-        </TestWrapper>
-      );
-      fireEvent.press(screen.getByTestId('quick-boost-button'));
-      expect(mockNavigate).toHaveBeenCalledWith('Session');
-    });
-
-    it('navigates to Calibration on Calibrate press', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen navigation={{ navigate: mockNavigate }} />
-        </TestWrapper>
-      );
-      fireEvent.press(screen.getByTestId('calibrate-button'));
-      expect(mockNavigate).toHaveBeenCalledWith('Calibration');
-    });
-  });
-
-  describe('Device Status', () => {
-    it('renders device status indicator', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen />
-        </TestWrapper>
-      );
-      // Should show "No Device" or "Not Connected" when no device connected
-      const hasDeviceStatus =
-        screen.queryByText('No Device') || screen.queryByText('Not Connected');
-      expect(hasDeviceStatus).toBeTruthy();
-    });
-  });
-
-  describe('Trend Widget', () => {
-    it('renders Recent Trend section', () => {
-      render(
-        <TestWrapper>
-          <DashboardScreen />
-        </TestWrapper>
-      );
-      expect(screen.getByText('Recent Trend')).toBeTruthy();
+      // Week days show as single letters
+      expect(screen.getAllByText('S').length).toBeGreaterThanOrEqual(1); // Sunday or Saturday
+      expect(screen.getAllByText('M').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('T').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('W').length).toBeGreaterThanOrEqual(1);
+      expect(screen.getAllByText('F').length).toBeGreaterThanOrEqual(1);
     });
   });
 

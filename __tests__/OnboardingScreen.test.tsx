@@ -2,7 +2,7 @@
  * Component tests for OnboardingScreen
  *
  * These tests render the actual component and verify:
- * 1. Rendering the 3 onboarding slides
+ * 1. Rendering the 5 onboarding slides
  * 2. Navigation between slides
  * 3. Skip and complete actions
  */
@@ -12,58 +12,78 @@ import { render, screen, fireEvent } from '@testing-library/react-native';
 import { OnboardingScreen } from '../src/screens/OnboardingScreen';
 
 describe('OnboardingScreen Component', () => {
-  describe('Rendering 3 onboarding slides', () => {
+  describe('Rendering 5 onboarding slides', () => {
     it('should render the onboarding screen container', () => {
       render(<OnboardingScreen />);
       expect(screen.getByTestId('onboarding-screen')).toBeTruthy();
     });
 
-    it('should render slide 1 with theta wave monitoring content', () => {
+    it('should render slide 1 with focus training hook content', () => {
       render(<OnboardingScreen />);
       expect(screen.getByTestId('onboarding-slide-1')).toBeTruthy();
-      expect(screen.getByText('Monitor Your Theta Waves')).toBeTruthy();
+      expect(screen.getByText('Train Your Focus')).toBeTruthy();
       expect(
-        screen.getByText(
-          'Watch your brain activity in real-time. See your theta waves rise as you enter deeper states of focus and relaxation.'
-        )
+        screen.getByText("Unlock your brain's potential with real-time neurofeedback training.")
       ).toBeTruthy();
     });
 
-    it('should render slide 2 with audio entrainment content', () => {
+    it('should render slide 2 with theta monitoring content', () => {
       render(<OnboardingScreen />);
       expect(screen.getByTestId('onboarding-slide-2')).toBeTruthy();
-      expect(screen.getByText('Personalized Audio Entrainment')).toBeTruthy();
+      expect(screen.getByText('Real-Time Theta Monitoring')).toBeTruthy();
       expect(
         screen.getByText(
-          'Our adaptive audio technology responds to your unique brain patterns, guiding you into optimal flow states.'
+          'Watch your brain activity in real-time. See your theta waves rise as you enter deeper states of focus.'
         )
       ).toBeTruthy();
     });
 
-    it('should render slide 3 with progress tracking content', () => {
+    it('should render slide 3 with AI insights content', () => {
       render(<OnboardingScreen />);
       expect(screen.getByTestId('onboarding-slide-3')).toBeTruthy();
-      expect(screen.getByText('Track Your Progress')).toBeTruthy();
+      expect(screen.getByText('AI-Powered Insights')).toBeTruthy();
       expect(
         screen.getByText(
-          'Build your practice over time. Discover your peak hours, track trends, and optimize your routine for maximum benefit.'
+          'Discover your peak performance hours. Get personalized recommendations to optimize your focus routine.'
         )
       ).toBeTruthy();
     });
 
-    it('should render all three slides', () => {
+    it('should render slide 4 with permissions/device connection content', () => {
+      render(<OnboardingScreen />);
+      expect(screen.getByTestId('onboarding-slide-4')).toBeTruthy();
+      expect(screen.getByText('Connect Your Device')).toBeTruthy();
+      expect(
+        screen.getByText('We need a few permissions to help you get started.')
+      ).toBeTruthy();
+    });
+
+    it('should render slide 5 with call to action', () => {
+      render(<OnboardingScreen />);
+      expect(screen.getByTestId('onboarding-slide-5')).toBeTruthy();
+      expect(screen.getByText('Ready to Focus?')).toBeTruthy();
+      expect(
+        screen.getByText('Your journey to enhanced focus and clarity begins now.')
+      ).toBeTruthy();
+    });
+
+    it('should render all five slides', () => {
       render(<OnboardingScreen />);
       expect(screen.getByTestId('onboarding-slide-1')).toBeTruthy();
       expect(screen.getByTestId('onboarding-slide-2')).toBeTruthy();
       expect(screen.getByTestId('onboarding-slide-3')).toBeTruthy();
+      expect(screen.getByTestId('onboarding-slide-4')).toBeTruthy();
+      expect(screen.getByTestId('onboarding-slide-5')).toBeTruthy();
     });
 
-    it('should render pagination dots for 3 slides', () => {
+    it('should render pagination dots for 5 slides', () => {
       render(<OnboardingScreen />);
       expect(screen.getByTestId('onboarding-pagination')).toBeTruthy();
       expect(screen.getByTestId('pagination-dot-0')).toBeTruthy();
       expect(screen.getByTestId('pagination-dot-1')).toBeTruthy();
       expect(screen.getByTestId('pagination-dot-2')).toBeTruthy();
+      expect(screen.getByTestId('pagination-dot-3')).toBeTruthy();
+      expect(screen.getByTestId('pagination-dot-4')).toBeTruthy();
     });
 
     it('should render the FlatList for slides', () => {
@@ -90,16 +110,22 @@ describe('OnboardingScreen Component', () => {
       const dot0 = screen.getByTestId('pagination-dot-0');
       const dot1 = screen.getByTestId('pagination-dot-1');
       const dot2 = screen.getByTestId('pagination-dot-2');
+      const dot3 = screen.getByTestId('pagination-dot-3');
+      const dot4 = screen.getByTestId('pagination-dot-4');
 
       // All dots should be touchable
       expect(dot0).toBeTruthy();
       expect(dot1).toBeTruthy();
       expect(dot2).toBeTruthy();
+      expect(dot3).toBeTruthy();
+      expect(dot4).toBeTruthy();
 
       // Dots should have accessibility labels
       expect(screen.getByLabelText('Go to slide 1')).toBeTruthy();
       expect(screen.getByLabelText('Go to slide 2')).toBeTruthy();
       expect(screen.getByLabelText('Go to slide 3')).toBeTruthy();
+      expect(screen.getByLabelText('Go to slide 4')).toBeTruthy();
+      expect(screen.getByLabelText('Go to slide 5')).toBeTruthy();
     });
 
     it('should allow pressing the Next button', () => {
@@ -184,23 +210,22 @@ describe('OnboardingScreen Component', () => {
     });
   });
 
-  describe('Slide content and icons', () => {
-    it('should display brain emoji on slide 1', () => {
+  describe('Slide content and SVG icons', () => {
+    it('should render SVG-based icons (no emojis)', () => {
       render(<OnboardingScreen />);
-      // The component renders the brain emoji for slide 1
-      expect(screen.getByText('\uD83E\uDDE0')).toBeTruthy();
+      // The new design uses SVG icons instead of emojis
+      // Just verify the slides render without looking for specific emojis
+      expect(screen.getByTestId('onboarding-slide-1')).toBeTruthy();
+      expect(screen.getByTestId('onboarding-slide-2')).toBeTruthy();
+      expect(screen.getByTestId('onboarding-slide-3')).toBeTruthy();
     });
 
-    it('should display music emoji on slide 2', () => {
+    it('should render permission cards on slide 4', () => {
       render(<OnboardingScreen />);
-      // The component renders the music emoji for slide 2
-      expect(screen.getByText('\uD83C\uDFB5')).toBeTruthy();
-    });
-
-    it('should display chart emoji on slide 3', () => {
-      render(<OnboardingScreen />);
-      // The component renders the chart emoji for slide 3
-      expect(screen.getByText('\uD83D\uDCC8')).toBeTruthy();
+      expect(screen.getByText('Bluetooth')).toBeTruthy();
+      expect(screen.getByText('Notifications')).toBeTruthy();
+      expect(screen.getByText('Connect to your EEG headband')).toBeTruthy();
+      expect(screen.getByText('Get session reminders')).toBeTruthy();
     });
   });
 
@@ -212,10 +237,12 @@ describe('OnboardingScreen Component', () => {
 
     it('should render all slides in the FlatList', () => {
       render(<OnboardingScreen />);
-      // All three slide titles should be present
-      expect(screen.getByText('Monitor Your Theta Waves')).toBeTruthy();
-      expect(screen.getByText('Personalized Audio Entrainment')).toBeTruthy();
-      expect(screen.getByText('Track Your Progress')).toBeTruthy();
+      // All five slide titles should be present
+      expect(screen.getByText('Train Your Focus')).toBeTruthy();
+      expect(screen.getByText('Real-Time Theta Monitoring')).toBeTruthy();
+      expect(screen.getByText('AI-Powered Insights')).toBeTruthy();
+      expect(screen.getByText('Connect Your Device')).toBeTruthy();
+      expect(screen.getByText('Ready to Focus?')).toBeTruthy();
     });
   });
 

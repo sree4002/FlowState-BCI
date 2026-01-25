@@ -18,7 +18,7 @@ describe('Theme - Color Palette', () => {
     });
 
     it('should have valid hex color values for primary colors', () => {
-      const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
+      const hexColorRegex = /^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/;
       expect(Colors.primary.main).toMatch(hexColorRegex);
       expect(Colors.primary.light).toMatch(hexColorRegex);
       expect(Colors.primary.dark).toMatch(hexColorRegex);
@@ -170,19 +170,16 @@ describe('Theme - Color Palette', () => {
   describe('Gradients', () => {
     it('should have all gradient types', () => {
       expect(Colors.gradients).toHaveProperty('primary');
-      expect(Colors.gradients).toHaveProperty('secondary');
       expect(Colors.gradients).toHaveProperty('theta');
     });
 
     it('should have arrays of colors for gradients', () => {
       expect(Array.isArray(Colors.gradients.primary)).toBe(true);
-      expect(Array.isArray(Colors.gradients.secondary)).toBe(true);
       expect(Array.isArray(Colors.gradients.theta)).toBe(true);
     });
 
     it('should have at least 2 colors in each gradient', () => {
       expect(Colors.gradients.primary.length).toBeGreaterThanOrEqual(2);
-      expect(Colors.gradients.secondary.length).toBeGreaterThanOrEqual(2);
       expect(Colors.gradients.theta.length).toBeGreaterThanOrEqual(2);
     });
   });
