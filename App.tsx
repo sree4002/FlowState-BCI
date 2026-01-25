@@ -5,10 +5,11 @@
  * Sets up navigation and provides global state via context providers.
  */
 
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { NavigationContainer, DarkTheme } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { StatusBar, Text, View, StyleSheet } from 'react-native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar, View, StyleSheet, ActivityIndicator } from 'react-native';
 
 // Contexts
 import {
@@ -22,123 +23,207 @@ import {
 import {
   DashboardScreen,
   ActiveSessionScreen,
+  OnboardingScreen,
+  InsightsScreen,
+  ProfileScreen,
   SettingsScreen,
 } from './src/screens';
 
+// Components
+import {
+  DashboardIcon,
+  SessionIcon,
+  InsightsIcon,
+  ProfileIcon,
+} from './src/components';
+
+// Storage
+import { OnboardingStorage } from './src/services/storage';
+
 // Theme
-import { Colors } from './src/constants/theme';
+import { Colors, Typography } from './src/constants/theme';
 
 // Navigation types
-type RootTabParamList = {
-  Dashboard: undefined;
-  Session: undefined;
-  History: undefined;
+export type RootStackParamList = {
+  MainTabs: undefined;
   Settings: undefined;
 };
 
-// Tab navigator
-const Tab = createBottomTabNavigator<RootTabParamList>();
-
-// Simple icon component (replace with react-native-vector-icons in production)
-interface TabIconProps {
-  name: keyof RootTabParamList;
-  focused: boolean;
-}
-
-const TabIcon: React.FC<TabIconProps> = ({ name, focused }) => {
-  const icons: Record<keyof RootTabParamList, string> = {
-    Dashboard: focused ? '🏠' : '🏚️',
-    Session: focused ? '🧠' : '💭',
-    History: focused ? '📊' : '📈',
-    Settings: focused ? '⚙️' : '🔧',
-  };
-  return <Text style={{ fontSize: 24 }}>{icons[name] || '•'}</Text>;
+type MainTabParamList = {
+  Dashboard: undefined;
+  Session: undefined;
+  Insights: undefined;
+  Profile: undefined;
 };
 
-// Placeholder History Screen (to be replaced with full implementation)
-const HistoryScreen: React.FC = () => (
-  <View style={styles.placeholderContainer}>
-    <Text style={styles.placeholderText}>Session History</Text>
-    <Text style={styles.placeholderSubtext}>Coming soon</Text>
-  </View>
-);
+// Navigators
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<MainTabParamList>();
+
+// Main Tab Navigator Component
+function MainTabNavigator() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: Colors.accent.primary,
+        tabBarInactiveTintColor: Colors.text.tertiary,
+        tabBarStyle: {
+          backgroundColor: Colors.background.primary,
+          borderTopColor: Colors.border.primary,
+          borderTopWidth: 0.5,
+          paddingTop: 8,
+          paddingBottom: 24,
+          height: 80,
+        },
+        tabBarLabelStyle: {
+          fontSize: Typography.fontSize.xs + 1,
+          marginTop: 4,
+        },
+      }}
+    >
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          tabBarLabel: 'Dashboard',
+          tabBarIcon: ({ color }) => (
+            <DashboardIcon color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Session"
+        component={ActiveSessionScreen}
+        options={{
+          tabBarLabel: 'Session',
+          tabBarIcon: ({ color }) => (
+            <SessionIcon color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Insights"
+        component={InsightsScreen}
+        options={{
+          tabBarLabel: 'Insights',
+          tabBarIcon: ({ color }) => (
+            <InsightsIcon color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{
+          tabBarLabel: 'Profile',
+          tabBarIcon: ({ color }) => (
+            <ProfileIcon color={color} size={24} />
+          ),
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
 
 export default function App(): React.JSX.Element {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+
+  // Check onboarding status on mount
+  useEffect(() => {
+    const checkOnboarding = async () => {
+      try {
+        const completed = await OnboardingStorage.isCompleted();
+        setHasCompletedOnboarding(completed);
+      } catch (error) {
+        console.error('Failed to check onboarding status:', error);
+        // Default to showing onboarding if check fails
+        setHasCompletedOnboarding(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkOnboarding();
+  }, []);
+
+  // Handle onboarding completion
+  const handleOnboardingComplete = useCallback(async () => {
+    try {
+      await OnboardingStorage.markCompleted();
+      setHasCompletedOnboarding(true);
+    } catch (error) {
+      console.error('Failed to mark onboarding complete:', error);
+      // Still proceed to main app even if storage fails
+      setHasCompletedOnboarding(true);
+    }
+  }, []);
+
+  // Show loading screen while checking onboarding status
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <ActivityIndicator size="large" color={Colors.accent.primary} />
+      </View>
+    );
+  }
+
+  // Show onboarding for first-time users
+  if (!hasCompletedOnboarding) {
+    return (
+      <View style={styles.onboardingContainer}>
+        <StatusBar barStyle="light-content" backgroundColor="#000000" />
+        <OnboardingScreen
+          onComplete={handleOnboardingComplete}
+          onSkip={handleOnboardingComplete}
+        />
+      </View>
+    );
+  }
+
   return (
     <SettingsProvider>
       <SimulatedModeProvider>
         <SessionProvider>
           <DeviceProvider>
-            <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
+            <StatusBar barStyle="light-content" backgroundColor="#000000" />
             <NavigationContainer
               theme={{
                 ...DarkTheme,
                 colors: {
                   ...DarkTheme.colors,
-                  primary: Colors.primary.main,
+                  primary: Colors.accent.primary,
                   background: Colors.background.primary,
-                  card: Colors.surface.primary,
+                  card: Colors.background.primary,
                   text: Colors.text.primary,
                   border: Colors.border.primary,
                   notification: Colors.accent.error,
                 },
               }}
             >
-              <Tab.Navigator
+              <Stack.Navigator
                 screenOptions={{
                   headerShown: false,
-                  tabBarActiveTintColor: Colors.primary.main,
-                  tabBarInactiveTintColor: Colors.text.tertiary,
-                  tabBarStyle: {
-                    backgroundColor: Colors.surface.primary,
-                    borderTopColor: Colors.border.primary,
-                    paddingBottom: 5,
-                    paddingTop: 5,
-                    height: 60,
-                  },
+                  animation: 'slide_from_right',
                 }}
               >
-                <Tab.Screen
-                  name="Dashboard"
-                  component={DashboardScreen}
-                  options={{
-                    tabBarLabel: 'Dashboard',
-                    tabBarIcon: ({ focused }) => (
-                      <TabIcon name="Dashboard" focused={focused} />
-                    ),
-                  }}
-                />
-                <Tab.Screen
-                  name="Session"
-                  component={ActiveSessionScreen}
-                  options={{
-                    tabBarLabel: 'Session',
-                    tabBarIcon: ({ focused }) => (
-                      <TabIcon name="Session" focused={focused} />
-                    ),
-                  }}
-                />
-                <Tab.Screen
-                  name="History"
-                  component={HistoryScreen}
-                  options={{
-                    tabBarLabel: 'History',
-                    tabBarIcon: ({ focused }) => (
-                      <TabIcon name="History" focused={focused} />
-                    ),
-                  }}
-                />
-                <Tab.Screen
+                <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+                <Stack.Screen
                   name="Settings"
                   component={SettingsScreen}
                   options={{
-                    tabBarLabel: 'Settings',
-                    tabBarIcon: ({ focused }) => (
-                      <TabIcon name="Settings" focused={focused} />
-                    ),
+                    headerShown: true,
+                    headerTitle: 'Settings',
+                    headerStyle: {
+                      backgroundColor: Colors.background.primary,
+                    },
+                    headerTintColor: Colors.text.primary,
+                    headerShadowVisible: false,
                   }}
                 />
-              </Tab.Navigator>
+              </Stack.Navigator>
             </NavigationContainer>
           </DeviceProvider>
         </SessionProvider>
@@ -148,20 +233,14 @@ export default function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  placeholderContainer: {
+  loadingContainer: {
     flex: 1,
     backgroundColor: Colors.background.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  placeholderText: {
-    color: Colors.text.primary,
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  placeholderSubtext: {
-    color: Colors.text.secondary,
-    fontSize: 16,
-    marginTop: 8,
+  onboardingContainer: {
+    flex: 1,
+    backgroundColor: Colors.background.primary,
   },
 });

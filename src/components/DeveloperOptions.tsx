@@ -15,6 +15,7 @@ import {
   Platform,
 } from 'react-native';
 import { useSettings } from '../contexts/SettingsContext';
+import { OnboardingStorage } from '../services/storage';
 import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
 
 /**
@@ -178,6 +179,32 @@ export const DeveloperOptions: React.FC<DeveloperOptionsProps> = ({
     );
   }, [updateSettings]);
 
+  const handleResetOnboarding = useCallback(async () => {
+    Alert.alert(
+      'Reset Onboarding',
+      'This will show the onboarding screens again on next app launch. The app will close.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset & Close',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await OnboardingStorage.reset();
+              Alert.alert(
+                'Onboarding Reset',
+                'Please restart the app to see the onboarding screens.',
+                [{ text: 'OK' }]
+              );
+            } catch (error) {
+              Alert.alert('Error', 'Failed to reset onboarding status.');
+            }
+          },
+        },
+      ]
+    );
+  }, []);
+
   if (!settings.developer_mode_enabled) {
     return null;
   }
@@ -239,7 +266,16 @@ export const DeveloperOptions: React.FC<DeveloperOptionsProps> = ({
         </View>
       )}
 
-      {/* Reset Button */}
+      {/* Reset Onboarding Button */}
+      <TouchableOpacity
+        style={styles.onboardingButton}
+        onPress={handleResetOnboarding}
+        testID="reset-onboarding"
+      >
+        <Text style={styles.onboardingButtonText}>Reset Onboarding</Text>
+      </TouchableOpacity>
+
+      {/* Reset Developer Settings Button */}
       <TouchableOpacity
         style={styles.resetButton}
         onPress={handleResetDeveloperSettings}
@@ -329,6 +365,20 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.sm,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.secondary,
+  },
+  onboardingButton: {
+    marginHorizontal: Spacing.md,
+    marginTop: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: Colors.accent.primary,
+    alignItems: 'center',
+  },
+  onboardingButtonText: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.accent.primary,
   },
   resetButton: {
     margin: Spacing.md,

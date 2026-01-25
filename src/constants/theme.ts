@@ -1,157 +1,173 @@
 /**
- * FlowState BCI - Dark Theme Color Palette
- * Calming blues and purples designed for focus and relaxation
+ * FlowState BCI - Premium Dark Theme
+ * Modern, minimal design with teal accent
  */
 
 export const Colors = {
-  // Primary colors - Deep calming blues
-  primary: {
-    main: '#4A90E2', // Soft blue
-    light: '#6BA3E8', // Lighter blue
-    dark: '#2E5F8F', // Deeper blue
-    muted: '#5A7A9F', // Muted blue
-  },
-
-  // Secondary colors - Soothing purples
-  secondary: {
-    main: '#7B68EE', // Medium purple
-    light: '#9B88F8', // Light purple
-    dark: '#5B48CE', // Deep purple
-    muted: '#6B5AA0', // Muted purple
-  },
-
-  // Background colors - Dark theme
+  // Backgrounds
   background: {
-    primary: '#0F1419', // Very dark blue-black
-    secondary: '#1A1F2E', // Dark blue-gray
-    tertiary: '#252B3B', // Lighter dark blue
-    elevated: '#2A3142', // Elevated surface
+    primary: '#000000',
+    secondary: '#0a0d10',
+    tertiary: '#1a1f24',
+    card: '#0d1117',
+    cardHover: '#1a1f24',
+    elevated: '#21262d',
   },
 
-  // Surface colors - Card and component backgrounds
-  surface: {
-    primary: '#1E2433', // Primary surface
-    secondary: '#262D3D', // Secondary surface
-    elevated: '#2F3647', // Elevated surface (modals, etc.)
-    overlay: '#353C4F', // Overlay backgrounds
-  },
-
-  // Text colors
-  text: {
-    primary: '#E8ECF1', // High emphasis text
-    secondary: '#B8BFC9', // Medium emphasis text
-    tertiary: '#8891A0', // Low emphasis text
-    disabled: '#5A6070', // Disabled text
-    inverse: '#0F1419', // Text on light backgrounds
-  },
-
-  // Status colors - Theta zone indicators
-  status: {
-    // Red zone - Below target
-    red: '#E74C3C',
-    redLight: '#F08080',
-    redDark: '#C0392B',
-
-    // Yellow zone - Approaching target
-    yellow: '#F39C12',
-    yellowLight: '#F5B041',
-    yellowDark: '#D68910',
-
-    // Green zone - Target range
-    green: '#2ECC71',
-    greenLight: '#58D68D',
-    greenDark: '#27AE60',
-
-    // Blue zone - Above target
-    blue: '#3498DB',
-    blueLight: '#5DADE2',
-    blueDark: '#2874A6',
-  },
-
-  // Signal quality indicators
-  signal: {
-    excellent: '#2ECC71', // Green
-    good: '#3498DB', // Blue
-    fair: '#F39C12', // Yellow
-    poor: '#E67E22', // Orange
-    critical: '#E74C3C', // Red
-  },
-
-  // Accent colors
+  // Accent - Teal
   accent: {
-    info: '#4A90E2', // Info messages
-    success: '#2ECC71', // Success states
-    warning: '#F39C12', // Warning states
-    error: '#E74C3C', // Error states
-    focus: '#7B68EE', // Focus/meditation
+    primary: '#00d4aa',
+    primaryDim: 'rgba(0, 212, 170, 0.1)',
+    primaryGlow: 'rgba(0, 212, 170, 0.15)',
+    success: '#00d4aa',
+    error: '#b56566',
+    warning: '#c9a857',
+    info: '#00d4aa',
+    focus: '#00d4aa',
   },
 
-  // Interactive elements
-  interactive: {
-    normal: '#4A90E2', // Normal state
-    hover: '#6BA3E8', // Hover state
-    active: '#2E5F8F', // Active/pressed state
-    disabled: '#3A4658', // Disabled state
+  // Primary (alias for accent for compatibility)
+  primary: {
+    main: '#00d4aa',
+    light: '#33ddbb',
+    dark: '#00a884',
+    muted: '#00d4aa80',
+  },
+
+  // Secondary
+  secondary: {
+    main: '#1a1f24',
+    light: '#2a3038',
+    dark: '#0d1117',
+    muted: '#30363d',
+  },
+
+  // Text
+  text: {
+    primary: '#f0f6fc',
+    secondary: '#8892b0',
+    tertiary: '#6b7280',
+    disabled: '#4a5568',
+    inverse: '#000000',
+  },
+
+  // Theta States
+  theta: {
+    low: '#b56566',      // Muted red
+    normal: '#c9a857',   // Muted gold
+    high: '#5d8a6b',     // Muted green
+  },
+
+  // Status colors (compatibility)
+  status: {
+    red: '#b56566',
+    redLight: '#c97879',
+    redDark: '#944f50',
+    yellow: '#c9a857',
+    yellowLight: '#d4b96d',
+    yellowDark: '#a88c45',
+    green: '#5d8a6b',
+    greenLight: '#6f9c7d',
+    greenDark: '#4b7257',
+    blue: '#00d4aa',
+    blueLight: '#33ddbb',
+    blueDark: '#00a884',
+  },
+
+  // Signal quality (using theta colors)
+  signal: {
+    excellent: '#5d8a6b',
+    good: '#5d8a6b',
+    fair: '#c9a857',
+    poor: '#b56566',
+    critical: '#b56566',
+  },
+
+  // Surface colors
+  surface: {
+    primary: '#0d1117',
+    secondary: '#1a1f24',
+    elevated: '#21262d',
+    overlay: '#30363d',
   },
 
   // Border colors
   border: {
-    primary: '#3A4658', // Primary borders
-    secondary: '#2F3647', // Secondary borders
-    focus: '#4A90E2', // Focus borders
-    error: '#E74C3C', // Error borders
+    primary: '#30363d',
+    secondary: '#21262d',
+    focus: '#00d4aa',
+    error: '#b56566',
+    active: '#00d4aa',
   },
 
-  // Chart colors - For data visualization
+  // Chart colors
   chart: {
-    line1: '#4A90E2', // Primary line
-    line2: '#7B68EE', // Secondary line
-    line3: '#2ECC71', // Tertiary line
-    grid: '#2F3647', // Grid lines
-    axis: '#5A6070', // Axis labels
+    line1: '#00d4aa',
+    line2: '#5d8a6b',
+    line3: '#c9a857',
+    grid: '#1a1f24',
+    axis: '#6b7280',
   },
 
-  // Overlay colors - Semi-transparent overlays
+  // Interactive elements
+  interactive: {
+    normal: '#00d4aa',
+    hover: '#33ddbb',
+    active: '#00a884',
+    disabled: '#30363d',
+  },
+
+  // Overlay colors
   overlay: {
-    dark: 'rgba(15, 20, 25, 0.9)', // Dark overlay
-    medium: 'rgba(15, 20, 25, 0.7)', // Medium overlay
-    light: 'rgba(15, 20, 25, 0.5)', // Light overlay
+    dark: 'rgba(0, 0, 0, 0.9)',
+    medium: 'rgba(0, 0, 0, 0.7)',
+    light: 'rgba(0, 0, 0, 0.5)',
   },
 
-  // Gradient definitions
+  // Button variants
+  button: {
+    danger: '#b56566',
+    dangerBg: 'rgba(181, 101, 102, 0.2)',
+  },
+
+  // Gradients
   gradients: {
-    primary: ['#2E5F8F', '#4A90E2', '#6BA3E8'],
-    secondary: ['#5B48CE', '#7B68EE', '#9B88F8'],
-    theta: ['#E74C3C', '#F39C12', '#2ECC71', '#3498DB'],
+    primary: ['#00d4aa', '#00a884'],
+    theta: ['#b56566', '#c9a857', '#5d8a6b'],
   },
 };
 
 export const Spacing = {
   xs: 4,
   sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
+  md: 12,
+  lg: 16,
+  xl: 20,
+  xxl: 24,
+  xxxl: 28,
+  screenPadding: 24,
+  cardPadding: 18,
 };
 
 export const BorderRadius = {
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  round: 9999,
+  sm: 10,
+  md: 14,
+  lg: 18,
+  xl: 24,
+  round: 50,
 };
 
 export const Typography = {
   fontSize: {
-    xs: 10,
-    sm: 12,
-    md: 14,
-    lg: 16,
-    xl: 20,
-    xxl: 24,
-    xxxl: 32,
+    xs: 9,
+    sm: 11,
+    md: 13,
+    lg: 15,
+    xl: 17,
+    xxl: 22,
+    xxxl: 28,
+    display: 76,
+    timer: 48,
   },
   fontWeight: {
     light: '300' as const,
@@ -165,6 +181,11 @@ export const Typography = {
     normal: 1.5,
     relaxed: 1.8,
   },
+  letterSpacing: {
+    tight: -3,
+    normal: 0,
+    wide: 1,
+  },
 };
 
 export const Shadows = {
@@ -172,21 +193,28 @@ export const Shadows = {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    shadowRadius: 2,
     elevation: 2,
   },
   md: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowRadius: 4,
     elevation: 5,
   },
   lg: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
-    shadowRadius: 4.65,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  glow: {
+    shadowColor: '#00d4aa',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
     elevation: 8,
   },
 };

@@ -8,6 +8,8 @@ export type { FirstSessionSuggestionScreenProps } from './FirstSessionSuggestion
 export { default as SettingsScreen } from './SettingsScreen';
 export { default as DashboardScreen } from './DashboardScreen';
 export { ActiveSessionScreen } from './ActiveSessionScreen';
+export { InsightsScreen } from './InsightsScreen';
+export { ProfileScreen } from './ProfileScreen';
 export {
   CalibrationInstructionsScreen,
   CALIBRATION_STEPS,

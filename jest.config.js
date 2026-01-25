@@ -36,6 +36,7 @@ module.exports = {
     '^expo-sharing$': '<rootDir>/__mocks__/expo-sharing.ts',
     '^expo-file-system$': '<rootDir>/__mocks__/expo-file-system.ts',
     '^react-native$': '<rootDir>/__mocks__/react-native.ts',
+    '^react-native-svg$': '<rootDir>/__mocks__/react-native-svg.ts',
     '^react-native-safe-area-context$':
       '<rootDir>/__mocks__/react-native-safe-area-context.ts',
     '^@react-navigation/native$':

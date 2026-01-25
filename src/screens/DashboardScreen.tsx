@@ -1,236 +1,122 @@
 /**
- * FlowState BCI - Dashboard Screen
- *
- * WHOOP-style dashboard showing:
- * - Hero card with today's main stat and gradient
- * - Stats row (sessions, time, theta avg)
- * - Quick action buttons (Quick Boost, Calibrate, Custom)
- * - Theta trend sparkline
- * - Subtle device status indicator
- *
- * Clean, minimal design with proper SafeArea handling.
+ * Dashboard Screen - Premium WHOOP-style Design
+ * Focus Score, AI Insights, and Streak tracking
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
-  RefreshControl,
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDevice, useSimulatedMode, useSettings } from '../contexts';
-import { useSession } from '../contexts';
+import { useNavigation } from '@react-navigation/native';
 import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
-import { ThetaTrendWidget } from '../components/ThetaTrendWidget';
+import { SparkleIcon, PlusIcon } from '../components/TabIcons';
 
-interface DashboardScreenProps {
-  navigation?: {
-    navigate: (screen: string) => void;
-  };
+// Helper to get time-based greeting
+const getGreeting = (): string => {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 17) return 'Good afternoon';
+  return 'Good evening';
+};
+
+// Helper to get day abbreviation
+const getDayAbbreviation = (date: Date): string => {
+  return ['S', 'M', 'T', 'W', 'T', 'F', 'S'][date.getDay()];
+};
+
+// Focus Score Breakdown Item
+interface BreakdownItemProps {
+  value: number;
+  label: string;
+  color?: string;
 }
 
-/**
- * Hero stat card with gradient-like background
- * Uses primary color with accent border for visual interest
- */
-const HeroCard: React.FC<{
-  value: string;
-  label: string;
-  sublabel?: string;
-}> = ({ value, label, sublabel }) => (
-  <View style={styles.heroCard}>
-    <View style={styles.heroAccent} />
-    <Text style={styles.heroLabel}>{label}</Text>
-    <Text style={styles.heroValue}>{value}</Text>
-    {sublabel && <Text style={styles.heroSublabel}>{sublabel}</Text>}
-  </View>
-);
-
-/**
- * Stats row showing key metrics
- */
-const StatsRow: React.FC<{
-  sessions: number;
-  totalMinutes: number;
-  avgTheta: number | null;
-}> = ({ sessions, totalMinutes, avgTheta }) => (
-  <View style={styles.statsRow}>
-    <View style={styles.statItem}>
-      <Text style={styles.statValue}>{sessions}</Text>
-      <Text style={styles.statLabel}>Sessions</Text>
-    </View>
-    <View style={styles.statDivider} />
-    <View style={styles.statItem}>
-      <Text style={styles.statValue}>{totalMinutes}</Text>
-      <Text style={styles.statLabel}>Minutes</Text>
-    </View>
-    <View style={styles.statDivider} />
-    <View style={styles.statItem}>
-      <Text style={styles.statValue}>
-        {avgTheta !== null ? avgTheta.toFixed(1) : '--'}
-      </Text>
-      <Text style={styles.statLabel}>Avg Theta</Text>
-    </View>
-  </View>
-);
-
-/**
- * Quick action button component
- */
-const ActionButton: React.FC<{
-  title: string;
-  subtitle?: string;
-  onPress: () => void;
-  variant?: 'primary' | 'secondary';
-  disabled?: boolean;
-  testID?: string;
-}> = ({ title, subtitle, onPress, variant = 'secondary', disabled, testID }) => (
-  <TouchableOpacity
-    style={[
-      styles.actionButton,
-      variant === 'primary' && styles.actionButtonPrimary,
-      disabled && styles.actionButtonDisabled,
-    ]}
-    onPress={onPress}
-    disabled={disabled}
-    activeOpacity={0.7}
-    testID={testID}
-  >
-    <Text
-      style={[
-        styles.actionButtonTitle,
-        variant === 'primary' && styles.actionButtonTitlePrimary,
-        disabled && styles.actionButtonTitleDisabled,
-      ]}
-    >
-      {title}
-    </Text>
-    {subtitle && (
-      <Text
+const BreakdownItem: React.FC<BreakdownItemProps> = ({
+  value,
+  label,
+  color = Colors.theta.high
+}) => (
+  <View style={styles.breakdownItem}>
+    <Text style={styles.breakdownValue}>{value}</Text>
+    <Text style={styles.breakdownLabel}>{label}</Text>
+    <View style={styles.breakdownBar}>
+      <View
         style={[
-          styles.actionButtonSubtitle,
-          disabled && styles.actionButtonSubtitleDisabled,
+          styles.breakdownFill,
+          { width: `${Math.min(value, 100)}%`, backgroundColor: color }
         ]}
-      >
-        {subtitle}
-      </Text>
-    )}
-  </TouchableOpacity>
+      />
+    </View>
+  </View>
 );
 
-/**
- * Device status indicator (subtle)
- */
-const DeviceStatusIndicator: React.FC<{
-  isConnected: boolean;
-  deviceName?: string;
-  isSimulated?: boolean;
-}> = ({ isConnected, deviceName, isSimulated }) => (
-  <View style={styles.deviceStatus}>
-    <View
-      style={[
-        styles.deviceDot,
-        {
-          backgroundColor: isConnected
-            ? Colors.accent.success
-            : Colors.accent.error,
-        },
-      ]}
-    />
-    <Text style={styles.deviceText}>
-      {isSimulated
-        ? isConnected
-          ? 'Simulator'
-          : 'Not Connected'
-        : deviceName || 'No Device'}
+// Mini Week Day Dot
+interface WeekDotProps {
+  day: string;
+  isCompleted: boolean;
+  isToday: boolean;
+}
+
+const WeekDot: React.FC<WeekDotProps> = ({ day, isCompleted, isToday }) => (
+  <View style={[
+    styles.miniDot,
+    isCompleted && styles.miniDotCompleted,
+    isToday && styles.miniDotToday,
+  ]}>
+    <Text style={[
+      styles.miniDotText,
+      isCompleted && styles.miniDotTextCompleted,
+    ]}>
+      {day}
     </Text>
   </View>
 );
 
-export default function DashboardScreen({ navigation }: DashboardScreenProps) {
-  const { isConnected, deviceInfo } = useDevice();
-  const { connectionState: simulatedConnectionState } = useSimulatedMode();
-  const { settings } = useSettings();
-  const {
-    sessionState,
-    isRefreshing,
-    refreshRecentSessions,
-    recentSessions,
-  } = useSession();
+export default function DashboardScreen(): React.JSX.Element {
+  const navigation = useNavigation();
 
-  // Device is usable if either real device OR simulator is connected
-  const isSimulatedMode = settings.simulated_mode_enabled;
-  const isDeviceUsable =
-    isConnected || simulatedConnectionState === 'connected';
-
-  // Calculate today's stats from recent sessions
-  const todayStats = useMemo(() => {
+  // Get current week days
+  const weekDays = useMemo(() => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const todayTimestamp = today.getTime();
+    const currentDay = today.getDay();
+    const days = [];
 
-    const todaySessions = (recentSessions || []).filter(
-      (s) => s.start_time >= todayTimestamp
-    );
-
-    const sessions = todaySessions.length;
-    const totalMinutes = Math.round(
-      todaySessions.reduce((acc, s) => acc + s.duration_seconds, 0) / 60
-    );
-    const avgTheta =
-      todaySessions.length > 0
-        ? todaySessions.reduce((acc, s) => acc + s.avg_theta_zscore, 0) /
-          todaySessions.length
-        : null;
-
-    return { sessions, totalMinutes, avgTheta };
-  }, [recentSessions]);
-
-  const handleRefresh = useCallback(() => {
-    refreshRecentSessions();
-  }, [refreshRecentSessions]);
-
-  const handleCalibrate = useCallback(() => {
-    navigation?.navigate('Calibration');
-  }, [navigation]);
-
-  const handleQuickBoost = useCallback(() => {
-    navigation?.navigate('Session');
-  }, [navigation]);
-
-  const handleCustomSession = useCallback(() => {
-    navigation?.navigate('Session');
-  }, [navigation]);
-
-  const isSessionActive =
-    sessionState === 'running' || sessionState === 'paused';
-
-  // Generate greeting based on time of day
-  const greeting = useMemo(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - currentDay + i);
+      days.push({
+        day: getDayAbbreviation(date),
+        isCompleted: i < currentDay, // Past days marked as completed for demo
+        isToday: i === currentDay,
+      });
+    }
+    return days;
   }, []);
 
-  // Get main stat for hero card
-  const heroStat = useMemo(() => {
-    if (todayStats.avgTheta !== null) {
-      return {
-        value: todayStats.avgTheta.toFixed(2),
-        label: "Today's Average",
-        sublabel: 'Theta Z-Score',
-      };
-    }
-    return {
-      value: '--',
-      label: 'No Sessions',
-      sublabel: 'Start a session to see your stats',
-    };
-  }, [todayStats.avgTheta]);
+  // Mock data - replace with real data from context
+  const focusScore = 87;
+  const qualityScore = 92;
+  const consistencyScore = 85;
+  const focusTimeScore = 78;
+  const streakDays = 5;
+  const sessionsThisWeek = 4;
+
+  const getScoreSubtitle = (score: number): { text: string; color: string } => {
+    if (score >= 85) return { text: "You're in a great flow", color: Colors.theta.high };
+    if (score >= 70) return { text: "Good progress today", color: Colors.theta.normal };
+    return { text: "Room for improvement", color: Colors.theta.low };
+  };
+
+  const { text: subtitleText, color: subtitleColor } = getScoreSubtitle(focusScore);
+
+  const handleStartSession = () => {
+    navigation.navigate('Session' as never);
+  };
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
@@ -238,76 +124,76 @@ export default function DashboardScreen({ navigation }: DashboardScreenProps) {
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={handleRefresh}
-            tintColor={Colors.primary.main}
-            colors={[Colors.primary.main]}
-            progressBackgroundColor={Colors.surface.primary}
-          />
-        }
       >
-        {/* Header with greeting and device status */}
+        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.greeting}>{greeting}</Text>
-          <DeviceStatusIndicator
-            isConnected={isDeviceUsable}
-            deviceName={isSimulatedMode ? 'Simulator' : deviceInfo?.name}
-            isSimulated={isSimulatedMode}
-          />
+          <Text style={styles.greeting}>{getGreeting()}</Text>
+          <Text style={styles.userName}>User</Text>
         </View>
 
-        {/* Hero Card - Main stat of the day */}
-        <HeroCard
-          value={heroStat.value}
-          label={heroStat.label}
-          sublabel={heroStat.sublabel}
-        />
+        {/* Focus Score Card */}
+        <View style={styles.scoreCard}>
+          <Text style={styles.scoreLabel}>Focus Score</Text>
+          <Text style={styles.scoreValue}>{focusScore}</Text>
+          <Text style={[styles.scoreSubtitle, { color: subtitleColor }]}>
+            {subtitleText}
+          </Text>
 
-        {/* Stats Row */}
-        <StatsRow
-          sessions={todayStats.sessions}
-          totalMinutes={todayStats.totalMinutes}
-          avgTheta={todayStats.avgTheta}
-        />
-
-        {/* Quick Actions */}
-        <View style={styles.actionsSection}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-          <ActionButton
-            title="Quick Boost"
-            subtitle="5 min theta session"
-            onPress={handleQuickBoost}
-            variant="primary"
-            disabled={!isDeviceUsable || isSessionActive}
-            testID="quick-boost-button"
-          />
-          <View style={styles.secondaryActions}>
-            <ActionButton
-              title="Calibrate"
-              onPress={handleCalibrate}
-              disabled={!isDeviceUsable || isSessionActive}
-              testID="calibrate-button"
-            />
-            <ActionButton
-              title="Custom"
-              onPress={handleCustomSession}
-              disabled={!isDeviceUsable || isSessionActive}
-              testID="custom-session-button"
-            />
+          {/* Breakdown Row */}
+          <View style={styles.breakdownRow}>
+            <BreakdownItem value={qualityScore} label="Quality" />
+            <BreakdownItem value={consistencyScore} label="Consistency" />
+            <BreakdownItem value={focusTimeScore} label="Focus Time" />
           </View>
         </View>
 
-        {/* Theta Trend */}
-        <View style={styles.trendSection}>
-          <ThetaTrendWidget
-            maxDataPoints={10}
-            showStats={true}
-            title="Recent Trend"
-          />
+        {/* AI Insight Card */}
+        <View style={styles.insightCard}>
+          <View style={styles.insightHeader}>
+            <SparkleIcon color={Colors.accent.primary} size={14} />
+            <Text style={styles.insightTitle}>Insight</Text>
+          </View>
+          <Text style={styles.insightText}>
+            Your morning sessions show 23% better theta response. Consider scheduling
+            important focus work before noon for optimal results.
+          </Text>
+        </View>
+
+        {/* Combined Streak Card */}
+        <View style={styles.combinedCard}>
+          <View style={styles.combinedHeader}>
+            <View>
+              <Text style={styles.streakValue}>{streakDays}</Text>
+              <Text style={styles.streakLabel}>day streak</Text>
+            </View>
+            <View style={styles.sessionsContainer}>
+              <Text style={styles.sessionsValue}>{sessionsThisWeek} sessions</Text>
+              <Text style={styles.sessionsLabel}>this week</Text>
+            </View>
+          </View>
+
+          {/* Mini Week */}
+          <View style={styles.miniWeek}>
+            {weekDays.map((day, index) => (
+              <WeekDot
+                key={index}
+                day={day.day}
+                isCompleted={day.isCompleted}
+                isToday={day.isToday}
+              />
+            ))}
+          </View>
         </View>
       </ScrollView>
+
+      {/* FAB - Start Session */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={handleStartSession}
+        activeOpacity={0.8}
+      >
+        <PlusIcon color={Colors.text.inverse} size={28} />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -321,151 +207,172 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentContainer: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.xxl,
+    paddingHorizontal: Spacing.screenPadding,
+    paddingTop: Spacing.xl,
+    paddingBottom: 100,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: Spacing.md,
-    marginBottom: Spacing.lg,
+    marginBottom: Spacing.xxxl,
   },
   greeting: {
-    fontSize: Typography.fontSize.xxl,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.text.primary,
-  },
-  deviceStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.surface.primary,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.round,
-  },
-  deviceDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: Spacing.sm,
-  },
-  deviceText: {
-    fontSize: Typography.fontSize.sm,
+    fontSize: Typography.fontSize.lg,
     color: Colors.text.secondary,
+    marginBottom: 4,
   },
-  // Hero Card
-  heroCard: {
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xl,
-    marginBottom: Spacing.lg,
-    alignItems: 'center',
-    backgroundColor: Colors.primary.main,
-    overflow: 'hidden',
-    position: 'relative',
-    ...Shadows.lg,
-  },
-  heroAccent: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 4,
-    backgroundColor: Colors.secondary.main,
-  },
-  heroLabel: {
-    fontSize: Typography.fontSize.md,
-    color: 'rgba(255, 255, 255, 0.8)',
-    marginBottom: Spacing.xs,
-  },
-  heroValue: {
-    fontSize: 64,
-    fontWeight: Typography.fontWeight.bold,
-    color: '#FFFFFF',
-    letterSpacing: -2,
-  },
-  heroSublabel: {
-    fontSize: Typography.fontSize.sm,
-    color: 'rgba(255, 255, 255, 0.7)',
-    marginTop: Spacing.xs,
-  },
-  // Stats Row
-  statsRow: {
-    flexDirection: 'row',
-    backgroundColor: Colors.surface.primary,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.lg,
-    ...Shadows.sm,
-  },
-  statItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  statValue: {
-    fontSize: Typography.fontSize.xxl,
-    fontWeight: Typography.fontWeight.bold,
+  userName: {
+    fontSize: 30,
+    fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
-    marginBottom: Spacing.xs,
+    letterSpacing: -0.5,
   },
-  statLabel: {
+  scoreCard: {
+    backgroundColor: Colors.accent.primaryDim,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xxxl,
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+  },
+  scoreLabel: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    marginBottom: 10,
+  },
+  scoreValue: {
+    fontSize: Typography.fontSize.display,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    letterSpacing: Typography.letterSpacing.tight,
+  },
+  scoreSubtitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.medium,
+    marginTop: 10,
+  },
+  breakdownRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: Spacing.xl,
+    marginTop: Spacing.xxl,
+    width: '100%',
+  },
+  breakdownItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  breakdownValue: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+  },
+  breakdownLabel: {
     fontSize: Typography.fontSize.sm,
     color: Colors.text.tertiary,
+    marginTop: 2,
   },
-  statDivider: {
-    width: 1,
-    backgroundColor: Colors.border.secondary,
-    marginHorizontal: Spacing.md,
+  breakdownBar: {
+    width: 50,
+    height: 3,
+    backgroundColor: Colors.surface.secondary,
+    borderRadius: 2,
+    marginTop: 6,
+    overflow: 'hidden',
   },
-  // Actions Section
-  actionsSection: {
-    marginBottom: Spacing.lg,
+  breakdownFill: {
+    height: '100%',
+    borderRadius: 2,
   },
-  sectionTitle: {
-    fontSize: Typography.fontSize.lg,
-    fontWeight: Typography.fontWeight.semibold,
-    color: Colors.text.primary,
-    marginBottom: Spacing.md,
-  },
-  actionButton: {
+  insightCard: {
     backgroundColor: Colors.surface.primary,
     borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.sm,
+    padding: Spacing.cardPadding,
+    marginBottom: Spacing.lg,
+  },
+  insightHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    ...Shadows.sm,
+    gap: Spacing.sm,
+    marginBottom: 10,
   },
-  actionButtonPrimary: {
-    backgroundColor: Colors.primary.main,
+  insightTitle: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.accent.primary,
   },
-  actionButtonDisabled: {
-    opacity: 0.5,
+  insightText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    lineHeight: 21,
   },
-  actionButtonTitle: {
-    fontSize: Typography.fontSize.lg,
+  combinedCard: {
+    backgroundColor: Colors.surface.primary,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.cardPadding,
+  },
+  combinedHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: Spacing.md,
+  },
+  streakValue: {
+    fontSize: 28,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
   },
-  actionButtonTitlePrimary: {
-    color: '#FFFFFF',
+  streakLabel: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.tertiary,
   },
-  actionButtonTitleDisabled: {
-    color: Colors.text.disabled,
+  sessionsContainer: {
+    alignItems: 'flex-end',
   },
-  actionButtonSubtitle: {
-    fontSize: Typography.fontSize.sm,
-    color: Colors.text.secondary,
-    marginTop: Spacing.xs,
+  sessionsValue: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
   },
-  actionButtonSubtitleDisabled: {
-    color: Colors.text.disabled,
+  sessionsLabel: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.tertiary,
   },
-  secondaryActions: {
+  miniWeek: {
     flexDirection: 'row',
-    gap: Spacing.sm,
+    justifyContent: 'space-between',
+    marginTop: Spacing.md,
   },
-  // Trend Section
-  trendSection: {
-    marginBottom: Spacing.lg,
+  miniDot: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.surface.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  miniDotCompleted: {
+    backgroundColor: Colors.theta.high,
+  },
+  miniDotToday: {
+    borderWidth: 2,
+    borderColor: Colors.accent.primary,
+    backgroundColor: 'transparent',
+  },
+  miniDotText: {
+    fontSize: Typography.fontSize.xs + 1,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.tertiary,
+  },
+  miniDotTextCompleted: {
+    color: Colors.text.inverse,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 100,
+    right: Spacing.screenPadding,
+    width: 56,
+    height: 56,
+    backgroundColor: Colors.accent.primary,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Shadows.glow,
   },
 });

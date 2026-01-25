@@ -172,43 +172,64 @@ export const Easing = {
   inOut: (easing: (t: number) => number) => (t: number) => t,
 };
 
+// Mock Animated Value class
+class AnimatedValue {
+  _value: number;
+  constructor(value: number) {
+    this._value = value;
+  }
+  setValue(value: number) {
+    this._value = value;
+  }
+  interpolate(config: any) {
+    return this;
+  }
+  stopAnimation(callback?: (value: number) => void) {
+    callback?.(this._value);
+  }
+}
+
 // Mock Animated
 export const Animated = {
   View,
   Text,
   Image,
-  Value: class {
-    constructor(value: number) {}
-    setValue(value: number) {}
-    interpolate(config: any) {
-      return this;
-    }
-  },
+  Value: AnimatedValue,
   timing: () => ({
-    start: (callback?: () => void) => callback?.(),
+    start: (callback?: (result?: { finished: boolean }) => void) => callback?.({ finished: true }),
     stop: () => {},
     reset: () => {},
   }),
   spring: () => ({
-    start: (callback?: () => void) => callback?.(),
+    start: (callback?: (result?: { finished: boolean }) => void) => callback?.({ finished: true }),
     stop: () => {},
     reset: () => {},
   }),
   parallel: () => ({
-    start: (callback?: () => void) => callback?.(),
+    start: (callback?: (result?: { finished: boolean }) => void) => callback?.({ finished: true }),
     stop: () => {},
     reset: () => {},
   }),
   sequence: () => ({
-    start: (callback?: () => void) => callback?.(),
+    start: (callback?: (result?: { finished: boolean }) => void) => callback?.({ finished: true }),
     stop: () => {},
     reset: () => {},
   }),
   loop: () => ({
-    start: (callback?: () => void) => callback?.(),
+    start: (callback?: (result?: { finished: boolean }) => void) => callback?.({ finished: true }),
     stop: () => {},
     reset: () => {},
   }),
+  delay: () => ({
+    start: (callback?: (result?: { finished: boolean }) => void) => callback?.({ finished: true }),
+    stop: () => {},
+    reset: () => {},
+  }),
+  createAnimatedComponent: (Component: any) => {
+    return React.forwardRef((props: any, ref: any) => {
+      return React.createElement(Component, { ...props, ref });
+    });
+  },
 };
 
 // Mock PixelRatio

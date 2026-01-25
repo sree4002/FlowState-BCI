@@ -224,3 +224,24 @@ export {
   getConnectionStatusInfo,
 } from './DebugOverlay';
 export type { DebugOverlayProps, DebugBarProps } from './DebugOverlay';
+
+// Tab bar icons
+export {
+  DashboardIcon,
+  SessionIcon,
+  InsightsIcon,
+  ProfileIcon,
+  PlusIcon,
+  PauseIcon,
+  StopIcon,
+  ChevronRightIcon,
+  SettingsIcon,
+  ShieldIcon,
+  BluetoothIcon,
+  BellIcon,
+  SparkleIcon,
+} from './TabIcons';
+
+// Neural network visualization
+export { NeuralNetworkVisualization } from './NeuralNetworkVisualization';
+export type { } from './NeuralNetworkVisualization';
