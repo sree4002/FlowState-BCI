@@ -11,6 +11,75 @@ import {
 import { openDatabase } from './database';
 
 /**
+ * Ensures game tables exist
+ * Fallback for cases where migrations didn't run on existing databases
+ */
+export const ensureGameTables = async (): Promise<void> => {
+  try {
+    const db = openDatabase();
+
+    // Create game_sessions table if it doesn't exist
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS game_sessions (
+        id TEXT PRIMARY KEY,
+        game_type TEXT NOT NULL,
+        mode TEXT NOT NULL,
+        session_id TEXT,
+        start_time INTEGER NOT NULL,
+        end_time INTEGER NOT NULL,
+        difficulty_start INTEGER NOT NULL,
+        difficulty_end INTEGER NOT NULL,
+        total_trials INTEGER NOT NULL,
+        correct_trials INTEGER NOT NULL,
+        accuracy REAL NOT NULL,
+        avg_response_time REAL NOT NULL,
+        theta_correlation REAL,
+        config TEXT NOT NULL,
+        FOREIGN KEY (session_id) REFERENCES sessions(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Create indexes for game_sessions
+    db.execSync(`
+      CREATE INDEX IF NOT EXISTS idx_game_sessions_start_time
+      ON game_sessions(start_time)
+    `);
+
+    db.execSync(`
+      CREATE INDEX IF NOT EXISTS idx_game_sessions_game_type
+      ON game_sessions(game_type)
+    `);
+
+    // Create game_trials table if it doesn't exist
+    db.execSync(`
+      CREATE TABLE IF NOT EXISTS game_trials (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        game_session_id TEXT NOT NULL,
+        trial_number INTEGER NOT NULL,
+        stimulus TEXT NOT NULL,
+        response TEXT,
+        correct INTEGER NOT NULL,
+        response_time REAL NOT NULL,
+        theta_zscore REAL,
+        timestamp INTEGER NOT NULL,
+        FOREIGN KEY (game_session_id) REFERENCES game_sessions(id) ON DELETE CASCADE
+      )
+    `);
+
+    // Create index for game_trials
+    db.execSync(`
+      CREATE INDEX IF NOT EXISTS idx_game_trials_session_id
+      ON game_trials(game_session_id)
+    `);
+
+    console.log('[GameDB] Game tables ensured');
+  } catch (error) {
+    console.error('[GameDB] Failed to ensure game tables:', error);
+    throw error;
+  }
+};
+
+/**
  * Game session database record interface
  */
 export interface GameSessionRecord {

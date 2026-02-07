@@ -12,9 +12,9 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import { Colors, Spacing, BorderRadius, Typography } from '../../constants/theme';
 import { GamesScreenProps } from '../../types/navigation';
 import { GameTimer } from '../../components/games/GameTimer';
@@ -25,10 +25,9 @@ import {
   WordRecallResponse,
 } from '../../types/games';
 
-type GamePhase = 'display' | 'delay' | 'recall' | 'complete';
+type GamePhase = 'instructions' | 'display' | 'delay' | 'recall' | 'complete';
 
-export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> = () => {
-  const navigation = useNavigation();
+export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> = ({ navigation }) => {
   const {
     gameState,
     generateNextTrial,
@@ -37,17 +36,17 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
     getCurrentGameEngine,
   } = useGames();
 
-  const [phase, setPhase] = useState<GamePhase>('display');
+  const [phase, setPhase] = useState<GamePhase>('instructions');
   const [currentStimulus, setCurrentStimulus] = useState<WordRecallStimulus | null>(null);
   const [recalledWords, setRecalledWords] = useState<string[]>([]);
   const [currentInput, setCurrentInput] = useState('');
   const [trialStartTime, setTrialStartTime] = useState(Date.now());
   const [phaseTimer, setPhaseTimer] = useState(0);
 
-  useEffect(() => {
-    // Start first trial
+  const handleStartGame = () => {
+    setPhase('display');
     startNewTrial();
-  }, []);
+  };
 
   useEffect(() => {
     if (!currentStimulus) return;
@@ -156,8 +155,74 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
     return null;
   }
 
+  const getGameInfo = () => {
+    const engine = getCurrentGameEngine();
+    if (!engine) return { wordCount: 10, studyTime: 20, delayTime: 30 };
+    const config = (engine as any).config;
+    const difficulty = config.difficulty ?? 5;
+
+    let wordCount = 5, studyTime = 30, delayTime = 10;
+    if (difficulty <= 2) {
+      wordCount = 5 + difficulty * 1;
+      studyTime = 30;
+      delayTime = 10;
+    } else if (difficulty <= 5) {
+      wordCount = 8 + (difficulty - 3) * 2;
+      studyTime = 20;
+      delayTime = 30;
+    } else if (difficulty <= 8) {
+      wordCount = 13 + (difficulty - 6) * 2;
+      studyTime = 15;
+      delayTime = 60;
+    } else {
+      wordCount = 18 + (difficulty - 9) * 1;
+      studyTime = 10;
+      delayTime = 90;
+    }
+
+    return { wordCount, studyTime, delayTime };
+  };
+
+  const gameInfo = getGameInfo();
+
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
+      {/* Instructions Modal */}
+      <Modal
+        visible={phase === 'instructions'}
+        transparent
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Word Recall Game</Text>
+            <Text style={styles.modalText}>
+              You will see a list of words. Memorize as many as you can.
+            </Text>
+            <Text style={styles.modalText}>
+              After the study period, you'll have a delay, then type back as many words as you remember.
+            </Text>
+            <View style={styles.modalInfoBox}>
+              <Text style={styles.modalInfoText}>
+                • Words to memorize: {gameInfo.wordCount}
+              </Text>
+              <Text style={styles.modalInfoText}>
+                • Study time: {gameInfo.studyTime} seconds
+              </Text>
+              <Text style={styles.modalInfoText}>
+                • Delay period: {gameInfo.delayTime} seconds
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={handleStartGame}
+            >
+              <Text style={styles.modalButtonText}>Start Game</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <View style={styles.header}>
         <GameTimer startTime={trialStartTime} isRunning={gameState === 'running'} />
         <TouchableOpacity style={styles.quitButton} onPress={handleQuit}>
@@ -257,6 +322,60 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background.primary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.screenPadding,
+  },
+  modalContent: {
+    backgroundColor: Colors.surface.secondary,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+    width: '100%',
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+  },
+  modalTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.regular,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.md,
+    lineHeight: 24,
+  },
+  modalInfoBox: {
+    backgroundColor: Colors.background.tertiary,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginVertical: Spacing.lg,
+  },
+  modalInfoText: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+    marginBottom: Spacing.sm,
+  },
+  modalButton: {
+    backgroundColor: Colors.accent.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    marginTop: Spacing.md,
+  },
+  modalButtonText: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.background.primary,
   },
   header: {
     flexDirection: 'row',

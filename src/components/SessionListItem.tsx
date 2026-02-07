@@ -50,6 +50,7 @@ export const SESSION_TYPE_LABELS: Record<Session['session_type'], string> = {
   custom: 'Custom',
   scheduled: 'Scheduled',
   sham: 'A/B Test',
+  game_session: 'Game Session',
 };
 
 /**
@@ -61,6 +62,7 @@ export const SESSION_TYPE_COLORS: Record<Session['session_type'], string> = {
   custom: Colors.primary.main,
   scheduled: Colors.accent.info,
   sham: Colors.text.tertiary,
+  game_session: Colors.accent.warning,
 };
 
 /**

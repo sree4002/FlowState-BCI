@@ -269,8 +269,8 @@ export abstract class CognitiveGameEngine {
     const thetaValues = trialsWithTheta.map((t) => t.theta_zscore!);
     const correctValues = trialsWithTheta.map((t) => (t.correct ? 1 : 0));
 
-    const meanTheta = thetaValues.reduce((a, b) => a + b, 0) / n;
-    const meanCorrect = correctValues.reduce((a, b) => a + b, 0) / n;
+    const meanTheta = thetaValues.reduce((a: number, b: number) => a + b, 0) / n;
+    const meanCorrect = correctValues.reduce((a: number, b: number) => a + b, 0) / n;
 
     let numerator = 0;
     let thetaVariance = 0;

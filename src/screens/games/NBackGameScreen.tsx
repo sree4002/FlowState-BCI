@@ -10,10 +10,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  Modal,
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import { Colors, Spacing, BorderRadius, Typography } from '../../constants/theme';
 import { GamesScreenProps } from '../../types/navigation';
 import { GameTimer } from '../../components/games/GameTimer';
@@ -25,12 +25,9 @@ import {
 } from '../../types/games';
 
 const GRID_SIZE = 3;
-const screenWidth = Dimensions.get('window').width;
-const gridPadding = Spacing.screenPadding * 2;
-const cellSize = (screenWidth - gridPadding - (GRID_SIZE - 1) * Spacing.sm) / GRID_SIZE;
+const CELL_SIZE = 70; // Fixed size for better layout control
 
-export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = () => {
-  const navigation = useNavigation();
+export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navigation }) => {
   const {
     gameState,
     generateNextTrial,
@@ -39,6 +36,7 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = () => {
     getCurrentGameEngine,
   } = useGames();
 
+  const [showInstructions, setShowInstructions] = useState(true);
   const [currentStimulus, setCurrentStimulus] = useState<NBackStimulus | null>(null);
   const [positionPressed, setPositionPressed] = useState(false);
   const [audioPressed, setAudioPressed] = useState(false);
@@ -47,9 +45,10 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = () => {
   const [correctTrials, setCorrectTrials] = useState(0);
   const [totalTrials] = useState(20); // Configurable based on difficulty
 
-  useEffect(() => {
+  const handleStartGame = () => {
+    setShowInstructions(false);
     startNewTrial();
-  }, []);
+  };
 
   const startNewTrial = () => {
     try {
@@ -139,7 +138,7 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = () => {
           key={i}
           style={[
             styles.gridCell,
-            { width: cellSize, height: cellSize },
+            { width: CELL_SIZE, height: CELL_SIZE },
             isActive && styles.gridCellActive,
           ]}
         />
@@ -148,8 +147,58 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = () => {
     return cells;
   };
 
+  const getNBackLevel = () => {
+    const engine = getCurrentGameEngine();
+    if (!engine) return 2;
+    const config = (engine as any).config;
+    const difficulty = config.difficulty ?? 5;
+    if (difficulty <= 2) return 1;
+    if (difficulty <= 5) return 2;
+    if (difficulty <= 7) return 3;
+    return 4;
+  };
+
+  const nBackLevel = getNBackLevel();
+
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      {/* Instructions Modal */}
+      <Modal
+        visible={showInstructions}
+        transparent
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{nBackLevel}-Back Game</Text>
+            <Text style={styles.modalText}>
+              A position will highlight on the grid and a letter will appear.
+            </Text>
+            <Text style={styles.modalText}>
+              Press <Text style={styles.highlight}>'Position Match'</Text> if the position is the same as {nBackLevel} trial{nBackLevel > 1 ? 's' : ''} ago.
+            </Text>
+            <Text style={styles.modalText}>
+              Press <Text style={styles.highlight}>'Audio Match'</Text> if the letter is the same as {nBackLevel} trial{nBackLevel > 1 ? 's' : ''} ago.
+            </Text>
+            <Text style={styles.modalText}>
+              Press both if both match!
+            </Text>
+            <View style={styles.modalInfoBox}>
+              <Text style={styles.modalInfoText}>
+                Example: If N={nBackLevel} and you see position B on trial 5, press Position Match if trial {5 - nBackLevel} also had position B.
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.modalButton}
+              onPress={handleStartGame}
+            >
+              <Text style={styles.modalButtonText}>Start Game</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Header with timer and quit */}
       <View style={styles.header}>
         <GameTimer startTime={trialStartTime} isRunning={gameState === 'running'} />
         <TouchableOpacity style={styles.quitButton} onPress={handleQuit}>
@@ -157,55 +206,62 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = () => {
         </TouchableOpacity>
       </View>
 
-      <TrialProgress
-        currentTrial={currentTrial}
-        totalTrials={totalTrials}
-        correctTrials={correctTrials}
-      />
+      {/* Trial counter and accuracy */}
+      <View style={styles.statsRow}>
+        <Text style={styles.statsText}>
+          Trial {currentTrial + 1} of {totalTrials}
+        </Text>
+        <Text style={styles.statsText}>
+          {Math.round((correctTrials / Math.max(currentTrial, 1)) * 100)}% Correct
+        </Text>
+      </View>
 
       <View style={styles.content}>
-        <View style={styles.stimulusContainer}>
-          <View style={styles.grid}>{renderGrid()}</View>
+        {/* Audio letter display - above grid */}
+        {currentStimulus && (
+          <View style={styles.audioContainer}>
+            <Text style={styles.audioLabel}>Letter:</Text>
+            <Text style={styles.audioLetter}>{currentStimulus.audio_letter}</Text>
+          </View>
+        )}
 
-          {currentStimulus && (
-            <View style={styles.audioContainer}>
-              <Text style={styles.audioLetter}>{currentStimulus.audio_letter}</Text>
-            </View>
-          )}
+        {/* 3x3 Grid - centered and appropriately sized */}
+        <View style={styles.gridContainer}>
+          <View style={styles.grid}>{renderGrid()}</View>
         </View>
 
-        <View style={styles.controls}>
-          <Text style={styles.instructionText}>
-            Press buttons if current stimulus matches n-back
-          </Text>
+        {/* Instruction text */}
+        <Text style={styles.instructionText}>
+          Press if current matches N trials ago
+        </Text>
 
-          <View style={styles.buttons}>
-            <TouchableOpacity
-              style={[
-                styles.responseButton,
-                positionPressed && styles.responseButtonPressed,
-              ]}
-              onPress={() => setPositionPressed(!positionPressed)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.responseButtonText}>
-                Position Match
-              </Text>
-            </TouchableOpacity>
+        {/* Response buttons - side by side */}
+        <View style={styles.buttons}>
+          <TouchableOpacity
+            style={[
+              styles.responseButton,
+              positionPressed && styles.responseButtonPressed,
+            ]}
+            onPress={() => setPositionPressed(!positionPressed)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.responseButtonText}>
+              Position{'\n'}Match
+            </Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[
-                styles.responseButton,
-                audioPressed && styles.responseButtonPressed,
-              ]}
-              onPress={() => setAudioPressed(!audioPressed)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.responseButtonText}>
-                Audio Match
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            style={[
+              styles.responseButton,
+              audioPressed && styles.responseButtonPressed,
+            ]}
+            onPress={() => setAudioPressed(!audioPressed)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.responseButtonText}>
+              Audio{'\n'}Match
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -216,6 +272,65 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background.primary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.screenPadding,
+  },
+  modalContent: {
+    backgroundColor: Colors.surface.secondary,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+    width: '100%',
+    maxWidth: 400,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+  },
+  modalTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  modalText: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.regular,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.md,
+    lineHeight: 24,
+  },
+  highlight: {
+    color: Colors.accent.primary,
+    fontWeight: Typography.fontWeight.bold,
+  },
+  modalInfoBox: {
+    backgroundColor: Colors.background.tertiary,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginVertical: Spacing.lg,
+  },
+  modalInfoText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.regular,
+    color: Colors.text.secondary,
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  modalButton: {
+    backgroundColor: Colors.accent.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    marginTop: Spacing.md,
+  },
+  modalButtonText: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.background.primary,
   },
   header: {
     flexDirection: 'row',
@@ -237,73 +352,93 @@ const styles = StyleSheet.create({
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.button.danger,
   },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.screenPadding,
+    paddingVertical: Spacing.md,
+    backgroundColor: Colors.surface.secondary,
+  },
+  statsText: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+  },
   content: {
     flex: 1,
     paddingHorizontal: Spacing.screenPadding,
-    paddingTop: Spacing.xl,
+    paddingTop: Spacing.lg,
+    justifyContent: 'space-between',
   },
-  stimulusContainer: {
-    flex: 1,
-    justifyContent: 'center',
+  audioContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.lg,
+    gap: Spacing.md,
+  },
+  audioLabel: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.secondary,
+  },
+  audioLetter: {
+    fontSize: 48,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.accent.primary,
+    minWidth: 50,
+    textAlign: 'center',
+  },
+  gridContainer: {
+    alignItems: 'center',
+    paddingVertical: Spacing.xl,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    width: cellSize * GRID_SIZE + Spacing.sm * (GRID_SIZE - 1),
-    gap: Spacing.sm,
-    marginBottom: Spacing.xxl,
+    width: CELL_SIZE * GRID_SIZE + Spacing.md * (GRID_SIZE - 1),
+    gap: Spacing.md,
   },
   gridCell: {
     backgroundColor: Colors.surface.secondary,
     borderRadius: BorderRadius.sm,
-    borderWidth: 1,
+    borderWidth: 2,
     borderColor: Colors.border.primary,
   },
   gridCellActive: {
     backgroundColor: Colors.accent.primary,
     borderColor: Colors.accent.primary,
   },
-  audioContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: BorderRadius.round,
-    backgroundColor: Colors.accent.primaryDim,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  audioLetter: {
-    fontSize: Typography.fontSize.display,
-    fontWeight: Typography.fontWeight.bold,
-    color: Colors.accent.primary,
-  },
-  controls: {
-    paddingBottom: Spacing.xl,
-  },
   instructionText: {
     fontSize: Typography.fontSize.md,
     fontWeight: Typography.fontWeight.regular,
     color: Colors.text.secondary,
     textAlign: 'center',
-    marginBottom: Spacing.lg,
+    marginVertical: Spacing.lg,
   },
   buttons: {
+    flexDirection: 'row',
     gap: Spacing.md,
+    paddingBottom: Spacing.xl,
   },
   responseButton: {
+    flex: 1,
     backgroundColor: Colors.surface.secondary,
     borderRadius: BorderRadius.md,
-    paddingVertical: Spacing.md,
+    paddingVertical: Spacing.lg,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: Colors.border.primary,
+    minHeight: 70,
   },
   responseButtonPressed: {
     backgroundColor: Colors.accent.primaryDim,
     borderColor: Colors.accent.primary,
   },
   responseButtonText: {
-    fontSize: Typography.fontSize.lg,
+    fontSize: Typography.fontSize.md,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
   },

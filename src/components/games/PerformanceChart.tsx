@@ -100,8 +100,8 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   bar: {
-    borderTopLeftRadius: BorderRadius.xs,
-    borderTopRightRadius: BorderRadius.xs,
+    borderTopLeftRadius: BorderRadius.sm,
+    borderTopRightRadius: BorderRadius.sm,
     marginBottom: Spacing.xs,
   },
   barLabel: {

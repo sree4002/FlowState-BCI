@@ -3,6 +3,7 @@ import React, {
   useContext,
   useState,
   useCallback,
+  useEffect,
   ReactNode,
   useRef,
 } from 'react';
@@ -20,6 +21,7 @@ import {
   insertGameTrial,
   getAllGameSessions,
   getGameSessionDetailById,
+  ensureGameTables,
   GameSessionRecord,
   GameTrialRecord,
 } from '../services/gameDatabase';
@@ -102,15 +104,31 @@ export const GamesProvider: React.FC<GamesProviderProps> = ({ children }) => {
     new SessionGameIntegration()
   );
 
+  // Ensure game tables exist on mount
+  useEffect(() => {
+    const initTables = async () => {
+      try {
+        await ensureGameTables();
+        console.log('[GamesContext] Game tables initialized');
+      } catch (error) {
+        console.error('[GamesContext] Failed to initialize game tables:', error);
+      }
+    };
+    initTables();
+  }, []);
+
   /**
    * Starts a new game
    */
   const startGame = useCallback(async (config: GameConfig): Promise<void> => {
     try {
+      // Ensure tables exist
+      await ensureGameTables();
+
       // Validate config
       const validation = sessionIntegrationRef.current.validateGameConfig(config);
       if (!validation.valid) {
-        throw new Error(validation.error);
+        throw new Error(`Game configuration error: ${validation.error}`);
       }
 
       // Create game engine based on type
@@ -166,7 +184,7 @@ export const GamesProvider: React.FC<GamesProviderProps> = ({ children }) => {
       thetaZScore?: number
     ): Promise<void> => {
       if (!gameEngineRef.current || gameState !== 'running') {
-        throw new Error('No active game running');
+        throw new Error('No active game running. Please start a game first.');
       }
 
       try {
@@ -199,8 +217,9 @@ export const GamesProvider: React.FC<GamesProviderProps> = ({ children }) => {
           });
         }
       } catch (error) {
-        console.error('Failed to record trial response:', error);
-        throw error;
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        console.error('[GamesContext] Failed to record trial response:', errorMessage);
+        throw new Error(`Failed to record response: ${errorMessage}`);
       }
     },
     [gameState, activeGame]
@@ -242,6 +261,9 @@ export const GamesProvider: React.FC<GamesProviderProps> = ({ children }) => {
       // End the game
       const sessionDetail = gameEngineRef.current.end();
       setGameState('completed');
+
+      // Ensure tables exist before saving
+      await ensureGameTables();
 
       // Save to database
       const db = openDatabase();
@@ -294,8 +316,9 @@ export const GamesProvider: React.FC<GamesProviderProps> = ({ children }) => {
 
       return sessionDetail;
     } catch (error) {
-      console.error('Failed to end game:', error);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('[GamesContext] Failed to end game:', errorMessage);
+      throw new Error(`Failed to save game: ${errorMessage}`);
     }
   }, [gameState]);
 
@@ -319,12 +342,18 @@ export const GamesProvider: React.FC<GamesProviderProps> = ({ children }) => {
    * Generates the next trial stimulus
    */
   const generateNextTrial = useCallback((): any => {
-    if (!gameEngineRef.current || gameState !== 'running') {
-      throw new Error('No active game running');
+    if (!gameEngineRef.current) {
+      throw new Error('Game engine not initialized. Please start a game first.');
     }
 
-    return gameEngineRef.current.generateNextTrial();
-  }, [gameState]);
+    try {
+      return gameEngineRef.current.generateNextTrial();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      console.error('[GamesContext] Failed to generate trial:', errorMessage);
+      throw new Error(`Failed to generate trial: ${errorMessage}`);
+    }
+  }, []);
 
   /**
    * Gets the current game engine

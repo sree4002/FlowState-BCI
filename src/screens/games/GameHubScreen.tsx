@@ -6,7 +6,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import { Colors, Spacing, BorderRadius, Typography } from '../../constants/theme';
 import { GamesScreenProps } from '../../types/navigation';
 import { GameCard } from '../../components/games/GameCard';
@@ -89,8 +88,7 @@ const NBackIcon = () => (
   </Svg>
 );
 
-export const GameHubScreen: React.FC<GamesScreenProps<'GameHub'>> = () => {
-  const navigation = useNavigation();
+export const GameHubScreen: React.FC<GamesScreenProps<'GameHub'>> = ({ navigation }) => {
   const { recentGames, refreshGameHistory } = useGames();
 
   useEffect(() => {

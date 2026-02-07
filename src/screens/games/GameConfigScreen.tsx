@@ -12,18 +12,17 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../../constants/theme';
-import { GamesScreenProps } from '../../types/navigation';
+import { GamesScreenProps, GamesStackParamList } from '../../types/navigation';
 import { DifficultySelector } from '../../components/games/DifficultySelector';
 import { GameConfig, GameMode, GameType } from '../../types/games';
 import { useGames } from '../../contexts/GamesContext';
 
-export const GameConfigScreen: React.FC<GamesScreenProps<'GameConfig'>> = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
+export const GameConfigScreen: React.FC<GamesScreenProps<'GameConfig'>> = ({ navigation, route }) => {
   const { startGame } = useGames();
-  const { gameType } = route.params as { gameType: GameType };
+  const { gameType } = route.params;
 
   const [selectedMode, setSelectedMode] = useState<GameMode>('standalone');
   const [selectedDifficulty, setSelectedDifficulty] = useState<number | undefined>(undefined);

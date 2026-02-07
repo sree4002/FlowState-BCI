@@ -6,7 +6,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { Colors, Spacing, BorderRadius, Typography } from '../../constants/theme';
 import { GamesScreenProps } from '../../types/navigation';
 import { ResultsSummary } from '../../components/games/ResultsSummary';
@@ -14,10 +13,8 @@ import { GameSessionDetail } from '../../types/games';
 import { openDatabase } from '../../services/database';
 import { getGameSessionDetailById } from '../../services/gameDatabase';
 
-export const GameResultsScreen: React.FC<GamesScreenProps<'GameResults'>> = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-  const { sessionId } = route.params as { sessionId: string };
+export const GameResultsScreen: React.FC<GamesScreenProps<'GameResults'>> = ({ navigation, route }) => {
+  const { sessionId } = route.params;
 
   const [session, setSession] = useState<GameSessionDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
