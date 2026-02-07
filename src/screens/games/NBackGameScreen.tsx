@@ -3,7 +3,7 @@
  * Play the dual n-back working memory game
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Speech from 'expo-speech';
 import { Colors, Spacing, BorderRadius, Typography } from '../../constants/theme';
 import { GamesScreenProps } from '../../types/navigation';
 import { GameTimer } from '../../components/games/GameTimer';
@@ -26,6 +27,9 @@ import {
 
 const GRID_SIZE = 3;
 const CELL_SIZE = 70; // Fixed size for better layout control
+const STIMULUS_DURATION = 2500; // Time to show stimulus
+const FEEDBACK_DURATION = 500; // Time to show feedback
+const INTER_TRIAL_INTERVAL = 300; // Pause between trials
 
 export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navigation }) => {
   const {
@@ -44,6 +48,13 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navig
   const [currentTrial, setCurrentTrial] = useState(0);
   const [correctTrials, setCorrectTrials] = useState(0);
   const [totalTrials] = useState(20); // Configurable based on difficulty
+  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showStimulus, setShowStimulus] = useState(true);
+
+  const responseTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const nextTrialTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleStartGame = () => {
     setShowInstructions(false);
@@ -52,23 +63,48 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navig
 
   const startNewTrial = () => {
     try {
-      const stimulus = generateNextTrial() as NBackStimulus;
-      setCurrentStimulus(stimulus);
+      // Clear any existing timers
+      if (responseTimerRef.current) clearTimeout(responseTimerRef.current);
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      if (nextTrialTimerRef.current) clearTimeout(nextTrialTimerRef.current);
+
+      // Reset state
       setPositionPressed(false);
       setAudioPressed(false);
+      setFeedback(null);
+      setIsProcessing(false);
+      setShowStimulus(true);
+
+      // Generate new trial
+      const stimulus = generateNextTrial() as NBackStimulus;
+      setCurrentStimulus(stimulus);
       setTrialStartTime(Date.now());
 
-      // Auto-submit after stimulus duration (2-3 seconds based on difficulty)
-      setTimeout(() => {
+      // Speak the letter aloud
+      if (stimulus.audio_letter) {
+        Speech.speak(stimulus.audio_letter, {
+          language: 'en',
+          rate: 0.8,
+          pitch: 1.0,
+        });
+      }
+
+      // Auto-submit after stimulus duration
+      responseTimerRef.current = setTimeout(() => {
         handleSubmitResponse();
-      }, 2500); // Default duration
+      }, STIMULUS_DURATION);
     } catch (error) {
       console.error('Failed to generate trial:', error);
+      Alert.alert('Error', 'Failed to start trial. Ending game.');
+      handleEndGame();
     }
   };
 
   const handleSubmitResponse = async () => {
-    if (!currentStimulus) return;
+    if (!currentStimulus || isProcessing) return;
+
+    setIsProcessing(true);
+    setShowStimulus(false);
 
     const responseTime = Date.now() - trialStartTime;
     const response: NBackResponse = {
@@ -87,22 +123,48 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navig
       const engine = getCurrentGameEngine();
       if (engine) {
         const trials = engine.getTrials();
-        const correct = trials[trials.length - 1].correct;
-        setCorrectTrials(prev => prev + (correct ? 1 : 0));
+        const latestTrial = trials[trials.length - 1];
+        const isCorrect = latestTrial.correct;
+
+        // Show feedback
+        setFeedback(isCorrect ? 'correct' : 'incorrect');
+
+        // Update counters
+        if (isCorrect) {
+          setCorrectTrials(prev => prev + 1);
+        }
         setCurrentTrial(trials.length);
 
-        if (trials.length >= totalTrials) {
-          // End game after completing all trials
-          handleEndGame();
-        } else {
-          // Start next trial
-          startNewTrial();
-        }
+        // Hide feedback and move to next trial or end game
+        feedbackTimerRef.current = setTimeout(() => {
+          setFeedback(null);
+
+          if (trials.length >= totalTrials) {
+            // End game after completing all trials
+            handleEndGame();
+          } else {
+            // Brief pause before next trial
+            nextTrialTimerRef.current = setTimeout(() => {
+              startNewTrial();
+            }, INTER_TRIAL_INTERVAL);
+          }
+        }, FEEDBACK_DURATION);
       }
     } catch (error) {
       console.error('Failed to record trial:', error);
+      Alert.alert('Error', 'Failed to record response. Please try again.');
+      setIsProcessing(false);
     }
   };
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (responseTimerRef.current) clearTimeout(responseTimerRef.current);
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+      if (nextTrialTimerRef.current) clearTimeout(nextTrialTimerRef.current);
+    };
+  }, []);
 
   const handleEndGame = async () => {
     try {
@@ -241,9 +303,12 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navig
             style={[
               styles.responseButton,
               positionPressed && styles.responseButtonPressed,
+              feedback === 'correct' && positionPressed && styles.responseButtonCorrect,
+              feedback === 'incorrect' && styles.responseButtonIncorrect,
             ]}
-            onPress={() => setPositionPressed(!positionPressed)}
+            onPress={() => !isProcessing && setPositionPressed(!positionPressed)}
             activeOpacity={0.7}
+            disabled={isProcessing}
           >
             <Text style={styles.responseButtonText}>
               Position{'\n'}Match
@@ -254,9 +319,12 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navig
             style={[
               styles.responseButton,
               audioPressed && styles.responseButtonPressed,
+              feedback === 'correct' && audioPressed && styles.responseButtonCorrect,
+              feedback === 'incorrect' && styles.responseButtonIncorrect,
             ]}
-            onPress={() => setAudioPressed(!audioPressed)}
+            onPress={() => !isProcessing && setAudioPressed(!audioPressed)}
             activeOpacity={0.7}
+            disabled={isProcessing}
           >
             <Text style={styles.responseButtonText}>
               Audio{'\n'}Match
@@ -436,6 +504,14 @@ const styles = StyleSheet.create({
   responseButtonPressed: {
     backgroundColor: Colors.accent.primaryDim,
     borderColor: Colors.accent.primary,
+  },
+  responseButtonCorrect: {
+    backgroundColor: 'rgba(93, 138, 107, 0.3)',
+    borderColor: '#5d8a6b',
+  },
+  responseButtonIncorrect: {
+    backgroundColor: 'rgba(181, 101, 102, 0.3)',
+    borderColor: '#b56566',
   },
   responseButtonText: {
     fontSize: Typography.fontSize.md,

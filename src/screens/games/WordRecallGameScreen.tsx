@@ -25,7 +25,7 @@ import {
   WordRecallResponse,
 } from '../../types/games';
 
-type GamePhase = 'instructions' | 'display' | 'delay' | 'recall' | 'complete';
+type GamePhase = 'instructions' | 'display' | 'delay' | 'recall' | 'results' | 'complete';
 
 export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> = ({ navigation }) => {
   const {
@@ -112,17 +112,29 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
         responseTime
       );
 
-      const engine = getCurrentGameEngine();
-      if (engine && engine.getCurrentTrialNumber() >= 5) {
-        // End after 5 trials (configurable)
-        setPhase('complete');
-      } else {
-        // Start next trial
-        startNewTrial();
-      }
+      // Show inline results before navigating to full results
+      setPhase('results');
     } catch (error) {
       console.error('Failed to record trial:', error);
+      Alert.alert('Error', 'Failed to submit response. Please try again.');
     }
+  };
+
+  const calculateResults = () => {
+    if (!currentStimulus) return { correct: [], missed: [], incorrect: [], accuracy: 0 };
+
+    const originalWords = currentStimulus.words.map(w => w.toLowerCase());
+    const recalled = recalledWords.map(w => w.toLowerCase());
+
+    const correct = recalled.filter(w => originalWords.includes(w));
+    const missed = originalWords.filter(w => !recalled.includes(w));
+    const incorrect = recalled.filter(w => !originalWords.includes(w));
+
+    const accuracy = originalWords.length > 0
+      ? Math.round((correct.length / originalWords.length) * 100)
+      : 0;
+
+    return { correct, missed, incorrect, accuracy };
   };
 
   const handleEndGame = async () => {
@@ -311,6 +323,113 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
             >
               <Text style={styles.submitButtonText}>Submit Answers</Text>
             </TouchableOpacity>
+          </View>
+        )}
+
+        {phase === 'results' && currentStimulus && (
+          <View style={styles.resultsPhase}>
+            <Text style={styles.phaseTitle}>Your Results</Text>
+
+            {(() => {
+              const results = calculateResults();
+              return (
+                <>
+                  <View style={styles.scoreBox}>
+                    <Text style={styles.scoreTitle}>Score</Text>
+                    <Text style={styles.scoreValue}>
+                      {results.correct.length} / {currentStimulus.words.length}
+                    </Text>
+                    <Text style={styles.scorePercentage}>
+                      {results.accuracy}% Correct
+                    </Text>
+                  </View>
+
+                  <View style={styles.wordComparison}>
+                    <View style={styles.comparisonColumn}>
+                      <Text style={styles.columnTitle}>Original Words</Text>
+                      <View style={styles.wordsGrid}>
+                        {currentStimulus.words.map((word, index) => {
+                          const wasRecalled = results.correct.includes(word.toLowerCase());
+                          return (
+                            <View
+                              key={index}
+                              style={[
+                                styles.resultWordChip,
+                                wasRecalled ? styles.correctWordChip : styles.missedWordChip,
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.resultWordText,
+                                  wasRecalled ? styles.correctWordText : styles.missedWordText,
+                                ]}
+                              >
+                                {word}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    </View>
+
+                    <View style={styles.comparisonColumn}>
+                      <Text style={styles.columnTitle}>Your Recall</Text>
+                      <View style={styles.wordsGrid}>
+                        {recalledWords.map((word, index) => {
+                          const isCorrect = results.correct.includes(word);
+                          const isIncorrect = results.incorrect.includes(word);
+                          return (
+                            <View
+                              key={index}
+                              style={[
+                                styles.resultWordChip,
+                                isCorrect && styles.correctWordChip,
+                                isIncorrect && styles.incorrectWordChip,
+                              ]}
+                            >
+                              <Text
+                                style={[
+                                  styles.resultWordText,
+                                  isCorrect && styles.correctWordText,
+                                  isIncorrect && styles.incorrectWordText,
+                                ]}
+                              >
+                                {word}
+                              </Text>
+                            </View>
+                          );
+                        })}
+                      </View>
+                    </View>
+                  </View>
+
+                  {results.missed.length > 0 && (
+                    <View style={styles.missedWordsBox}>
+                      <Text style={styles.missedTitle}>
+                        Words You Missed ({results.missed.length})
+                      </Text>
+                      <View style={styles.wordsGrid}>
+                        {results.missed.map((word, index) => (
+                          <View key={index} style={[styles.resultWordChip, styles.missedWordChip]}>
+                            <Text style={[styles.resultWordText, styles.missedWordText]}>
+                              {word}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    </View>
+                  )}
+
+                  <TouchableOpacity
+                    style={styles.continueButton}
+                    onPress={handleEndGame}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.continueButtonText}>Continue to Full Results</Text>
+                  </TouchableOpacity>
+                </>
+              );
+            })()}
           </View>
         )}
       </ScrollView>
@@ -507,6 +626,107 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xl,
   },
   submitButtonText: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.background.primary,
+  },
+  resultsPhase: {
+    padding: Spacing.screenPadding,
+  },
+  scoreBox: {
+    backgroundColor: Colors.surface.elevated,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.xl,
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+  },
+  scoreTitle: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.sm,
+  },
+  scoreValue: {
+    fontSize: 48,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.accent.primary,
+    marginBottom: Spacing.xs,
+  },
+  scorePercentage: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+  },
+  wordComparison: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    marginBottom: Spacing.xl,
+  },
+  comparisonColumn: {
+    flex: 1,
+  },
+  columnTitle: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
+  },
+  resultWordChip: {
+    borderRadius: BorderRadius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    marginRight: Spacing.sm,
+    marginBottom: Spacing.sm,
+    borderWidth: 1,
+  },
+  correctWordChip: {
+    backgroundColor: 'rgba(93, 138, 107, 0.2)',
+    borderColor: '#5d8a6b',
+  },
+  correctWordText: {
+    color: '#5d8a6b',
+  },
+  missedWordChip: {
+    backgroundColor: 'rgba(181, 101, 102, 0.2)',
+    borderColor: '#b56566',
+  },
+  missedWordText: {
+    color: '#b56566',
+  },
+  incorrectWordChip: {
+    backgroundColor: 'rgba(201, 168, 87, 0.2)',
+    borderColor: '#c9a857',
+  },
+  incorrectWordText: {
+    color: '#c9a857',
+  },
+  resultWordText: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.medium,
+  },
+  missedWordsBox: {
+    backgroundColor: Colors.background.tertiary,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.xl,
+  },
+  missedTitle: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.sm,
+  },
+  continueButton: {
+    backgroundColor: Colors.accent.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    marginTop: Spacing.md,
+  },
+  continueButtonText: {
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.background.primary,
