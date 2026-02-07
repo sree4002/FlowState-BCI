@@ -238,6 +238,28 @@ export const SparkleIcon: React.FC<TabIconProps> = ({ color, size = 24 }) => (
   </Svg>
 );
 
+/**
+ * Games icon - Brain with puzzle piece
+ */
+export const GamesIcon: React.FC<TabIconProps> = ({ color, size = 24 }) => (
+  <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+    <Path
+      d="M12 4c-4 0-7 3-7 7 0 2.5 1 4.5 2.5 6l1.5 1.5V20h6v-1.5L16.5 17c1.5-1.5 2.5-3.5 2.5-6 0-4-3-7-7-7z"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <Path
+      d="M9 10h2v2H9zM13 10h2v2h-2z"
+      stroke={color}
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </Svg>
+);
+
 export default {
   DashboardIcon,
   SessionIcon,
@@ -252,4 +274,5 @@ export default {
   BluetoothIcon,
   BellIcon,
   SparkleIcon,
+  GamesIcon,
 };

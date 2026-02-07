@@ -240,6 +240,7 @@ export {
   BluetoothIcon,
   BellIcon,
   SparkleIcon,
+  GamesIcon,
 } from './TabIcons';
 
 // Neural network visualization
