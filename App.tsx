@@ -18,6 +18,7 @@ import {
   SessionProvider,
   DeviceProvider,
 } from './src/contexts';
+import { GamesProvider } from './src/contexts/GamesContext';
 
 // Screens
 import {
@@ -188,43 +189,45 @@ export default function App(): React.JSX.Element {
       <SimulatedModeProvider>
         <SessionProvider>
           <DeviceProvider>
-            <StatusBar barStyle="light-content" backgroundColor="#000000" />
-            <NavigationContainer
-              theme={{
-                ...DarkTheme,
-                colors: {
-                  ...DarkTheme.colors,
-                  primary: Colors.accent.primary,
-                  background: Colors.background.primary,
-                  card: Colors.background.primary,
-                  text: Colors.text.primary,
-                  border: Colors.border.primary,
-                  notification: Colors.accent.error,
-                },
-              }}
-            >
-              <Stack.Navigator
-                screenOptions={{
-                  headerShown: false,
-                  animation: 'slide_from_right',
+            <GamesProvider>
+              <StatusBar barStyle="light-content" backgroundColor="#000000" />
+              <NavigationContainer
+                theme={{
+                  ...DarkTheme,
+                  colors: {
+                    ...DarkTheme.colors,
+                    primary: Colors.accent.primary,
+                    background: Colors.background.primary,
+                    card: Colors.background.primary,
+                    text: Colors.text.primary,
+                    border: Colors.border.primary,
+                    notification: Colors.accent.error,
+                  },
                 }}
               >
-                <Stack.Screen name="MainTabs" component={MainTabNavigator} />
-                <Stack.Screen
-                  name="Settings"
-                  component={SettingsScreen}
-                  options={{
-                    headerShown: true,
-                    headerTitle: 'Settings',
-                    headerStyle: {
-                      backgroundColor: Colors.background.primary,
-                    },
-                    headerTintColor: Colors.text.primary,
-                    headerShadowVisible: false,
+                <Stack.Navigator
+                  screenOptions={{
+                    headerShown: false,
+                    animation: 'slide_from_right',
                   }}
-                />
-              </Stack.Navigator>
-            </NavigationContainer>
+                >
+                  <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+                  <Stack.Screen
+                    name="Settings"
+                    component={SettingsScreen}
+                    options={{
+                      headerShown: true,
+                      headerTitle: 'Settings',
+                      headerStyle: {
+                        backgroundColor: Colors.background.primary,
+                      },
+                      headerTintColor: Colors.text.primary,
+                      headerShadowVisible: false,
+                    }}
+                  />
+                </Stack.Navigator>
+              </NavigationContainer>
+            </GamesProvider>
           </DeviceProvider>
         </SessionProvider>
       </SimulatedModeProvider>
