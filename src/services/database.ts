@@ -297,7 +297,8 @@ export type SessionType =
   | 'quick_boost'
   | 'custom'
   | 'scheduled'
-  | 'sham';
+  | 'sham'
+  | 'game_session';
 
 /**
  * Session record interface matching database schema
@@ -326,7 +327,7 @@ export const createSessionsTable = (db: SQLite.SQLiteDatabase): void => {
   db.execSync(`
     CREATE TABLE IF NOT EXISTS sessions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      session_type TEXT NOT NULL CHECK(session_type IN ('calibration', 'quick_boost', 'custom', 'scheduled', 'sham')),
+      session_type TEXT NOT NULL CHECK(session_type IN ('calibration', 'quick_boost', 'custom', 'scheduled', 'sham', 'game_session')),
       start_time INTEGER NOT NULL,
       end_time INTEGER NOT NULL,
       duration_seconds INTEGER NOT NULL,

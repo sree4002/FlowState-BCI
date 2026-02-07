@@ -23,7 +23,7 @@ export interface BaselineProfile {
  */
 export interface Session {
   id: number;
-  session_type: 'calibration' | 'quick_boost' | 'custom' | 'scheduled' | 'sham';
+  session_type: 'calibration' | 'quick_boost' | 'custom' | 'scheduled' | 'sham' | 'game_session';
   start_time: number;
   end_time: number;
   duration_seconds: number;
