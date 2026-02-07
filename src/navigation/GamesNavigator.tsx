@@ -8,12 +8,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { GamesStackParamList } from '../types/navigation';
 import { Colors } from '../constants/theme';
 
-// Placeholder screens - will be implemented in Phase 6
-const GameHubScreen = () => null;
-const GameConfigScreen = () => null;
-const WordRecallGameScreen = () => null;
-const NBackGameScreen = () => null;
-const GameResultsScreen = () => null;
+// Import game screens
+import { GameHubScreen } from '../screens/games/GameHubScreen';
+import { GameConfigScreen } from '../screens/games/GameConfigScreen';
+import { WordRecallGameScreen } from '../screens/games/WordRecallGameScreen';
+import { NBackGameScreen } from '../screens/games/NBackGameScreen';
+import { GameResultsScreen } from '../screens/games/GameResultsScreen';
 
 const Stack = createNativeStackNavigator<GamesStackParamList>();
 
