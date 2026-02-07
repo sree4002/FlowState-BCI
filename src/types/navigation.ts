@@ -43,6 +43,7 @@ export type MainTabParamList = {
   Dashboard: undefined;
   Session: SessionTabParams;
   History: NavigatorScreenParams<HistoryTabParamList>;
+  Games: NavigatorScreenParams<GamesStackParamList>;
   Settings: undefined;
 };
 
@@ -109,6 +110,25 @@ export type CalibrationStackParamList = {
 };
 
 /**
+ * Games navigator param list
+ */
+export type GamesStackParamList = {
+  GameHub: undefined;
+  GameConfig: {
+    gameType: 'word_recall' | 'nback';
+  };
+  WordRecallGame: {
+    config: any; // GameConfig from games types
+  };
+  NBackGame: {
+    config: any; // GameConfig from games types
+  };
+  GameResults: {
+    sessionId: string;
+  };
+};
+
+/**
  * Settings screen navigator param list
  * For settings sub-screens
  */
@@ -167,6 +187,15 @@ export type CalibrationScreenProps<T extends keyof CalibrationStackParamList> =
   CompositeScreenProps<
     NativeStackScreenProps<CalibrationStackParamList, T>,
     RootStackScreenProps<'Calibration'>
+  >;
+
+/**
+ * Props for screens in the Games Stack
+ */
+export type GamesScreenProps<T extends keyof GamesStackParamList> =
+  CompositeScreenProps<
+    NativeStackScreenProps<GamesStackParamList, T>,
+    MainTabScreenProps<'Games'>
   >;
 
 /**

@@ -36,7 +36,11 @@ import {
   SessionIcon,
   InsightsIcon,
   ProfileIcon,
+  GamesIcon,
 } from './src/components';
+
+// Navigation
+import { GamesNavigator } from './src/navigation/GamesNavigator';
 
 // Storage
 import { OnboardingStorage } from './src/services/storage';
@@ -54,6 +58,7 @@ type MainTabParamList = {
   Dashboard: undefined;
   Session: undefined;
   Insights: undefined;
+  Games: undefined;
   Profile: undefined;
 };
 
@@ -110,6 +115,16 @@ function MainTabNavigator() {
           tabBarLabel: 'Insights',
           tabBarIcon: ({ color }) => (
             <InsightsIcon color={color} size={24} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Games"
+        component={GamesNavigator}
+        options={{
+          tabBarLabel: 'Games',
+          tabBarIcon: ({ color }) => (
+            <GamesIcon color={color} size={24} />
           ),
         }}
       />
