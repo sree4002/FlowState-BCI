@@ -1,5 +1,6 @@
 # Python
 venv/
+.venv/
 __pycache__/
 *.py[cod]
 *.so
@@ -10,6 +11,9 @@ build/
 
 # Simulator venv
 simulator/venv/
+
+# Python virtual environments (project-level)
+thetasync_env/
 
 # Node
 node_modules/
@@ -44,15 +48,26 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
 .env
+.env.*
+
+# Log files
+*.log
 
 # typescript
 *.tsbuildinfo
 
+# IDE configs
+.vscode/
+.idea/
+
 # Claude/Ralphy working directories
 .claude/
 .ralphy/
+ralphy/
+
+# PlatformIO (ESP32 firmware)
+.pio/
 
 # Generated/temp files
 *.png
