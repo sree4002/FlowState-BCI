@@ -14,6 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, BorderRadius, Typography } from '../constants/theme';
 import { SparkleIcon } from '../components/TabIcons';
+import { DemoModeBanner } from '../components/DemoModeBanner';
 
 type InsightTab = 'trends' | 'history' | 'patterns';
 
@@ -180,6 +181,7 @@ export function InsightsScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <DemoModeBanner />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}

@@ -28,6 +28,7 @@ import { useDevice } from '../contexts/DeviceContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { useSimulatedMode } from '../contexts/SimulatedModeContext';
 import { NeuralNetworkVisualization } from '../components/NeuralNetworkVisualization';
+import { DemoModeBanner } from '../components/DemoModeBanner';
 
 interface ActiveSessionScreenProps {
   navigation?: any;
@@ -258,6 +259,7 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
   if (!isActive) {
     return (
       <SafeAreaView style={styles.safeArea} edges={['top']}>
+        <DemoModeBanner />
         <View style={styles.idleContainer}>
           {/* Neural network - static */}
           <View style={styles.visualizationContainer}>
@@ -295,6 +297,7 @@ export const ActiveSessionScreen: React.FC<ActiveSessionScreenProps> = ({
   // Render active session state
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <DemoModeBanner />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}

@@ -146,6 +146,7 @@ export interface AppSettings {
   simulated_mode_enabled: boolean;
   simulated_mode_server_url: string;
   force_theta_state: 'auto' | 'low' | 'normal' | 'high';
+  demo_mode_enabled: boolean;
 }
 
 /**

@@ -43,8 +43,16 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
   const [trialStartTime, setTrialStartTime] = useState(Date.now());
   const [phaseTimer, setPhaseTimer] = useState(0);
 
+  // Multi-round tracking
+  const [currentRound, setCurrentRound] = useState(1);
+  const [totalWordsCorrect, setTotalWordsCorrect] = useState(0);
+  const [totalWordsShown, setTotalWordsShown] = useState(0);
+
   const handleStartGame = () => {
     setPhase('display');
+    setCurrentRound(1);
+    setTotalWordsCorrect(0);
+    setTotalWordsShown(0);
     startNewTrial();
   };
 
@@ -135,6 +143,57 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
       : 0;
 
     return { correct, missed, incorrect, accuracy };
+  };
+
+  const handleContinuePlaying = () => {
+    if (!currentStimulus) return;
+
+    // Update cumulative stats
+    const results = calculateResults();
+    setTotalWordsCorrect(prev => prev + results.correct.length);
+    setTotalWordsShown(prev => prev + currentStimulus.words.length);
+    setCurrentRound(prev => prev + 1);
+
+    // Start new round
+    startNewTrial();
+  };
+
+  const handleSeeFinalResults = async () => {
+    try {
+      // Calculate final cumulative stats
+      if (!currentStimulus) return;
+
+      const currentResults = calculateResults();
+      const finalCorrect = totalWordsCorrect + currentResults.correct.length;
+      const finalShown = totalWordsShown + currentStimulus.words.length;
+      const finalAccuracy = finalShown > 0 ? (finalCorrect / finalShown) * 100 : 0;
+
+      console.log('[Word Recall] Final results:', {
+        totalRounds: currentRound,
+        totalWordsCorrect: finalCorrect,
+        totalWordsShown: finalShown,
+        accuracy: finalAccuracy.toFixed(1) + '%',
+      });
+
+      // Save to database
+      const sessionDetail = await endGame();
+
+      // Navigate with computed results as backup
+      // NOTE: Pass accuracy as DECIMAL (0.5 for 50%) to match database format
+      navigation.navigate('GameResults', {
+        sessionId: sessionDetail.id,
+        directResults: {
+          accuracy: finalAccuracy / 100, // Convert percentage to decimal
+          avgResponseTime: 0, // Word recall doesn't track individual response times
+          totalTrials: currentRound,
+          correctTrials: currentRound, // All rounds completed
+          gameType: 'word_recall' as const,
+        },
+      });
+    } catch (error) {
+      console.error('Failed to end game:', error);
+      Alert.alert('Error', 'Failed to end game. Please try again.');
+    }
   };
 
   const handleEndGame = async () => {
@@ -236,7 +295,12 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
       </Modal>
 
       <View style={styles.header}>
-        <GameTimer startTime={trialStartTime} isRunning={gameState === 'running'} />
+        <View style={styles.headerLeft}>
+          <GameTimer startTime={trialStartTime} isRunning={gameState === 'running'} />
+          {phase !== 'instructions' && (
+            <Text style={styles.roundIndicator}>Round {currentRound}</Text>
+          )}
+        </View>
         <TouchableOpacity style={styles.quitButton} onPress={handleQuit}>
           <Text style={styles.quitButtonText}>Quit</Text>
         </TouchableOpacity>
@@ -328,14 +392,22 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
 
         {phase === 'results' && currentStimulus && (
           <View style={styles.resultsPhase}>
-            <Text style={styles.phaseTitle}>Your Results</Text>
+            <Text style={styles.phaseTitle}>Round {currentRound} Results</Text>
 
             {(() => {
               const results = calculateResults();
+              const roundWordsCorrect = results.correct.length;
+              const roundWordsShown = currentStimulus.words.length;
+              const cumulativeCorrect = totalWordsCorrect + roundWordsCorrect;
+              const cumulativeShown = totalWordsShown + roundWordsShown;
+              const overallAccuracy = cumulativeShown > 0
+                ? Math.round((cumulativeCorrect / cumulativeShown) * 100)
+                : 0;
+
               return (
                 <>
                   <View style={styles.scoreBox}>
-                    <Text style={styles.scoreTitle}>Score</Text>
+                    <Text style={styles.scoreTitle}>This Round</Text>
                     <Text style={styles.scoreValue}>
                       {results.correct.length} / {currentStimulus.words.length}
                     </Text>
@@ -343,6 +415,24 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
                       {results.accuracy}% Correct
                     </Text>
                   </View>
+
+                  {currentRound > 1 && (
+                    <View style={styles.cumulativeStatsBox}>
+                      <Text style={styles.cumulativeTitle}>Overall Performance</Text>
+                      <View style={styles.cumulativeRow}>
+                        <Text style={styles.cumulativeLabel}>Total Words Correct:</Text>
+                        <Text style={styles.cumulativeValue}>{cumulativeCorrect}</Text>
+                      </View>
+                      <View style={styles.cumulativeRow}>
+                        <Text style={styles.cumulativeLabel}>Total Words Shown:</Text>
+                        <Text style={styles.cumulativeValue}>{cumulativeShown}</Text>
+                      </View>
+                      <View style={styles.cumulativeRow}>
+                        <Text style={styles.cumulativeLabel}>Overall Accuracy:</Text>
+                        <Text style={styles.cumulativeValue}>{overallAccuracy}%</Text>
+                      </View>
+                    </View>
+                  )}
 
                   <View style={styles.wordComparison}>
                     <View style={styles.comparisonColumn}>
@@ -420,13 +510,23 @@ export const WordRecallGameScreen: React.FC<GamesScreenProps<'WordRecallGame'>> 
                     </View>
                   )}
 
-                  <TouchableOpacity
-                    style={styles.continueButton}
-                    onPress={handleEndGame}
-                    activeOpacity={0.7}
-                  >
-                    <Text style={styles.continueButtonText}>Continue to Full Results</Text>
-                  </TouchableOpacity>
+                  <View style={styles.buttonRow}>
+                    <TouchableOpacity
+                      style={styles.continuePlayingButton}
+                      onPress={handleContinuePlaying}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.continuePlayingButtonText}>Continue Playing</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.finalResultsButton}
+                      onPress={handleSeeFinalResults}
+                      activeOpacity={0.7}
+                    >
+                      <Text style={styles.finalResultsButtonText}>See Final Results</Text>
+                    </TouchableOpacity>
+                  </View>
                 </>
               );
             })()}
@@ -504,6 +604,20 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border.primary,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+  },
+  roundIndicator: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.accent.primary,
+    backgroundColor: Colors.accent.primaryDim,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.sm,
   },
   quitButton: {
     paddingHorizontal: Spacing.md,
@@ -730,5 +844,67 @@ const styles = StyleSheet.create({
     fontSize: Typography.fontSize.lg,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.background.primary,
+  },
+  cumulativeStatsBox: {
+    backgroundColor: Colors.background.tertiary,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.lg,
+    marginBottom: Spacing.xl,
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+  },
+  cumulativeTitle: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+    marginBottom: Spacing.md,
+    textAlign: 'center',
+  },
+  cumulativeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  cumulativeLabel: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.secondary,
+  },
+  cumulativeValue: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.accent.primary,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+    marginTop: Spacing.md,
+  },
+  continuePlayingButton: {
+    flex: 1,
+    backgroundColor: Colors.accent.primary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+  },
+  continuePlayingButtonText: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.background.primary,
+  },
+  finalResultsButton: {
+    flex: 1,
+    backgroundColor: Colors.surface.secondary,
+    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border.primary,
+  },
+  finalResultsButtonText: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
   },
 });

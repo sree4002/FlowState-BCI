@@ -71,6 +71,7 @@ export const defaultSettings: AppSettings = {
   // localhost only works on iOS Simulator; Android emulator needs 10.0.2.2
   simulated_mode_server_url: 'ws://10.5.29.191:8765',
   force_theta_state: 'auto',
+  demo_mode_enabled: false,
 };
 
 /**

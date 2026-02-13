@@ -1,200 +1,427 @@
 /**
  * N-Back Game Screen
- * Play the dual n-back working memory game
+ * Dual n-back working memory game with position and audio matching
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
+  Pressable,
   Alert,
   Modal,
-  Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Speech from 'expo-speech';
 import { Colors, Spacing, BorderRadius, Typography } from '../../constants/theme';
 import { GamesScreenProps } from '../../types/navigation';
 import { GameTimer } from '../../components/games/GameTimer';
-import { TrialProgress } from '../../components/games/TrialProgress';
 import { useGames } from '../../contexts/GamesContext';
-import {
-  NBackStimulus,
-  NBackResponse,
-} from '../../types/games';
 
 const GRID_SIZE = 3;
-const CELL_SIZE = 70; // Fixed size for better layout control
-const STIMULUS_DURATION = 2500; // Time to show stimulus
-const FEEDBACK_DURATION = 500; // Time to show feedback
-const INTER_TRIAL_INTERVAL = 300; // Pause between trials
+const CELL_SIZE = 70;
+const STIMULUS_DURATION = 2500; // Time to show stimulus and collect response
+const FEEDBACK_DURATION = 800; // Time to show feedback
+
+// Available letters for audio
+const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'L', 'N', 'Q', 'R'];
+
+interface Trial {
+  position: number; // 0-8 grid position
+  letter: string;
+  isPositionMatch: boolean;
+  isAudioMatch: boolean;
+}
+
+interface TrialResult {
+  userRespondedPosition: boolean;
+  userRespondedAudio: boolean;
+  correctPosition: boolean;
+  correctAudio: boolean;
+  responseTime: number; // milliseconds
+}
+
+type Phase = 'showing' | 'feedback' | 'waiting';
 
 export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navigation }) => {
-  const {
-    gameState,
-    generateNextTrial,
-    recordTrialResponse,
-    endGame,
-    getCurrentGameEngine,
-  } = useGames();
+  const { endGame, getCurrentGameEngine } = useGames();
 
+  // REFS: Game-critical state (no re-renders, no stale closures)
+  const trialsRef = useRef<Trial[]>([]);
+  const currentTrialRef = useRef(0);
+  const userPressedPosition = useRef(false);
+  const userPressedAudio = useRef(false);
+  const trialStartTimeRef = useRef(0);
+  const responseTimesRef = useRef<number[]>([]);
+  const resultsRef = useRef<TrialResult[]>([]);
+  const isEvaluating = useRef(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const nLevelRef = useRef(2);
+  const gameStartTimeRef = useRef(Date.now());
+
+  // STATE: UI display only (triggers re-renders)
   const [showInstructions, setShowInstructions] = useState(true);
-  const [currentStimulus, setCurrentStimulus] = useState<NBackStimulus | null>(null);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [displayTrialIndex, setDisplayTrialIndex] = useState(0);
+  const [activePosition, setActivePosition] = useState<number | null>(null);
+  const [activeLetter, setActiveLetter] = useState('');
   const [positionPressed, setPositionPressed] = useState(false);
   const [audioPressed, setAudioPressed] = useState(false);
-  const [trialStartTime, setTrialStartTime] = useState(Date.now());
-  const [currentTrial, setCurrentTrial] = useState(0);
-  const [correctTrials, setCorrectTrials] = useState(0);
-  const [totalTrials] = useState(20); // Configurable based on difficulty
-  const [feedback, setFeedback] = useState<'correct' | 'incorrect' | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [showStimulus, setShowStimulus] = useState(true);
+  const [positionFeedback, setPositionFeedback] = useState<'correct' | 'incorrect' | 'miss' | null>(null);
+  const [audioFeedback, setAudioFeedback] = useState<'correct' | 'incorrect' | 'miss' | null>(null);
+  const [trialActive, setTrialActive] = useState(true);
+  const [correctCount, setCorrectCount] = useState(0);
+  const [totalEvaluated, setTotalEvaluated] = useState(0);
+  const [totalTrials] = useState(20);
 
-  const responseTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const feedbackTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const nextTrialTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleStartGame = () => {
-    setShowInstructions(false);
-    startNewTrial();
-  };
-
-  const startNewTrial = () => {
-    try {
-      // Clear any existing timers
-      if (responseTimerRef.current) clearTimeout(responseTimerRef.current);
-      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-      if (nextTrialTimerRef.current) clearTimeout(nextTrialTimerRef.current);
-
-      // Reset state
-      setPositionPressed(false);
-      setAudioPressed(false);
-      setFeedback(null);
-      setIsProcessing(false);
-      setShowStimulus(true);
-
-      // Generate new trial
-      const stimulus = generateNextTrial() as NBackStimulus;
-      setCurrentStimulus(stimulus);
-      setTrialStartTime(Date.now());
-
-      // Speak the letter aloud
-      if (stimulus.audio_letter) {
-        Speech.speak(stimulus.audio_letter, {
-          language: 'en',
-          rate: 0.8,
-          pitch: 1.0,
-        });
-      }
-
-      // Auto-submit after stimulus duration
-      responseTimerRef.current = setTimeout(() => {
-        handleSubmitResponse();
-      }, STIMULUS_DURATION);
-    } catch (error) {
-      console.error('Failed to generate trial:', error);
-      Alert.alert('Error', 'Failed to start trial. Ending game.');
-      handleEndGame();
+  // Button handlers - dead simple, no stale closures
+  const handlePositionPress = useCallback(() => {
+    if (!trialActive || isEvaluating.current) {
+      console.log('[N-Back] Position press ignored - trialActive:', trialActive, 'isEvaluating:', isEvaluating.current);
+      return;
     }
-  };
 
-  const handleSubmitResponse = async () => {
-    if (!currentStimulus || isProcessing) return;
+    console.log('[N-Back] Position Match pressed on trial', currentTrialRef.current + 1);
+    userPressedPosition.current = true;
 
-    setIsProcessing(true);
-    setShowStimulus(false);
+    // Record response time on first button press
+    if (responseTimesRef.current[currentTrialRef.current] === 0) {
+      responseTimesRef.current[currentTrialRef.current] = Date.now() - trialStartTimeRef.current;
+      console.log('[N-Back] Response time:', responseTimesRef.current[currentTrialRef.current], 'ms');
+    }
 
-    const responseTime = Date.now() - trialStartTime;
-    const response: NBackResponse = {
-      position_match_pressed: positionPressed,
-      audio_match_pressed: audioPressed,
-      response_time_ms: responseTime,
-    };
+    setPositionPressed(true); // Visual feedback only
+  }, [trialActive]);
 
-    try {
-      await recordTrialResponse(
-        currentStimulus,
-        response,
-        responseTime
-      );
+  const handleAudioPress = useCallback(() => {
+    if (!trialActive || isEvaluating.current) {
+      console.log('[N-Back] Audio press ignored - trialActive:', trialActive, 'isEvaluating:', isEvaluating.current);
+      return;
+    }
 
-      const engine = getCurrentGameEngine();
-      if (engine) {
-        const trials = engine.getTrials();
-        const latestTrial = trials[trials.length - 1];
-        const isCorrect = latestTrial.correct;
+    console.log('[N-Back] Audio Match pressed on trial', currentTrialRef.current + 1);
+    userPressedAudio.current = true;
 
-        // Show feedback
-        setFeedback(isCorrect ? 'correct' : 'incorrect');
+    // Record response time on first button press
+    if (responseTimesRef.current[currentTrialRef.current] === 0) {
+      responseTimesRef.current[currentTrialRef.current] = Date.now() - trialStartTimeRef.current;
+      console.log('[N-Back] Response time:', responseTimesRef.current[currentTrialRef.current], 'ms');
+    }
 
-        // Update counters
-        if (isCorrect) {
-          setCorrectTrials(prev => prev + 1);
+    setAudioPressed(true); // Visual feedback only
+  }, [trialActive]);
+
+  // Generate trial sequence upfront
+  const generateTrialSequence = (n: number, numTrials: number): Trial[] => {
+    const sequence: Trial[] = [];
+    const positions: number[] = [];
+    const letters: string[] = [];
+
+    console.log(`[N-Back] Generating ${numTrials} trials for ${n}-back`);
+
+    for (let i = 0; i < numTrials; i++) {
+      // Generate random position and letter
+      const position = Math.floor(Math.random() * 9);
+      const letter = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+
+      positions.push(position);
+      letters.push(letter);
+
+      // Determine if this trial is a match
+      let isPositionMatch = false;
+      let isAudioMatch = false;
+
+      if (i >= n) {
+        // Compare current trial (index i) with N trials back (index i - n)
+        isPositionMatch = positions[i] === positions[i - n];
+        isAudioMatch = letters[i] === letters[i - n];
+
+        // Debug logging for matches
+        if (isPositionMatch || isAudioMatch) {
+          console.log(`[N-Back] Trial ${i + 1}: MATCH DETECTED!`, {
+            currentPos: positions[i],
+            nBackPos: positions[i - n],
+            currentLetter: letters[i],
+            nBackLetter: letters[i - n],
+            isPositionMatch,
+            isAudioMatch,
+          });
         }
-        setCurrentTrial(trials.length);
-
-        // Hide feedback and move to next trial or end game
-        feedbackTimerRef.current = setTimeout(() => {
-          setFeedback(null);
-
-          if (trials.length >= totalTrials) {
-            // End game after completing all trials
-            handleEndGame();
-          } else {
-            // Brief pause before next trial
-            nextTrialTimerRef.current = setTimeout(() => {
-              startNewTrial();
-            }, INTER_TRIAL_INTERVAL);
-          }
-        }, FEEDBACK_DURATION);
       }
-    } catch (error) {
-      console.error('Failed to record trial:', error);
-      Alert.alert('Error', 'Failed to record response. Please try again.');
-      setIsProcessing(false);
+
+      sequence.push({
+        position,
+        letter,
+        isPositionMatch,
+        isAudioMatch,
+      });
     }
+
+    // Count matches for verification
+    const posMatches = sequence.filter(t => t.isPositionMatch).length;
+    const audMatches = sequence.filter(t => t.isAudioMatch).length;
+    console.log(`[N-Back] Generated sequence: ${posMatches} position matches, ${audMatches} audio matches`);
+
+    return sequence;
   };
 
-  // Cleanup timers on unmount
+  // Get N-back level from game config
+  const getNBackLevel = (): number => {
+    const engine = getCurrentGameEngine();
+    if (!engine) return 2;
+    const config = (engine as any).config;
+    const difficulty = config.difficulty ?? 5;
+    if (difficulty <= 2) return 1;
+    if (difficulty <= 5) return 2;
+    if (difficulty <= 7) return 3;
+    return 4;
+  };
+
+  // Trial flow using refs to avoid stale closures
+  const startTrial = useCallback((index: number) => {
+    const trial = trialsRef.current[index];
+    if (!trial) {
+      console.log('[N-Back] startTrial: no trial at index', index);
+      return;
+    }
+
+    console.log(`[N-Back] ===== STARTING TRIAL ${index + 1}/${trialsRef.current.length} =====`);
+
+    // Enhanced debugging for match detection
+    const referenceTrialIndex = index - nLevelRef.current;
+    const referenceTrial = referenceTrialIndex >= 0 ? trialsRef.current[referenceTrialIndex] : null;
+
+    console.log(`[N-Back] Current trial:`, {
+      index,
+      position: trial.position,
+      letter: trial.letter,
+      isPositionMatch: trial.isPositionMatch,
+      isAudioMatch: trial.isAudioMatch,
+    });
+
+    if (referenceTrial) {
+      console.log(`[N-Back] ${nLevelRef.current}-back reference trial (index ${referenceTrialIndex}):`, {
+        position: referenceTrial.position,
+        letter: referenceTrial.letter,
+      });
+    }
+
+    // Reset refs
+    currentTrialRef.current = index;
+    userPressedPosition.current = false;
+    userPressedAudio.current = false;
+    isEvaluating.current = false;
+    trialStartTimeRef.current = Date.now();
+    responseTimesRef.current[index] = 0;
+
+    // Update display state
+    setDisplayTrialIndex(index);
+    setActivePosition(trial.position);
+    setActiveLetter(trial.letter);
+    setPositionPressed(false);
+    setAudioPressed(false);
+    setPositionFeedback(null);
+    setAudioFeedback(null);
+    setTrialActive(true);
+
+    // Speak letter
+    Speech.speak(trial.letter, { language: 'en', rate: 0.8, pitch: 1.0 });
+
+    // Set timer for end of response window
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      console.log(`[N-Back] Response window ended for trial ${index + 1}`);
+      evaluateTrial(index);
+    }, STIMULUS_DURATION);
+  }, []);
+
+  const evaluateTrial = useCallback((index: number) => {
+    console.log(`[N-Back] ===== EVALUATING TRIAL ${index + 1} =====`);
+
+    isEvaluating.current = true;
+    setTrialActive(false);
+
+    const trial = trialsRef.current[index];
+    const pressedPos = userPressedPosition.current;
+    const pressedAudio = userPressedAudio.current;
+
+    // Determine correctness
+    const posCorrect = pressedPos === trial.isPositionMatch;
+    const audCorrect = pressedAudio === trial.isAudioMatch;
+    const trialCorrect = posCorrect && audCorrect;
+
+    console.log(`[N-Back] Expected:`, {
+      shouldPressPosition: trial.isPositionMatch,
+      shouldPressAudio: trial.isAudioMatch,
+    });
+    console.log(`[N-Back] User pressed:`, { position: pressedPos, audio: pressedAudio });
+    console.log(`[N-Back] Result:`, {
+      positionCorrect: posCorrect ? '✓' : '✗',
+      audioCorrect: audCorrect ? '✓' : '✗',
+      trialCorrect: trialCorrect ? '✓ CORRECT' : '✗ INCORRECT',
+    });
+
+    // Show feedback
+    if (pressedPos && trial.isPositionMatch) {
+      setPositionFeedback('correct');
+    } else if (pressedPos && !trial.isPositionMatch) {
+      setPositionFeedback('incorrect');
+    } else if (!pressedPos && trial.isPositionMatch) {
+      setPositionFeedback('miss');
+    } else {
+      setPositionFeedback('correct'); // Correct rejection
+    }
+
+    if (pressedAudio && trial.isAudioMatch) {
+      setAudioFeedback('correct');
+    } else if (pressedAudio && !trial.isAudioMatch) {
+      setAudioFeedback('incorrect');
+    } else if (!pressedAudio && trial.isAudioMatch) {
+      setAudioFeedback('miss');
+    } else {
+      setAudioFeedback('correct'); // Correct rejection
+    }
+
+    // Save result
+    const result: TrialResult = {
+      userRespondedPosition: pressedPos,
+      userRespondedAudio: pressedAudio,
+      correctPosition: posCorrect,
+      correctAudio: audCorrect,
+      responseTime: responseTimesRef.current[index],
+    };
+    resultsRef.current.push(result);
+
+    const newCorrectCount = resultsRef.current.filter(r => r.correctPosition && r.correctAudio).length;
+    setCorrectCount(newCorrectCount);
+    setTotalEvaluated(resultsRef.current.length);
+
+    console.log('[N-Back] Stats:', { correct: newCorrectCount, total: resultsRef.current.length });
+
+    // Clear highlight
+    setActivePosition(null);
+
+    // Advance after feedback
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      if (index + 1 < trialsRef.current.length) {
+        console.log(`[N-Back] Advancing to trial ${index + 2}`);
+        startTrial(index + 1);
+      } else {
+        console.log('[N-Back] All trials completed');
+        endGameAndShowResults();
+      }
+    }, FEEDBACK_DURATION);
+  }, []);
+
+  // Start game - pre-generate all trials
+  const handleStartGame = useCallback(() => {
+    const level = getNBackLevel();
+    nLevelRef.current = level;
+    const sequence = generateTrialSequence(level, totalTrials);
+    trialsRef.current = sequence;
+    responseTimesRef.current = new Array(sequence.length).fill(0);
+
+    setShowInstructions(false);
+    setGameStarted(true);
+
+    // Start first trial
+    startTrial(0);
+  }, [totalTrials, startTrial]);
+
+  // End game and show results
+  const endGameAndShowResults = useCallback(async () => {
+    try {
+      const results = resultsRef.current;
+
+      // Calculate overall accuracy (both position AND audio correct)
+      const totalCorrect = results.filter(r => r.correctPosition && r.correctAudio).length;
+      const finalAccuracy = results.length > 0 ? (totalCorrect / results.length) * 100 : 0;
+
+      // Calculate position-only accuracy
+      const positionCorrect = results.filter(r => r.correctPosition).length;
+      const positionAccuracy = results.length > 0 ? (positionCorrect / results.length) * 100 : 0;
+
+      // Calculate audio-only accuracy
+      const audioCorrect = results.filter(r => r.correctAudio).length;
+      const audioAccuracy = results.length > 0 ? (audioCorrect / results.length) * 100 : 0;
+
+      // Calculate average response time (only for trials where user responded)
+      const responseTimes = results.filter(r => r.responseTime > 0).map(r => r.responseTime);
+      const avgResponseTime = responseTimes.length > 0
+        ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
+        : 0;
+
+      console.log('[N-Back] ===== FINAL RESULTS =====');
+      console.log('[N-Back] Total trials:', results.length);
+      console.log('[N-Back] Correct trials:', totalCorrect);
+      console.log('[N-Back] Overall accuracy:', finalAccuracy.toFixed(1) + '%');
+      console.log('[N-Back] Position accuracy:', positionAccuracy.toFixed(1) + '%');
+      console.log('[N-Back] Audio accuracy:', audioAccuracy.toFixed(1) + '%');
+      console.log('[N-Back] Avg response time:', avgResponseTime.toFixed(0) + 'ms');
+
+      // Save to database via GamesContext
+      const sessionDetail = await endGame();
+
+      // Navigate with computed results as backup
+      // NOTE: Pass accuracy as DECIMAL (0.5 for 50%) to match database format
+      navigation.navigate('GameResults', {
+        sessionId: sessionDetail.id,
+        directResults: {
+          accuracy: finalAccuracy / 100, // Convert percentage to decimal
+          avgResponseTime: avgResponseTime,
+          totalTrials: results.length,
+          correctTrials: totalCorrect,
+          positionAccuracy: positionAccuracy / 100,
+          audioAccuracy: audioAccuracy / 100,
+          gameType: 'nback' as const,
+          nLevel: nLevelRef.current,
+        },
+      });
+    } catch (error) {
+      console.error('[N-Back] Failed to end game:', error);
+      Alert.alert('Error', 'Failed to end game. Please try again.');
+    }
+  }, [endGame, navigation]);
+
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (responseTimerRef.current) clearTimeout(responseTimerRef.current);
-      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-      if (nextTrialTimerRef.current) clearTimeout(nextTrialTimerRef.current);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      Speech.stop();
+      console.log('[N-Back] Component unmounted, timers cleared');
     };
   }, []);
 
-  const handleEndGame = async () => {
-    try {
-      const sessionDetail = await endGame();
-      navigation.navigate('GameResults', { sessionId: sessionDetail.id });
-    } catch (error) {
-      console.error('Failed to end game:', error);
-      Alert.alert('Error', 'Failed to end game. Please try again.');
-    }
-  };
-
-  const handleQuit = () => {
+  const handleQuit = useCallback(() => {
     Alert.alert(
       'Quit Game',
-      'Are you sure you want to quit? Your progress will be saved.',
+      'Are you sure you want to quit?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Quit',
           style: 'destructive',
-          onPress: handleEndGame,
+          onPress: endGameAndShowResults,
         },
       ]
     );
-  };
+  }, [endGameAndShowResults]);
 
+  // Calculate current accuracy
+  const currentAccuracy = totalEvaluated > 0
+    ? Math.round((correctCount / totalEvaluated) * 100)
+    : 0;
+
+  // Render grid
   const renderGrid = () => {
     const cells = [];
     for (let i = 0; i < GRID_SIZE * GRID_SIZE; i++) {
-      const isActive = currentStimulus?.position === i;
+      const isActive = activePosition === i;
       cells.push(
         <View
           key={i}
@@ -209,19 +436,6 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navig
     return cells;
   };
 
-  const getNBackLevel = () => {
-    const engine = getCurrentGameEngine();
-    if (!engine) return 2;
-    const config = (engine as any).config;
-    const difficulty = config.difficulty ?? 5;
-    if (difficulty <= 2) return 1;
-    if (difficulty <= 5) return 2;
-    if (difficulty <= 7) return 3;
-    return 4;
-  };
-
-  const nBackLevel = getNBackLevel();
-
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       {/* Instructions Modal */}
@@ -232,104 +446,101 @@ export const NBackGameScreen: React.FC<GamesScreenProps<'NBackGame'>> = ({ navig
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>{nBackLevel}-Back Game</Text>
+            <Text style={styles.modalTitle}>{getNBackLevel()}-Back Game</Text>
             <Text style={styles.modalText}>
               A position will highlight on the grid and a letter will appear.
             </Text>
             <Text style={styles.modalText}>
-              Press <Text style={styles.highlight}>'Position Match'</Text> if the position is the same as {nBackLevel} trial{nBackLevel > 1 ? 's' : ''} ago.
+              Press <Text style={styles.highlight}>'Position Match'</Text> if the position is the same as {getNBackLevel()} trial{getNBackLevel() > 1 ? 's' : ''} ago.
             </Text>
             <Text style={styles.modalText}>
-              Press <Text style={styles.highlight}>'Audio Match'</Text> if the letter is the same as {nBackLevel} trial{nBackLevel > 1 ? 's' : ''} ago.
+              Press <Text style={styles.highlight}>'Audio Match'</Text> if the letter is the same as {getNBackLevel()} trial{getNBackLevel() > 1 ? 's' : ''} ago.
             </Text>
             <Text style={styles.modalText}>
               Press both if both match!
             </Text>
             <View style={styles.modalInfoBox}>
               <Text style={styles.modalInfoText}>
-                Example: If N={nBackLevel} and you see position B on trial 5, press Position Match if trial {5 - nBackLevel} also had position B.
+                Example: If N={getNBackLevel()} and you see position B on trial 5, press Position Match if trial {5 - getNBackLevel()} also had position B.
               </Text>
             </View>
-            <TouchableOpacity
+            <Pressable
               style={styles.modalButton}
               onPress={handleStartGame}
             >
               <Text style={styles.modalButtonText}>Start Game</Text>
-            </TouchableOpacity>
+            </Pressable>
           </View>
         </View>
       </Modal>
 
-      {/* Header with timer and quit */}
+      {/* Header */}
       <View style={styles.header}>
-        <GameTimer startTime={trialStartTime} isRunning={gameState === 'running'} />
-        <TouchableOpacity style={styles.quitButton} onPress={handleQuit}>
+        <GameTimer startTime={gameStartTimeRef.current} isRunning={gameStarted} />
+        <Pressable style={styles.quitButton} onPress={handleQuit}>
           <Text style={styles.quitButtonText}>Quit</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
-      {/* Trial counter and accuracy */}
+      {/* Stats Row */}
       <View style={styles.statsRow}>
         <Text style={styles.statsText}>
-          Trial {currentTrial + 1} of {totalTrials}
+          Trial {displayTrialIndex + 1} of {totalTrials}
         </Text>
         <Text style={styles.statsText}>
-          {Math.round((correctTrials / Math.max(currentTrial, 1)) * 100)}% Correct
+          {currentAccuracy}% Correct
         </Text>
       </View>
 
+      {/* Game Content */}
       <View style={styles.content}>
-        {/* Audio letter display - above grid */}
-        {currentStimulus && (
+        {/* Audio Letter Display */}
+        {gameStarted && (
           <View style={styles.audioContainer}>
             <Text style={styles.audioLabel}>Letter:</Text>
-            <Text style={styles.audioLetter}>{currentStimulus.audio_letter}</Text>
+            <Text style={styles.audioLetter}>{activeLetter}</Text>
           </View>
         )}
 
-        {/* 3x3 Grid - centered and appropriately sized */}
+        {/* Grid */}
         <View style={styles.gridContainer}>
           <View style={styles.grid}>{renderGrid()}</View>
         </View>
 
-        {/* Instruction text */}
+        {/* Instruction */}
         <Text style={styles.instructionText}>
-          Press if current matches N trials ago
+          Press if current matches {nLevelRef.current} trial{nLevelRef.current > 1 ? 's' : ''} ago
         </Text>
 
-        {/* Response buttons - side by side */}
+        {/* Response Buttons */}
         <View style={styles.buttons}>
-          <TouchableOpacity
-            style={[
-              styles.responseButton,
-              positionPressed && styles.responseButtonPressed,
-              feedback === 'correct' && positionPressed && styles.responseButtonCorrect,
-              feedback === 'incorrect' && styles.responseButtonIncorrect,
+          <Pressable
+            onPress={handlePositionPress}
+            style={({ pressed }) => [
+              styles.matchButton,
+              positionPressed && styles.buttonSelected,
+              positionFeedback === 'correct' && styles.buttonCorrect,
+              positionFeedback === 'incorrect' && styles.buttonIncorrect,
+              positionFeedback === 'miss' && styles.buttonMiss,
+              pressed && !positionPressed && styles.buttonPressing,
             ]}
-            onPress={() => !isProcessing && setPositionPressed(!positionPressed)}
-            activeOpacity={0.7}
-            disabled={isProcessing}
           >
-            <Text style={styles.responseButtonText}>
-              Position{'\n'}Match
-            </Text>
-          </TouchableOpacity>
+            <Text style={styles.buttonText}>Position{'\n'}Match</Text>
+          </Pressable>
 
-          <TouchableOpacity
-            style={[
-              styles.responseButton,
-              audioPressed && styles.responseButtonPressed,
-              feedback === 'correct' && audioPressed && styles.responseButtonCorrect,
-              feedback === 'incorrect' && styles.responseButtonIncorrect,
+          <Pressable
+            onPress={handleAudioPress}
+            style={({ pressed }) => [
+              styles.matchButton,
+              audioPressed && styles.buttonSelected,
+              audioFeedback === 'correct' && styles.buttonCorrect,
+              audioFeedback === 'incorrect' && styles.buttonIncorrect,
+              audioFeedback === 'miss' && styles.buttonMiss,
+              pressed && !audioPressed && styles.buttonPressing,
             ]}
-            onPress={() => !isProcessing && setAudioPressed(!audioPressed)}
-            activeOpacity={0.7}
-            disabled={isProcessing}
           >
-            <Text style={styles.responseButtonText}>
-              Audio{'\n'}Match
-            </Text>
-          </TouchableOpacity>
+            <Text style={styles.buttonText}>Audio{'\n'}Match</Text>
+          </Pressable>
         </View>
       </View>
     </SafeAreaView>
@@ -489,33 +700,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.md,
     paddingBottom: Spacing.xl,
+    paddingHorizontal: Spacing.screenPadding,
   },
-  responseButton: {
+  matchButton: {
     flex: 1,
-    backgroundColor: Colors.surface.secondary,
-    borderRadius: BorderRadius.md,
-    paddingVertical: Spacing.lg,
+    paddingVertical: 20,
+    borderRadius: BorderRadius.lg,
+    backgroundColor: '#1a2a3a',
+    borderWidth: 2,
+    borderColor: '#2a3a4a',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.border.primary,
     minHeight: 70,
   },
-  responseButtonPressed: {
-    backgroundColor: Colors.accent.primaryDim,
-    borderColor: Colors.accent.primary,
+  buttonSelected: {
+    backgroundColor: '#0d3d4d',
+    borderColor: '#64ffda',
   },
-  responseButtonCorrect: {
-    backgroundColor: 'rgba(93, 138, 107, 0.3)',
-    borderColor: '#5d8a6b',
+  buttonCorrect: {
+    backgroundColor: '#1b5e20',
+    borderColor: '#4CAF50',
   },
-  responseButtonIncorrect: {
-    backgroundColor: 'rgba(181, 101, 102, 0.3)',
-    borderColor: '#b56566',
+  buttonIncorrect: {
+    backgroundColor: '#b71c1c',
+    borderColor: '#F44336',
   },
-  responseButtonText: {
+  buttonMiss: {
+    backgroundColor: '#e65100',
+    borderColor: '#FF9800',
+  },
+  buttonPressing: {
+    opacity: 0.7,
+  },
+  buttonText: {
     fontSize: Typography.fontSize.md,
     fontWeight: Typography.fontWeight.semibold,
     color: Colors.text.primary,
+    textAlign: 'center',
   },
 });

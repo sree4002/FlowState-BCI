@@ -12,6 +12,7 @@ import { GameCard } from '../../components/games/GameCard';
 import { PerformanceChart } from '../../components/games/PerformanceChart';
 import { useGames } from '../../contexts/GamesContext';
 import Svg, { Path, Rect } from 'react-native-svg';
+import { DemoModeBanner } from '../../components/DemoModeBanner';
 
 // Word Recall Icon
 const WordRecallIcon = () => (
@@ -101,6 +102,7 @@ export const GameHubScreen: React.FC<GamesScreenProps<'GameHub'>> = ({ navigatio
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      <DemoModeBanner />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.content}

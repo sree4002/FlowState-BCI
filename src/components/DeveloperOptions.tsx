@@ -143,6 +143,10 @@ export const DeveloperOptions: React.FC<DeveloperOptionsProps> = ({
     updateSettings({ simulated_mode_enabled: enabled });
   }, [updateSettings]);
 
+  const handleToggleDemoMode = useCallback((enabled: boolean) => {
+    updateSettings({ demo_mode_enabled: enabled });
+  }, [updateSettings]);
+
   const handleServerUrlChange = useCallback((url: string) => {
     setServerUrl(url);
   }, []);
@@ -265,6 +269,23 @@ export const DeveloperOptions: React.FC<DeveloperOptionsProps> = ({
           />
         </View>
       )}
+
+      {/* Demo Mode */}
+      <View style={styles.settingRow}>
+        <View style={styles.settingInfo}>
+          <Text style={styles.settingLabel}>Investor Demo Mode</Text>
+          <Text style={styles.settingDescription}>
+            Show demo Dashboard with simulated data for investor presentations
+          </Text>
+        </View>
+        <Switch
+          value={settings.demo_mode_enabled}
+          onValueChange={handleToggleDemoMode}
+          trackColor={{ false: Colors.border.primary, true: Colors.primary.main }}
+          thumbColor={Colors.text.primary}
+          testID="demo-mode-toggle"
+        />
+      </View>
 
       {/* Reset Onboarding Button */}
       <TouchableOpacity

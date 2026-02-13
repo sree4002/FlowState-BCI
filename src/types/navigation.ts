@@ -125,6 +125,16 @@ export type GamesStackParamList = {
   };
   GameResults: {
     sessionId: string;
+    directResults?: {
+      accuracy: number;
+      avgResponseTime: number;
+      totalTrials: number;
+      correctTrials: number;
+      positionAccuracy?: number;
+      audioAccuracy?: number;
+      gameType?: 'nback' | 'word_recall';
+      nLevel?: number;
+    };
   };
 };
 

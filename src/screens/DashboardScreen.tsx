@@ -15,6 +15,230 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Colors, Spacing, BorderRadius, Typography, Shadows } from '../constants/theme';
 import { SparkleIcon, PlusIcon } from '../components/TabIcons';
+import { useSettings } from '../contexts/SettingsContext';
+import { DemoModeBanner } from '../components/DemoModeBanner';
+
+// Demo Dashboard Component
+const DemoDashboard: React.FC = () => {
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <DemoModeBanner />
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Hero Section */}
+        <View style={styles.demoHero}>
+          <Text style={styles.demoHeroTitle}>FlowState BCI</Text>
+          <Text style={styles.demoHeroSubtitle}>
+            Closed-Loop Theta Entrainment for Peak Cognitive Performance
+          </Text>
+          <Text style={styles.demoHeroDescription}>
+            Real-time brainwave monitoring meets adaptive neurofeedback.
+            Our technology delivers measurable cognitive enhancement through
+            personalized theta oscillation entrainment.
+          </Text>
+        </View>
+
+        {/* Live EEG Simulation */}
+        <View style={styles.demoCard}>
+          <Text style={styles.demoCardTitle}>Real-Time EEG Monitoring</Text>
+          <Text style={styles.demoCardSubtitle}>4-channel frontal theta detection</Text>
+          <View style={styles.demoEEGContainer}>
+            <View style={styles.demoEEGChannel}>
+              <Text style={styles.demoChannelLabel}>Fp1</Text>
+              <View style={styles.demoWaveform} />
+              <Text style={styles.demoChannelValue}>6.2 Hz</Text>
+            </View>
+            <View style={styles.demoEEGChannel}>
+              <Text style={styles.demoChannelLabel}>Fp2</Text>
+              <View style={styles.demoWaveform} />
+              <Text style={styles.demoChannelValue}>6.0 Hz</Text>
+            </View>
+            <View style={styles.demoEEGChannel}>
+              <Text style={styles.demoChannelLabel}>F3</Text>
+              <View style={styles.demoWaveform} />
+              <Text style={styles.demoChannelValue}>6.3 Hz</Text>
+            </View>
+            <View style={styles.demoEEGChannel}>
+              <Text style={styles.demoChannelLabel}>F4</Text>
+              <View style={styles.demoWaveform} />
+              <Text style={styles.demoChannelValue}>6.1 Hz</Text>
+            </View>
+          </View>
+          <View style={styles.demoThetaIndicator}>
+            <Text style={styles.demoThetaLabel}>Theta Z-Score</Text>
+            <Text style={styles.demoThetaValue}>+1.8</Text>
+            <Text style={styles.demoThetaStatus}>HIGH THETA STATE</Text>
+          </View>
+        </View>
+
+        {/* Pipeline Visualization */}
+        <View style={styles.demoCard}>
+          <Text style={styles.demoCardTitle}>Signal Processing Pipeline</Text>
+          <View style={styles.demoPipeline}>
+            <View style={styles.demoPipelineStep}>
+              <View style={styles.demoPipelineCircle}>
+                <Text style={styles.demoPipelineNumber}>1</Text>
+              </View>
+              <Text style={styles.demoPipelineLabel}>Raw EEG</Text>
+              <Text style={styles.demoPipelineDetail}>500 Hz, 4 channels</Text>
+            </View>
+            <View style={styles.demoPipelineArrow}>
+              <Text style={styles.demoPipelineArrowText}>→</Text>
+            </View>
+            <View style={styles.demoPipelineStep}>
+              <View style={styles.demoPipelineCircle}>
+                <Text style={styles.demoPipelineNumber}>2</Text>
+              </View>
+              <Text style={styles.demoPipelineLabel}>Filter</Text>
+              <Text style={styles.demoPipelineDetail}>4-8 Hz bandpass</Text>
+            </View>
+            <View style={styles.demoPipelineArrow}>
+              <Text style={styles.demoPipelineArrowText}>→</Text>
+            </View>
+            <View style={styles.demoPipelineStep}>
+              <View style={styles.demoPipelineCircle}>
+                <Text style={styles.demoPipelineNumber}>3</Text>
+              </View>
+              <Text style={styles.demoPipelineLabel}>Detect</Text>
+              <Text style={styles.demoPipelineDetail}>Z-score vs baseline</Text>
+            </View>
+            <View style={styles.demoPipelineArrow}>
+              <Text style={styles.demoPipelineArrowText}>→</Text>
+            </View>
+            <View style={styles.demoPipelineStep}>
+              <View style={styles.demoPipelineCircle}>
+                <Text style={styles.demoPipelineNumber}>4</Text>
+              </View>
+              <Text style={styles.demoPipelineLabel}>Entrain</Text>
+              <Text style={styles.demoPipelineDetail}>Adaptive audio</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Calibration Results */}
+        <View style={styles.demoCard}>
+          <Text style={styles.demoCardTitle}>Latest Calibration Results</Text>
+          <View style={styles.demoMetricsGrid}>
+            <View style={styles.demoMetric}>
+              <Text style={styles.demoMetricValue}>94%</Text>
+              <Text style={styles.demoMetricLabel}>Signal Quality</Text>
+            </View>
+            <View style={styles.demoMetric}>
+              <Text style={styles.demoMetricValue}>6.2 Hz</Text>
+              <Text style={styles.demoMetricLabel}>Avg Theta Freq</Text>
+            </View>
+            <View style={styles.demoMetric}>
+              <Text style={styles.demoMetricValue}>μ=1.2 σ=0.8</Text>
+              <Text style={styles.demoMetricLabel}>Baseline Stats</Text>
+            </View>
+            <View style={styles.demoMetric}>
+              <Text style={styles.demoMetricValue}>18 min</Text>
+              <Text style={styles.demoMetricLabel}>Duration</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Cognitive Performance */}
+        <View style={styles.demoCard}>
+          <Text style={styles.demoCardTitle}>Cognitive Performance</Text>
+          <Text style={styles.demoCardSubtitle}>Pre/Post session improvements</Text>
+          <View style={styles.demoPerformanceRow}>
+            <View style={styles.demoPerformanceItem}>
+              <Text style={styles.demoPerformanceTest}>N-Back (2-back)</Text>
+              <Text style={styles.demoPerformanceImprovement}>+23%</Text>
+              <Text style={styles.demoPerformanceDetail}>Pre: 72% → Post: 95%</Text>
+            </View>
+            <View style={styles.demoPerformanceItem}>
+              <Text style={styles.demoPerformanceTest}>Word Recall</Text>
+              <Text style={styles.demoPerformanceImprovement}>+18%</Text>
+              <Text style={styles.demoPerformanceDetail}>Pre: 11/15 → Post: 14/15</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Competitive Edge */}
+        <View style={styles.demoCard}>
+          <Text style={styles.demoCardTitle}>Competitive Advantages</Text>
+          <View style={styles.demoAdvantagesList}>
+            <View style={styles.demoAdvantage}>
+              <Text style={styles.demoAdvantageIcon}>✓</Text>
+              <Text style={styles.demoAdvantageText}>
+                <Text style={styles.demoAdvantageBold}>Closed-Loop Control:</Text>
+                {' '}Real-time feedback adaptation based on live EEG
+              </Text>
+            </View>
+            <View style={styles.demoAdvantage}>
+              <Text style={styles.demoAdvantageIcon}>✓</Text>
+              <Text style={styles.demoAdvantageText}>
+                <Text style={styles.demoAdvantageBold}>Validated Efficacy:</Text>
+                {' '}Integrated cognitive testing pre/post every session
+              </Text>
+            </View>
+            <View style={styles.demoAdvantage}>
+              <Text style={styles.demoAdvantageIcon}>✓</Text>
+              <Text style={styles.demoAdvantageText}>
+                <Text style={styles.demoAdvantageBold}>Personalized Baseline:</Text>
+                {' '}Individual z-score normalization, not one-size-fits-all
+              </Text>
+            </View>
+            <View style={styles.demoAdvantage}>
+              <Text style={styles.demoAdvantageIcon}>✓</Text>
+              <Text style={styles.demoAdvantageText}>
+                <Text style={styles.demoAdvantageBold}>Consumer-Ready:</Text>
+                {' '}Native mobile app with seamless BLE integration
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Roadmap */}
+        <View style={styles.demoCard}>
+          <Text style={styles.demoCardTitle}>Product Roadmap</Text>
+          <View style={styles.demoRoadmapList}>
+            <View style={styles.demoRoadmapItem}>
+              <Text style={styles.demoRoadmapPhase}>Phase 1 (Complete)</Text>
+              <Text style={styles.demoRoadmapText}>
+                • Core EEG pipeline + Closed-loop entrainment
+              </Text>
+              <Text style={styles.demoRoadmapText}>
+                • Cognitive games (N-Back, Word Recall)
+              </Text>
+            </View>
+            <View style={styles.demoRoadmapItem}>
+              <Text style={styles.demoRoadmapPhase}>Phase 2 (Q2 2026)</Text>
+              <Text style={styles.demoRoadmapText}>
+                • Pilot study with 50 users (IRB approved)
+              </Text>
+              <Text style={styles.demoRoadmapText}>
+                • ML model for optimal timing predictions
+              </Text>
+            </View>
+            <View style={styles.demoRoadmapItem}>
+              <Text style={styles.demoRoadmapPhase}>Phase 3 (Q3 2026)</Text>
+              <Text style={styles.demoRoadmapText}>
+                • FDA breakthrough device designation
+              </Text>
+              <Text style={styles.demoRoadmapText}>
+                • Public beta launch
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Disclaimer */}
+        <View style={styles.demoDisclaimer}>
+          <Text style={styles.demoDisclaimerText}>
+            This demo showcases simulated data for investor presentation purposes.
+            All metrics and results shown are representative of system capabilities.
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
 
 // Helper to get time-based greeting
 const getGreeting = (): string => {
@@ -79,6 +303,12 @@ const WeekDot: React.FC<WeekDotProps> = ({ day, isCompleted, isToday }) => (
 
 export default function DashboardScreen(): React.JSX.Element {
   const navigation = useNavigation();
+  const { settings } = useSettings();
+
+  // Show demo dashboard if demo mode is enabled
+  if (settings.demo_mode_enabled) {
+    return <DemoDashboard />;
+  }
 
   // Get current week days
   const weekDays = useMemo(() => {
@@ -120,6 +350,7 @@ export default function DashboardScreen(): React.JSX.Element {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <DemoModeBanner />
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
@@ -374,5 +605,245 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.glow,
+  },
+  // Demo Mode Styles
+  demoHero: {
+    backgroundColor: Colors.surface.primary,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xxxl,
+    marginBottom: Spacing.xl,
+    alignItems: 'center',
+  },
+  demoHeroTitle: {
+    fontSize: Typography.fontSize.display,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.accent.primary,
+    marginBottom: Spacing.md,
+    letterSpacing: -1,
+  },
+  demoHeroSubtitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Spacing.lg,
+    textAlign: 'center',
+  },
+  demoHeroDescription: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  demoCard: {
+    backgroundColor: Colors.surface.primary,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.cardPadding,
+    marginBottom: Spacing.lg,
+  },
+  demoCardTitle: {
+    fontSize: Typography.fontSize.xl,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: Spacing.xs,
+  },
+  demoCardSubtitle: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary,
+    marginBottom: Spacing.md,
+  },
+  demoEEGContainer: {
+    marginTop: Spacing.md,
+  },
+  demoEEGChannel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: Spacing.md,
+  },
+  demoChannelLabel: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+    width: 40,
+  },
+  demoWaveform: {
+    flex: 1,
+    height: 40,
+    backgroundColor: Colors.background.secondary,
+    borderRadius: BorderRadius.md,
+    marginHorizontal: Spacing.md,
+  },
+  demoChannelValue: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.theta.high,
+    width: 60,
+    textAlign: 'right',
+  },
+  demoThetaIndicator: {
+    backgroundColor: Colors.accent.primaryDim,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginTop: Spacing.md,
+    alignItems: 'center',
+  },
+  demoThetaLabel: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    marginBottom: Spacing.xs,
+  },
+  demoThetaValue: {
+    fontSize: Typography.fontSize.xxxl * 1.2,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.theta.high,
+    marginBottom: Spacing.xs,
+  },
+  demoThetaStatus: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.theta.high,
+    letterSpacing: 1,
+  },
+  demoPipeline: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: Spacing.md,
+  },
+  demoPipelineStep: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  demoPipelineCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.accent.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
+  },
+  demoPipelineNumber: {
+    fontSize: Typography.fontSize.lg,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.inverse,
+  },
+  demoPipelineLabel: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+    marginBottom: 2,
+  },
+  demoPipelineDetail: {
+    fontSize: Typography.fontSize.xs,
+    color: Colors.text.tertiary,
+    textAlign: 'center',
+  },
+  demoPipelineArrow: {
+    paddingHorizontal: Spacing.xs,
+  },
+  demoPipelineArrowText: {
+    fontSize: Typography.fontSize.xl,
+    color: Colors.text.tertiary,
+  },
+  demoMetricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: Spacing.md,
+  },
+  demoMetric: {
+    width: '50%',
+    marginBottom: Spacing.lg,
+    alignItems: 'center',
+  },
+  demoMetricValue: {
+    fontSize: Typography.fontSize.xxl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.text.primary,
+    marginBottom: Spacing.xs,
+  },
+  demoMetricLabel: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary,
+    textAlign: 'center',
+  },
+  demoPerformanceRow: {
+    marginTop: Spacing.md,
+  },
+  demoPerformanceItem: {
+    backgroundColor: Colors.background.secondary,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  demoPerformanceTest: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.medium,
+    color: Colors.text.primary,
+    marginBottom: Spacing.xs,
+  },
+  demoPerformanceImprovement: {
+    fontSize: Typography.fontSize.xxxl,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.status.green,
+    marginBottom: Spacing.xs,
+  },
+  demoPerformanceDetail: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary,
+  },
+  demoAdvantagesList: {
+    marginTop: Spacing.md,
+  },
+  demoAdvantage: {
+    flexDirection: 'row',
+    marginBottom: Spacing.lg,
+  },
+  demoAdvantageIcon: {
+    fontSize: Typography.fontSize.xl,
+    color: Colors.status.green,
+    marginRight: Spacing.md,
+    marginTop: 2,
+  },
+  demoAdvantageText: {
+    flex: 1,
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    lineHeight: 21,
+  },
+  demoAdvantageBold: {
+    fontWeight: Typography.fontWeight.semibold,
+    color: Colors.text.primary,
+  },
+  demoRoadmapList: {
+    marginTop: Spacing.md,
+  },
+  demoRoadmapItem: {
+    marginBottom: Spacing.lg,
+  },
+  demoRoadmapPhase: {
+    fontSize: Typography.fontSize.md,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.accent.primary,
+    marginBottom: Spacing.sm,
+  },
+  demoRoadmapText: {
+    fontSize: Typography.fontSize.md,
+    color: Colors.text.secondary,
+    lineHeight: 21,
+    marginBottom: Spacing.xs,
+  },
+  demoDisclaimer: {
+    backgroundColor: Colors.surface.secondary,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.xxl,
+  },
+  demoDisclaimerText: {
+    fontSize: Typography.fontSize.sm,
+    color: Colors.text.tertiary,
+    textAlign: 'center',
+    lineHeight: 18,
+    fontStyle: 'italic',
   },
 });

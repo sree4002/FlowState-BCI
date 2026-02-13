@@ -14,7 +14,7 @@ import { openDatabase } from '../../services/database';
 import { getGameSessionDetailById } from '../../services/gameDatabase';
 
 export const GameResultsScreen: React.FC<GamesScreenProps<'GameResults'>> = ({ navigation, route }) => {
-  const { sessionId } = route.params;
+  const { sessionId, directResults } = route.params;
 
   const [session, setSession] = useState<GameSessionDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,6 +24,17 @@ export const GameResultsScreen: React.FC<GamesScreenProps<'GameResults'>> = ({ n
       try {
         const db = openDatabase();
         const sessionDetail = getGameSessionDetailById(db, sessionId);
+
+        // If directResults provided, override the database values
+        // This ensures accuracy even if DB save had issues
+        if (directResults && sessionDetail) {
+          console.log('[GameResults] Using direct results:', directResults);
+          sessionDetail.performance.accuracy = directResults.accuracy;
+          sessionDetail.performance.avg_response_time = directResults.avgResponseTime;
+          sessionDetail.performance.total_trials = directResults.totalTrials;
+          sessionDetail.performance.correct_trials = directResults.correctTrials;
+        }
+
         setSession(sessionDetail);
       } catch (error) {
         console.error('Failed to load game session:', error);
@@ -33,7 +44,7 @@ export const GameResultsScreen: React.FC<GamesScreenProps<'GameResults'>> = ({ n
     };
 
     loadSession();
-  }, [sessionId]);
+  }, [sessionId, directResults]);
 
   const handlePlayAgain = () => {
     if (!session) return;
