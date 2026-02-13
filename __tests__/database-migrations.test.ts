@@ -164,8 +164,7 @@ describe('Database Migrations', () => {
   });
 
   describe('Incremental migrations', () => {
-    // TODO: fix version tracking accumulation bug in rollback tests
-    it.skip('should apply only new migrations', () => {
+    it('should apply only new migrations', () => {
       // Apply first migration only
       const firstMigration = allMigrations.filter((m) => m.version === 1);
       runMigrations(db, firstMigration);
@@ -177,33 +176,33 @@ describe('Database Migrations', () => {
       // Apply all migrations
       const result = runMigrations(db, allMigrations);
 
-      // Should only apply migrations 2 and 3
-      expect(result.applied.length).toBe(2);
+      // Should apply migrations 2, 3, 4, 5 (all except 1)
+      expect(result.applied.length).toBe(allMigrations.length - 1);
       expect(result.applied[0].version).toBe(2);
       expect(result.applied[1].version).toBe(3);
-      expect(getCurrentVersion(db)).toBe(3);
+      expect(result.applied[2].version).toBe(4);
+      expect(result.applied[3].version).toBe(5);
+      expect(getCurrentVersion(db)).toBe(allMigrations.length);
     });
   });
 
   describe('Migration rollback', () => {
-    // TODO: fix version tracking accumulation bug in rollback tests
-    it.skip('should rollback last migration', () => {
+    it('should rollback last migration', () => {
       runMigrations(db, allMigrations);
-      expect(getCurrentVersion(db)).toBe(3);
+      expect(getCurrentVersion(db)).toBe(allMigrations.length);
 
       const result = rollbackLastMigration(db, allMigrations);
 
       expect(result.success).toBe(true);
-      expect(result.currentVersion).toBe(2);
+      expect(result.currentVersion).toBe(allMigrations.length - 1);
     });
 
-    // TODO: fix version tracking accumulation bug in rollback tests
-    it.skip('should remove rolled back table', () => {
+    it('should remove rolled back table', () => {
       runMigrations(db, allMigrations);
 
-      // Verify table exists
+      // Verify last table exists (game_trials from migration 5)
       let result = db.getFirstSync<{ count: number }>(
-        "SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='circadian_patterns'"
+        "SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='game_trials'"
       );
       expect(result?.count).toBe(1);
 
@@ -211,7 +210,7 @@ describe('Database Migrations', () => {
 
       // Verify table is dropped
       result = db.getFirstSync<{ count: number }>(
-        "SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='circadian_patterns'"
+        "SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='game_trials'"
       );
       expect(result?.count).toBe(0);
     });
@@ -224,16 +223,27 @@ describe('Database Migrations', () => {
       expect(result.currentVersion).toBe(0);
     });
 
-    // TODO: fix version tracking accumulation bug in rollback tests
-    it.skip('should rollback multiple migrations sequentially', () => {
+    it('should rollback multiple migrations sequentially', () => {
       runMigrations(db, allMigrations);
+      expect(getCurrentVersion(db)).toBe(allMigrations.length);
 
+      // Rollback migration 5
       rollbackLastMigration(db, allMigrations);
-      expect(getCurrentVersion(db)).toBe(2);
+      expect(getCurrentVersion(db)).toBe(allMigrations.length - 1);
 
+      // Rollback migration 4
       rollbackLastMigration(db, allMigrations);
-      expect(getCurrentVersion(db)).toBe(1);
+      expect(getCurrentVersion(db)).toBe(allMigrations.length - 2);
 
+      // Rollback migration 3
+      rollbackLastMigration(db, allMigrations);
+      expect(getCurrentVersion(db)).toBe(allMigrations.length - 3);
+
+      // Rollback migration 2
+      rollbackLastMigration(db, allMigrations);
+      expect(getCurrentVersion(db)).toBe(allMigrations.length - 4);
+
+      // Rollback migration 1
       rollbackLastMigration(db, allMigrations);
       expect(getCurrentVersion(db)).toBe(0);
     });

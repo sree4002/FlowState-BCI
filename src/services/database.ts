@@ -107,11 +107,16 @@ export const rollbackMigration = (
 
 /**
  * Drops all tables (use with caution - for testing/development only)
+ * NOTE: When adding new migrations that create tables, update this function
+ * to drop those tables as well (in reverse dependency order)
  */
 export const dropAllTables = (db: SQLite.SQLiteDatabase): void => {
-  db.execSync('DROP TABLE IF EXISTS baselines;');
-  db.execSync('DROP TABLE IF EXISTS sessions;');
-  db.execSync('DROP TABLE IF EXISTS circadian_patterns;');
+  // Drop in reverse order due to foreign key constraints
+  db.execSync('DROP TABLE IF EXISTS game_trials;');        // Migration 5
+  db.execSync('DROP TABLE IF EXISTS game_sessions;');      // Migration 4
+  db.execSync('DROP TABLE IF EXISTS circadian_patterns;'); // Migration 3
+  db.execSync('DROP TABLE IF EXISTS sessions;');           // Migration 2
+  db.execSync('DROP TABLE IF EXISTS baselines;');          // Migration 1
   dropMigrationsTable(db);
 };
 
