@@ -166,6 +166,5 @@ This project uses labels to categorize and prioritize issues and PRs. When creat
 
 > **Note**: Known issues are tracked as GitHub issues. See [open issues](https://github.com/sree4002/FlowState-BCI/issues) for full list with labels.
 
-- 4 failing migration tests (version tracking accumulation)
 - `@types/jest` and `@types/react` in both deps and devDeps (should be devDeps only)
 - Consider resolving peer deps to remove `--legacy-peer-deps`
