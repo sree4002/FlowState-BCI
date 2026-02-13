@@ -132,7 +132,39 @@ See `docs/RUNNING_SIMULATED_MODE.md` for details.
 
 `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`, `ci:`
 
+## GitHub Labels
+
+This project uses labels to categorize and prioritize issues and PRs. When creating or triaging issues, apply appropriate labels:
+
+### Priority & Difficulty
+- `good first issue` — Good for newcomers, low complexity
+- `help wanted` — Extra attention or expertise needed
+
+### Issue Type
+- `bug` — Something isn't working correctly
+- `enhancement` — New feature or improvement request
+- `documentation` — Documentation improvements
+- `question` — Needs clarification or discussion
+
+### Technical Categories
+- `code-quality` — Code style, linting, formatting improvements
+- `tech-debt` — Technical debt requiring refactoring
+- `dependencies` — Package dependencies, version upgrades, conflicts
+- `config` — Configuration files (.gitignore, tsconfig, etc.)
+
+### Workflow
+- `tracking` — Tracking external issues or upstream changes
+- `duplicate` — Duplicate of another issue
+- `wontfix` — Will not be addressed
+
+### Labeling Guidelines
+- **Use multiple labels** when appropriate (e.g., `tech-debt` + `dependencies`)
+- **Add priority context** in issue description rather than priority labels
+- **Link related issues** using "Related to #X" or "Blocks #X"
+
 ## Known Issues to Fix
+
+> **Note**: Known issues are tracked as GitHub issues. See [open issues](https://github.com/sree4002/FlowState-BCI/issues) for full list with labels.
 
 - 4 failing migration tests (version tracking accumulation)
 - `@types/jest` and `@types/react` in both deps and devDeps (should be devDeps only)
