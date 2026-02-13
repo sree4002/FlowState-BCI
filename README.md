@@ -2,7 +2,7 @@
 
 **Codename: FlowState_BCI**
 
-A closed-loop memory enhancement system using EEG theta rhythm detection and isochronic tone entrainment. Built for the April 2025 hackathon.
+A closed-loop memory enhancement system using EEG theta rhythm detection and isochronic tone entrainment. Built for the April 2026 hackathon.
 
 ## Overview
 
@@ -126,6 +126,8 @@ FlowState-BCI/
 │   │   └── ble/        # Bluetooth handlers
 │   ├── contexts/       # React contexts (Settings, Session, Device)
 │   └── types/          # TypeScript type definitions
+├── firmware/           # ESP32 earpiece firmware (coming soon)
+├── signal/             # Python EEG signal processing pipeline (coming soon)
 ├── simulator/
 │   ├── eeg_simulator.py      # WebSocket EEG simulator
 │   ├── requirements.txt      # Python dependencies
@@ -142,7 +144,33 @@ FlowState-BCI/
         └── ci.yml      # GitHub Actions CI
 ```
 
-## Architecture
+## System Architecture
+
+FlowState BCI is a three-subsystem closed-loop neurofeedback platform:
+
+| Subsystem | Technology | Status |
+|-----------|------------|--------|
+| **Mobile App** | React Native / Expo / TypeScript | Active development (`src/`) |
+| **Signal Processing** | Python / BrainFlow / scipy | Coming soon (`signal/`) |
+| **Earpiece Firmware** | ESP32 / Arduino / ESP-IDF | Coming soon (`firmware/`) |
+
+**How they connect:**
+
+```
+┌──────────────┐  BLE   ┌──────────────────┐  BLE   ┌──────────────┐
+│  OpenBCI     │───────▶│   Mobile App     │───────▶│  ESP32       │
+│  Ganglion    │  EEG   │  (React Native)  │ Audio  │  Earpiece    │
+│  (headband)  │  data  │                  │  ctrl  │  (firmware)  │
+└──────────────┘        └──────────────────┘        └──────────────┘
+                               │    ▲
+                               ▼    │
+                        ┌──────────────────┐
+                        │  Signal Pipeline │
+                        │  (Python/BrainFlow)
+                        └──────────────────┘
+```
+
+**App-internal data flow:**
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
@@ -200,11 +228,8 @@ View the CI status: [Actions](https://github.com/sree4002/FlowState-BCI/actions)
 
 ## Team
 
-*Team information placeholder*
-
-<!-- Add team members here:
-- Name — Role — [GitHub](link) / [LinkedIn](link)
--->
+- **Sreenidhi** — Founder / Lead Developer
+- **Nina** — CTO
 
 ## License
 
@@ -214,4 +239,4 @@ View the CI status: [Actions](https://github.com/sree4002/FlowState-BCI/actions)
 
 ---
 
-Built with focus for the April 2025 Hackathon
+Built with focus for the April 2026 Hackathon
